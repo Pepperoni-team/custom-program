@@ -1,0 +1,15 @@
+[package]
+name = "fanex-curve-onchain-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dev-dependencies]
+fanex_curve = { path = "../../programs/fanex_curve", features = ["no-entrypoint"] }
+anchor-lang = "0.31.1"
+anchor-spl = "0.31.1"
+litesvm = "0.6"
+solana-sdk = "2.2"
+openssl = { version = "0.10", features = ["vendored"] }
