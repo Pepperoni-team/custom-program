@@ -2,6 +2,10 @@
 members = ["programs/*"]
 resolver = "2"
 
+# Overflow checks ON in release: this is a money-handling program; a silent
+# wrap on a lamport/token amount must abort, not roll over.
+# opt-level "z" + strip shrink the deployed .so (→ lower one-time deploy rent);
+# overflow-checks stays ON so the size win never costs us silent wraparound.
 [profile.release]
 overflow-checks = true
 lto = "fat"

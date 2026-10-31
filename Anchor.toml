@@ -5,18 +5,33 @@ anchor_version = "0.31.1"
 resolution = true
 skip-lint = false
 
+# The math crate is a library, not a program: `anchor build` would try to build its IDL.
+[workspace]
+exclude = ["programs/pepper_curve_math"]
+
 [programs.localnet]
-fanex_curve = "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ"
+pepper_curve = "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ"
+pepper_dividends = "GdWxRsHF5wneNgLQmdoKS9Zcu6enMVzoVTe9EFaxJxcU"
 
 [programs.devnet]
-fanex_curve = "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ"
+pepper_curve = "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ"
+pepper_dividends = "GdWxRsHF5wneNgLQmdoKS9Zcu6enMVzoVTe9EFaxJxcU"
 
 [programs.mainnet]
-fanex_curve = "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ"
+pepper_curve = "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ"
+pepper_dividends = "GdWxRsHF5wneNgLQmdoKS9Zcu6enMVzoVTe9EFaxJxcU"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
+# Deliberately NOT mainnet: the wallet below is the program upgrade authority, so a bare
+# `anchor deploy`/`anchor upgrade` must not be able to reach mainnet by default. Mainnet is
+# always passed explicitly per command (`--provider.cluster <mainnet RPC url>`).
 cluster = "Devnet"
-wallet = "~/.config/solana/fanex-authority.json"
+wallet = "~/.config/solana/id.json"
+
+[test.validator]
+# Clone the Raydium CPMM program on localnet so graduation-release tests can
+# exercise the post-graduation hand-off path end to end (deferred; placeholder).
+url = "https://api.mainnet-beta.solana.com"

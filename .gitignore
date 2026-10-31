@@ -75,3 +75,5 @@ tests-onchain/*/target/
 .ui-auth/
 
 *prompt*.md
+# third-party programs the LiteSVM tests load: dumped from mainnet, never committed
+tests-onchain/pepper-curve/fixtures/*.so

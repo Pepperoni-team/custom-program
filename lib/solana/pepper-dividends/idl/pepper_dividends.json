@@ -1,0 +1,2484 @@
+{
+  "address": "GdWxRsHF5wneNgLQmdoKS9Zcu6enMVzoVTe9EFaxJxcU",
+  "metadata": {
+    "name": "pepper_dividends",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Pepper (pepper.fan) USDC dividends: a token's month paid in USDC against a merkle root, each holder claiming into their own USDC account",
+    "repository": "https://github.com/Pepperoni-team/custom-program"
+  },
+  "docs": [
+    "The instructions, each with its LiteSVM suite (the canonical doc, §3)."
+  ],
+  "instructions": [
+    {
+      "name": "claim",
+      "docs": [
+        "Leaf `index` paid into the claimant's own USDC account, from any sender."
+      ],
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "The month. Only this program creates one, at its own address: its owner and discriminator",
+            "bind it, and its seeds sign for the vault."
+          ],
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "The month's vault: the distributor's associated USDC account."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "distributor"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "claimant"
+        },
+        {
+          "name": "claimant_usdc",
+          "docs": [
+            "The claimant's own USDC ATA, which a holder without one creates in the same transaction."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "claimant"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The config's USDC (`AccountMismatch` for another mint)."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "index",
+          "type": "u32"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "proof",
+          "type": {
+            "vec": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "close_distributor",
+      "docs": [
+        "A month closed by its funder or the closer: what is left back to the funder, the rents to",
+        "the rent payer, the record kept closed."
+      ],
+      "discriminator": [
+        202,
+        56,
+        180,
+        143,
+        46,
+        104,
+        106,
+        112
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The month's funder or the config's closer (`Unauthorized` for any other key)."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "The month. Only this program creates one, at its own address: its owner and discriminator",
+            "bind it, and it names the accounts the money and the rents go back to (`AccountMismatch`",
+            "for any other), as the funding or a re-home (`rehome_distributor`) last wrote them."
+          ],
+          "writable": true
+        },
+        {
+          "name": "month_record",
+          "docs": [
+            "The month's record, bound by its seeds (`ConstraintSeeds` for another month's), kept closed."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  110,
+                  116,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "distributor.mint",
+                "account": "UsdcDistributor"
+              },
+              {
+                "kind": "account",
+                "path": "distributor.month",
+                "account": "UsdcDistributor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "The month's vault: the distributor's associated USDC account."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "distributor"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "funder_usdc_account",
+          "docs": [
+            "it, so an empty vault closes even while its owner has closed it; a vault holding USDC needs",
+            "it open again first, `create_idempotent` in the same transaction."
+          ],
+          "writable": true,
+          "relations": [
+            "distributor"
+          ]
+        },
+        {
+          "name": "rent_payer",
+          "docs": [
+            "distributor's rents go back to it."
+          ],
+          "writable": true,
+          "relations": [
+            "distributor"
+          ]
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The config's USDC (`AccountMismatch` for another mint)."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "hold_claims",
+      "docs": [
+        "One month's claims held until `until`, by the pauser or the admin: only started or",
+        "extended, an hour at least and 7 days at most; every other month keeps claiming."
+      ],
+      "discriminator": [
+        68,
+        129,
+        152,
+        196,
+        115,
+        102,
+        235,
+        248
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The pauser or the admin; each instruction checks which may act."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "The month. Only this program creates one, at its own address: its owner and discriminator",
+            "bind it."
+          ],
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "until",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "init_distributor",
+      "docs": [
+        "A month funded: the funder's µUSDC into the vault, with the approver's signature, the",
+        "dividend payer paying the rents; its claims held for its review window, a day."
+      ],
+      "discriminator": [
+        4,
+        170,
+        72,
+        1,
+        58,
+        177,
+        150,
+        43
+      ],
+      "accounts": [
+        {
+          "name": "funder",
+          "docs": [
+            "Its USDC pays: the config's `pepper_funder` or `payer_funder`, or the curve's creator."
+          ],
+          "signer": true
+        },
+        {
+          "name": "approver",
+          "docs": [
+            "The config's approver, a key of its own, co-signing every month (`Unauthorized` for another)."
+          ],
+          "signer": true
+        },
+        {
+          "name": "rent_payer",
+          "docs": [
+            "Pays the three rents, the record's, the distributor's and the vault's: the config's",
+            "dividend payer (`Unauthorized` for any other key, the internal audit of 2026-10-29), a",
+            "creator's month included, so a creator spends only USDC and every month's rents go back",
+            "to a key `rehome_distributor` can move."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "and read by hand (`curve_creator`) only when the funder is neither Fanex key: a Fanex month",
+            "opens for a mint with no curve."
+          ]
+        },
+        {
+          "name": "legacy_distributor",
+          "docs": [
+            "and v2 distributors of this token and month share (`ConstraintSeeds` for another month's or",
+            "mint's), read by hand (`legacy_month_live`): a v1 or v2 month there blocks this one until",
+            "its expiry, any other data for good, whatever its owner (`LegacyMonthLive`)."
+          ]
+        },
+        {
+          "name": "month_record",
+          "docs": [
+            "Created with the month and never closed. Before the distributor, with a check of its own:",
+            "Anchor runs the init fields in their order, so a month open or closed is `MonthAlreadyFunded`",
+            "before the distributor's `init` would meet an account in use. A voided one opens again. One",
+            "this funding creates reads version 0; any version but that and `ACCOUNT_VERSION` is",
+            "`UnsupportedVersion`."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  110,
+                  116,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "arg",
+                "path": "month"
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "arg",
+                "path": "month"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "The distributor's associated USDC account. `init_if_needed`: anyone may create it first,",
+            "which `init` would refuse for good; Anchor checks what it finds (its mint, its owner, its",
+            "token program, its address), and the close sweeps whatever a stranger left in it."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "distributor"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "funder_usdc",
+          "docs": [
+            "The funder's own USDC ATA (`AccountMismatch` for any other account), recorded so the close",
+            "can always reach it: anyone can open an ATA again, so a funder who closed theirs cannot keep",
+            "a month from closing."
+          ],
+          "writable": true
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The config's USDC (`AccountMismatch` for another mint)."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "month",
+          "type": "i64"
+        },
+        {
+          "name": "merkle_root",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "total_amount",
+          "type": "u64"
+        },
+        {
+          "name": "expires_at",
+          "type": "i64"
+        },
+        {
+          "name": "leaf_count",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "initialize_config",
+      "docs": [
+        "Signed by this program's upgrade authority, read from its ProgramData."
+      ],
+      "discriminator": [
+        208,
+        127,
+        21,
+        1,
+        194,
+        190,
+        196,
+        70
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "docs": [
+            "Pays the config's rent: on mainnet the vault itself, since a vault transaction carries no",
+            "other keypair's signature."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "upgrade_authority",
+          "docs": [
+            "This program's upgrade authority, as its ProgramData records it."
+          ],
+          "signer": true
+        },
+        {
+          "name": "program_data",
+          "docs": [
+            "`program_data_upgrade_authority`. The program's ProgramData, the upgradeable loader's PDA",
+            "of the program id (`ConstraintSeeds` anywhere else, so another program's ProgramData is",
+            "refused), owned by the loader, whose recorded authority must be the signer:",
+            "`Unauthorized` for any other key, for an immutable program, which records none, and for a",
+            "program loaded without the upgradeable loader, which has no ProgramData."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  232,
+                  58,
+                  21,
+                  129,
+                  68,
+                  20,
+                  36,
+                  100,
+                  138,
+                  205,
+                  107,
+                  249,
+                  18,
+                  79,
+                  48,
+                  136,
+                  61,
+                  15,
+                  180,
+                  129,
+                  185,
+                  55,
+                  136,
+                  182,
+                  211,
+                  59,
+                  2,
+                  104,
+                  51,
+                  18,
+                  129,
+                  125
+                ]
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                168,
+                246,
+                145,
+                78,
+                136,
+                161,
+                176,
+                226,
+                16,
+                21,
+                62,
+                247,
+                99,
+                174,
+                43,
+                0,
+                194,
+                185,
+                61,
+                22,
+                193,
+                36,
+                210,
+                192,
+                83,
+                122,
+                16,
+                4,
+                128,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "docs": [
+            "The admin: an account the system program owns, as a Squads vault is (`AccountNotSystemOwned`",
+            "otherwise). The multisig account is the Squads program's and never signs: an admin handed to",
+            "it would be lost for ever (MULTISIG.md §2)."
+          ]
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The classic SPL Token USDC of 6 decimals (`AccountOwnedByWrongProgram` for Token-2022's,",
+            "`ConstraintMintDecimals` for another number of decimals). Set once."
+          ]
+        },
+        {
+          "name": "curve_program",
+          "docs": [
+            "(`ConstraintExecutable`, `ConstraintOwner`): set once, a wrong key would turn",
+            "`LegacyMonthLive` off for good and every creator month into `CurveUnreadable`. Which program",
+            "it is the caller's to check (B13's script requires `pepper_curve`'s id)."
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "keys",
+          "type": {
+            "defined": {
+              "name": "ConfigKeys"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "pause_claims",
+      "docs": [
+        "Claims paused until `until`, by the pauser or the admin: only started or extended, an hour",
+        "at least and 7 days at most from when it runs."
+      ],
+      "discriminator": [
+        126,
+        36,
+        199,
+        228,
+        204,
+        57,
+        224,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The pauser or the admin; each instruction checks which may act."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "until",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "rehome_distributor",
+      "docs": [
+        "An open month's funder, its USDC account and its rent payer moved by the admin to the",
+        "config's dividend payer as it stands, each only where the funding recorded a Fanex payee."
+      ],
+      "discriminator": [
+        39,
+        180,
+        255,
+        194,
+        88,
+        42,
+        249,
+        58
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "The admin, the upgrade Squad's vault (`Unauthorized` for any other key, the month's funder",
+            "and the closer included)."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "The month. Only this program creates one, at its own address: its owner and discriminator",
+            "bind it; a month closed or voided is gone (`AccountNotInitialized`)."
+          ],
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "release_claims",
+      "docs": [
+        "That month's claims open again, by the admin alone, at the time it runs."
+      ],
+      "discriminator": [
+        23,
+        234,
+        113,
+        97,
+        107,
+        134,
+        246,
+        133
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The pauser or the admin; each instruction checks which may act."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "The month. Only this program creates one, at its own address: its owner and discriminator",
+            "bind it."
+          ],
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resume_claims",
+      "docs": [
+        "Claims open again, by the admin alone, at the time it runs."
+      ],
+      "discriminator": [
+        129,
+        86,
+        176,
+        86,
+        139,
+        207,
+        186,
+        59
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The pauser or the admin; each instruction checks which may act."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "set_paused",
+      "docs": [
+        "The funding paused by the pauser or the admin, unpaused by the admin alone."
+      ],
+      "discriminator": [
+        91,
+        60,
+        125,
+        192,
+        176,
+        225,
+        166,
+        218
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The pauser or the admin; each instruction checks which may act."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "top_up_distributor",
+      "docs": [
+        "More µUSDC into an open month from its funder's USDC, with the approver's signature: its",
+        "total grows by as much, its root stays."
+      ],
+      "discriminator": [
+        124,
+        150,
+        18,
+        247,
+        79,
+        6,
+        226,
+        66
+      ],
+      "accounts": [
+        {
+          "name": "funder",
+          "docs": [
+            "The month's funder as the month records it (`Unauthorized` for any other key): its USDC pays."
+          ],
+          "signer": true,
+          "relations": [
+            "distributor"
+          ]
+        },
+        {
+          "name": "approver",
+          "docs": [
+            "The config's approver, co-signing as at the funding (`Unauthorized` for another key)."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "The month. Only this program creates one, at its own address: its owner and discriminator",
+            "bind it; a month closed or voided is gone (`AccountNotInitialized`)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "The month's vault: the distributor's associated USDC account."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "distributor"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "funder_usdc_account",
+          "docs": [
+            "associated account: the transfer reads it, signed by the funder."
+          ],
+          "writable": true,
+          "relations": [
+            "distributor"
+          ]
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The config's USDC (`AccountMismatch` for another mint)."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "update_config",
+      "docs": [
+        "Signed by the admin; each key an `Option`, the admin through `new_admin`."
+      ],
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "new_admin",
+          "docs": [
+            "The next admin, held to `initialize_config`'s owner rule (`AccountNotSystemOwned`); `None`",
+            "keeps the admin."
+          ],
+          "optional": true
+        }
+      ],
+      "args": [
+        {
+          "name": "update",
+          "type": {
+            "defined": {
+              "name": "ConfigUpdate"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "void_distributor",
+      "docs": [
+        "A month funded wrong, voided by the admin while nobody has claimed from it: settled as at a",
+        "close, the record voided, so the month may be funded again."
+      ],
+      "discriminator": [
+        78,
+        184,
+        17,
+        182,
+        61,
+        126,
+        68,
+        18
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "The admin, the upgrade Squad's vault (`Unauthorized` for any other key)."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "The month, naming the accounts the money and the rents go back to, as at a close",
+            "(`AccountMismatch` for any other)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "month_record",
+          "docs": [
+            "The month's record, bound by its seeds (`ConstraintSeeds` for another month's), kept voided."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  110,
+                  116,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "distributor.mint",
+                "account": "UsdcDistributor"
+              },
+              {
+                "kind": "account",
+                "path": "distributor.month",
+                "account": "UsdcDistributor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "The month's vault: the distributor's associated USDC account."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "distributor"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "funder_usdc_account",
+          "docs": [
+            "alone, as at a close."
+          ],
+          "writable": true,
+          "relations": [
+            "distributor"
+          ]
+        },
+        {
+          "name": "rent_payer",
+          "writable": true,
+          "relations": [
+            "distributor"
+          ]
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The config's USDC (`AccountMismatch` for another mint)."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "DividendsConfig",
+      "discriminator": [
+        20,
+        198,
+        109,
+        122,
+        226,
+        121,
+        191,
+        253
+      ]
+    },
+    {
+      "name": "MonthRecord",
+      "discriminator": [
+        253,
+        225,
+        197,
+        68,
+        4,
+        50,
+        181,
+        176
+      ]
+    },
+    {
+      "name": "UsdcDistributor",
+      "discriminator": [
+        42,
+        186,
+        165,
+        125,
+        5,
+        62,
+        139,
+        212
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ClaimsHeld",
+      "discriminator": [
+        26,
+        143,
+        209,
+        167,
+        86,
+        33,
+        147,
+        29
+      ]
+    },
+    {
+      "name": "ClaimsPaused",
+      "discriminator": [
+        206,
+        206,
+        66,
+        135,
+        233,
+        245,
+        249,
+        105
+      ]
+    },
+    {
+      "name": "ConfigUpdated",
+      "discriminator": [
+        40,
+        241,
+        230,
+        122,
+        11,
+        19,
+        198,
+        194
+      ]
+    },
+    {
+      "name": "FundingPauseSet",
+      "discriminator": [
+        224,
+        205,
+        167,
+        204,
+        109,
+        145,
+        198,
+        74
+      ]
+    },
+    {
+      "name": "UsdcDistributorClosed",
+      "discriminator": [
+        172,
+        102,
+        48,
+        161,
+        69,
+        92,
+        161,
+        181
+      ]
+    },
+    {
+      "name": "UsdcDistributorFunded",
+      "discriminator": [
+        28,
+        37,
+        249,
+        86,
+        228,
+        57,
+        207,
+        163
+      ]
+    },
+    {
+      "name": "UsdcDistributorRehomed",
+      "discriminator": [
+        151,
+        240,
+        213,
+        169,
+        205,
+        144,
+        137,
+        49
+      ]
+    },
+    {
+      "name": "UsdcDistributorToppedUp",
+      "discriminator": [
+        113,
+        109,
+        112,
+        115,
+        106,
+        100,
+        5,
+        225
+      ]
+    },
+    {
+      "name": "UsdcDistributorVoided",
+      "discriminator": [
+        255,
+        113,
+        27,
+        215,
+        84,
+        188,
+        194,
+        178
+      ]
+    },
+    {
+      "name": "UsdcDividendClaimed",
+      "discriminator": [
+        33,
+        206,
+        247,
+        2,
+        34,
+        127,
+        39,
+        162
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Paused",
+      "msg": "Funding is paused"
+    },
+    {
+      "code": 6001,
+      "name": "ClaimsPaused",
+      "msg": "Claims are paused"
+    },
+    {
+      "code": 6002,
+      "name": "PauseTooLong",
+      "msg": "A claims pause may end at most 7 days from now"
+    },
+    {
+      "code": 6003,
+      "name": "Unauthorized",
+      "msg": "Signer is not authorized for this action"
+    },
+    {
+      "code": 6004,
+      "name": "AccountMismatch",
+      "msg": "Account does not match the expected one"
+    },
+    {
+      "code": 6005,
+      "name": "ZeroAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6006,
+      "name": "MathOverflow",
+      "msg": "Numeric overflow"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidLeafCount",
+      "msg": "A month needs between 1 and 65,536 leaves"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidLeafIndex",
+      "msg": "Leaf index is outside this month's claim registry"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidProof",
+      "msg": "Merkle proof verification failed"
+    },
+    {
+      "code": 6010,
+      "name": "AlreadyClaimed",
+      "msg": "This dividend has already been claimed"
+    },
+    {
+      "code": 6011,
+      "name": "ExceedsFundedTotal",
+      "msg": "Claim would exceed the month's funded total"
+    },
+    {
+      "code": 6012,
+      "name": "ExpiryTooFar",
+      "msg": "A month may expire at most 400 days from its funding"
+    },
+    {
+      "code": 6013,
+      "name": "NotExpired",
+      "msg": "The month is neither expired nor fully claimed"
+    },
+    {
+      "code": 6014,
+      "name": "NotAFunder",
+      "msg": "Only Fanex's two funders or the curve's creator may fund a month"
+    },
+    {
+      "code": 6015,
+      "name": "LegacyMonthLive",
+      "msg": "pepper_curve still holds a live distributor for this token and month"
+    },
+    {
+      "code": 6016,
+      "name": "CurveUnreadable",
+      "msg": "The curve is neither a Curve nor a CurveUsdc of pepper_curve"
+    },
+    {
+      "code": 6017,
+      "name": "ExpiryTooSoon",
+      "msg": "A month must expire at least 364 days from its funding"
+    },
+    {
+      "code": 6018,
+      "name": "ClaimsPausedRecently",
+      "msg": "Claims were paused too recently for an expired month to close"
+    },
+    {
+      "code": 6019,
+      "name": "MonthAlreadyFunded",
+      "msg": "This month was already funded here: it is open or closed"
+    },
+    {
+      "code": 6020,
+      "name": "MonthHasClaims",
+      "msg": "A month with a claim cannot be voided"
+    },
+    {
+      "code": 6021,
+      "name": "PauseEndTooEarly",
+      "msg": "A claims pause may only start or extend, never end before now or the current end"
+    },
+    {
+      "code": 6022,
+      "name": "ApproverIsFunder",
+      "msg": "The approver must be a key of its own, neither Fanex funder"
+    },
+    {
+      "code": 6023,
+      "name": "ClaimsHeld",
+      "msg": "This month's claims are held"
+    },
+    {
+      "code": 6024,
+      "name": "PauseTooShort",
+      "msg": "A claims pause or hold must end at least an hour from now"
+    },
+    {
+      "code": 6025,
+      "name": "UnsupportedVersion",
+      "msg": "The account's layout version is not one this program reads"
+    },
+    {
+      "code": 6026,
+      "name": "NotRehomable",
+      "msg": "This month records no Fanex payee to re-home, or the config names no payer"
+    }
+  ],
+  "types": [
+    {
+      "name": "ClaimsHeld",
+      "docs": [
+        "One month's `claims_held_until` as `hold_claims` or `release_claims` left it, and who",
+        "signed (Rick, 2026-10-26)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "until",
+            "type": "i64"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClaimsPaused",
+      "docs": [
+        "`claims_paused_until` as `pause_claims` or `resume_claims` left it, and who signed."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "until",
+            "type": "i64"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigKeys",
+      "docs": [
+        "The keys `initialize_config` writes beside its accounts: every role but the admin, which is",
+        "an account so that its owner can be checked."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pauser",
+            "type": "pubkey"
+          },
+          {
+            "name": "approver",
+            "type": "pubkey"
+          },
+          {
+            "name": "closer",
+            "type": "pubkey"
+          },
+          {
+            "name": "pepper_funder",
+            "type": "pubkey"
+          },
+          {
+            "name": "payer_funder",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigUpdate",
+      "docs": [
+        "What `update_config` changes: each key it names, the others kept. The admin moves through",
+        "the `new_admin` account, the set-once fields through nothing."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pauser",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "approver",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "closer",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "pepper_funder",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "payer_funder",
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigUpdated",
+      "docs": [
+        "Every key of the config after `initialize_config` or `update_config`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "pauser",
+            "type": "pubkey"
+          },
+          {
+            "name": "approver",
+            "type": "pubkey"
+          },
+          {
+            "name": "closer",
+            "type": "pubkey"
+          },
+          {
+            "name": "pepper_funder",
+            "type": "pubkey"
+          },
+          {
+            "name": "payer_funder",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DividendsConfig",
+      "docs": [
+        "The program's one config (PDA: [CONFIG_SEED]), 403 bytes on chain (8 + 395)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "paused",
+            "docs": [
+              "Stops `init_distributor`: the pauser or the admin sets it, the admin",
+              "alone clears it."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "claims_paused_until",
+            "docs": [
+              "Unix seconds: a claim before it is refused (`ClaimsPaused`). Kept once it",
+              "has passed, as the time claims last opened again, which an expired month's",
+              "close reads (`CLAIMS_OPEN_BEFORE_CLOSE_SECONDS`); 0 on a fresh config."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "admin",
+            "docs": [
+              "The upgrade Squad's vault, never the multisig account: every config",
+              "change, the funding unpause, `resume_claims` and `void_distributor`."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "pauser",
+            "docs": [
+              "A hot key: pauses funding and claims, never resumes either."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "approver",
+            "docs": [
+              "Co-signs every month's funding: a key of its own, neither funder",
+              "(`ApproverIsFunder`, Rick, 2026-10-21)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "closer",
+            "docs": [
+              "Closes an expired month, beside its funder."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "usdc_mint",
+            "docs": [
+              "Set once: the classic SPL Token USDC, 6 decimals."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "pepper_funder",
+            "docs": [
+              "Fanex's funder of a month, beside the dividend payer. Which key is open:",
+              "the receive-only fee wallet signs nothing (all-zero or the dividend payer",
+              "proposed), and never the production hot key."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "payer_funder",
+            "docs": [
+              "The dividend payer, the funder of Fanex's months."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "curve_program",
+            "docs": [
+              "Set once: `pepper_curve`, whose curves and v1 and v2 distributors",
+              "`init_distributor` reads by their seeds."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Room to grow without a layout break."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundingPauseSet",
+      "docs": [
+        "The funding pause set or cleared, and who signed."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MonthRecord",
+      "docs": [
+        "A month's record (PDA: [MONTH_SEED, mint, month as i64 LE]), 75 bytes on chain",
+        "(8 + 67). Created with the month and never closed: a month closed here never",
+        "opens again, a voided one may."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "`MONTH_STATUS_OPEN`, `MONTH_STATUS_CLOSED` or `MONTH_STATUS_VOIDED`; 0 only",
+              "inside the funding that creates the record."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "distributor",
+            "docs": [
+              "The distributor the month's last funding opened."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "funded_at",
+            "docs": [
+              "Unix seconds of that funding."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Room to grow without a layout break."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                24
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcDistributor",
+      "docs": [
+        "One token's month (PDA: [DISTRIBUTOR_SEED, mint, month as i64 LE]): the root",
+        "its claims prove against and the claims made. Its µUSDC sits in its vault, the",
+        "associated USDC account of this PDA. A header of `HEADER_SPACE` bytes, then",
+        "one bit per leaf."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "docs": [
+              "The month's key (YYYYMM), as in `pepper_curve`: not validated, as there."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "merkle_root",
+            "docs": [
+              "Root over this program's leaves (`math::dividend_leaf`)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "total_amount",
+            "docs": [
+              "µUSDC the funding moved into the vault."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "claimed_amount",
+            "docs": [
+              "µUSDC claimed so far, never above `total_amount`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "funder",
+            "type": "pubkey"
+          },
+          {
+            "name": "funder_usdc_account",
+            "docs": [
+              "The funder's USDC ATA, where the close and the void send the vault's",
+              "whole balance."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "rent_payer",
+            "docs": [
+              "Who paid the rents, and gets the vault's and the distributor's back."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Unix seconds: from then the funder or the closer may close the month."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "leaf_count",
+            "docs": [
+              "Leaves the root commits to; `claimed` holds one bit for each."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "claims_held_until",
+            "docs": [
+              "Unix seconds: this month's claims are refused before it (`ClaimsHeld`),",
+              "the hold the pauser or the admin sets on this month alone (Rick,",
+              "2026-10-26). The funding writes the end of its review window",
+              "(`REVIEW_WINDOW_SECONDS`, 2026-10-29); kept once it has passed, as when this",
+              "month's claims last opened again, which its close reads. Taken from the",
+              "reserved bytes on 2026-10-26."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "funded_by_fanex",
+            "docs": [
+              "Whether the funder was one of Fanex's two funders at the funding",
+              "(`is_pepper_funder`): only then does `rehome_distributor` move the funder and",
+              "its USDC account, so a creator's leftovers never move. False in every month",
+              "funded before 2026-10-29. Taken from the reserved bytes on 2026-10-29."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "rents_by_payer",
+            "docs": [
+              "Whether the config's dividend payer paid the rents (every funding since",
+              "2026-10-29, which refuses any other rent payer): only then does",
+              "`rehome_distributor` move the rent payer. Taken from the reserved bytes then."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Room to grow without a layout break, before the bitmap, whose length varies."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                54
+              ]
+            }
+          },
+          {
+            "name": "claimed",
+            "docs": [
+              "Bit `index % 8` of byte `index / 8`, least significant first, set once",
+              "leaf `index` has claimed: exactly ⌈leaf_count / 8⌉ bytes."
+            ],
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcDistributorClosed",
+      "docs": [
+        "A month closed: `returned` µUSDC, the vault's whole balance, went to `to`, the",
+        "funder's recorded USDC account."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "returned",
+            "type": "u64"
+          },
+          {
+            "name": "to",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcDistributorFunded",
+      "docs": [
+        "A month funded: `total_amount` µUSDC moved from the funder into the vault."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "funder",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcDistributorRehomed",
+      "docs": [
+        "A month's payees re-homed by the admin to the config's dividend payer (the internal audit,",
+        "2026-10-29): the three accounts it records after the write, the close's and the void's."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "funder",
+            "type": "pubkey"
+          },
+          {
+            "name": "funder_usdc_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "rent_payer",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcDistributorToppedUp",
+      "docs": [
+        "A month topped up by its funder with the approver's signature (the internal audit,",
+        "2026-10-29): `amount` µUSDC more in the vault, `total_amount` as it now stands."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcDistributorVoided",
+      "docs": [
+        "A month voided by the admin before any claim: the same money move as a close,",
+        "and the month may be funded again."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "returned",
+            "type": "u64"
+          },
+          {
+            "name": "to",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcDividendClaimed",
+      "docs": [
+        "Leaf `index` paid `amount` µUSDC into the claimant's own USDC account."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "claimant",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u32"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "note": "Written by scripts/solana/devnet-usdc-jupiter-pools.ts: the devnet USDC curves tests/devnet_pools.rs snapshots. Rerun it, then the kit with RPC= and REFRESH=1, to take new ones.",
+  "cluster": "devnet",
+  "program": "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ",
+  "usdc_mint": "3KVFue8ug46TW2itUWis5hzEYfUqgraJCNy1RXT2Pfy1",
+  "fee_usdc_account": "79XbKMEXLr7gwH7tzAviZJxzh5zxzPDA9uwgzXpKn5NN",
+  "written_at": "2026-10-24T18:16:06.530Z",
+  "pools": [
+    {
+      "state": "equity-fresh",
+      "mint": "DM6XUa2RnaJyin9ozsXpteuVXUWUSYE7eXDxwFvDWK2p",
+      "curve": "3D3Zx45Cizm3odvWitn2FX2GyimMwwTdqMiksxMGjUFC",
+      "launch": [
+        "3CfPeFkrsCwrG7L6RSKf3D9A9Jb6qqnzeFSHKh7Y3xn9ztAyXCjwxzBtFg7iK4f3wXy4T1upDUky8aWmn8vjJSpw"
+      ],
+      "buy": {
+        "usdcIn": "100000000",
+        "charged": "100000000",
+        "tokensOut": "16527545909849",
+        "signature": "5sJTTU8vrJpzaEY295rQsmjQjHefdZwNM1XVSLgjywrTzrQT1FJXfJ8zkjMFFdFLJPknBM7LzivEPKKusxpmFmbQ"
+      }
+    },
+    {
+      "state": "equity-near-graduation",
+      "mint": "FSEkvPvjZ5qW74EgjaLgZmYtx6eFfJ2oWn4ZaPQguxC2",
+      "curve": "8iHJbvAFGBs73r9Vn28PShXeJkpg97JTnH1TuE5zdJnj",
+      "launch": [
+        "ofaQf5WQfRjBN4teKCBWdgp99WgWFZ2n3SE63Cwmyd1e6wjddnxejXyvT31Sx5Fimd8QRJ4B3LuQqxjHoef5dFi"
+      ],
+      "buy": {
+        "usdcIn": "1800000000",
+        "charged": "1800000000",
+        "tokensOut": "78089395267309",
+        "signature": "2ycRghVTc6W3oscbmboXBKcz5JAApnRFUBshDVmMqXww1oc22tg5Yjsb268uPRr5fiYNE5aG7xzHXPNMJm8PUXFr"
+      }
+    },
+    {
+      "state": "revenue-inside-raise",
+      "mint": "8medqVpu6yR6FFVvWPTbUpT761obtHwL2jM1ZbzdmqUx",
+      "curve": "BTd5VkhWAZ7M6zmPLAtK4HobDkhVGbSHTBYwE4cQCESG",
+      "launch": [
+        "3GHjbqFYSTyBqcFD81tQoEZw3dGfrUBw8wHSaXfu4ohMJxnKN9FVdZKGah6yrdiQ6Gopp5ia81FHva4ijnZ9nFKu"
+      ],
+      "buy": {
+        "usdcIn": "100000000",
+        "charged": "100000000",
+        "tokensOut": "5606947328676",
+        "signature": "23GkZdFgJxtg8j3hZDCo425C4KKnvpJJMag3veeaYzcQcissrEsr3wKiYybEYYtPcro2Py3eCzpbsrGtvEqtwz8M"
+      }
+    },
+    {
+      "state": "revenue-past-creator-cap",
+      "mint": "Go29PeqecqC4iUdSkLRv4CHPCHBVDMbkTH53by48Nmdt",
+      "curve": "2JxinHaK7HyyypDubXviQeBUoMtZx7Mg8fKiV5XYSPwp",
+      "launch": [
+        "nSQ134SgAbba9r9BE1UN1o5F3cSWkXVNe7AkhW87tSMr77YyVhKCe9YHZK98FfJkGe4Fh9u6MgQyBBmGdXHH3TU"
+      ],
+      "buy": {
+        "usdcIn": "4100000000",
+        "charged": "4100000000",
+        "tokensOut": "71089910378722",
+        "signature": "vqX4BkYGPZP9AQUwVPojSDQPhmUfzSAvsJ9XvTMgEyXQ5436nQNUcqnhUCRn1Yk2HTcpB2uAVAhdLpU5bBVHDdm"
+      }
+    }
+  ]
+}

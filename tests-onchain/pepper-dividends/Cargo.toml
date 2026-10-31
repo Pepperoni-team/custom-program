@@ -1,0 +1,31 @@
+[package]
+name = "pepper-dividends-onchain-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Standalone: not a member of the root workspace, so the in-process validator
+# LiteSVM pulls in never enters the programs' Cargo.lock or their host unit tests.
+# Run by scripts/ci-onchain-tests.sh, which builds both .so files from this tree
+# first (docs/solana/PEPPER-DIVIDENDS-PROGRAM.md §8). Its lock was seeded from the
+# pepper-curve suite's and resolved offline.
+[workspace]
+
+[dev-dependencies]
+pepper_dividends = { path = "../../programs/pepper_dividends", features = ["no-entrypoint"] }
+# The real pepper_curve, loaded from its own .so beside this program: its crate
+# writes the curves and the config, and its instructions open, claim and close
+# the SOL months whose addresses this program reads.
+pepper_curve = { path = "../../programs/pepper_curve", features = ["no-entrypoint"] }
+anchor-lang = "0.31.1"
+# Its `spl_token` and `spl_associated_token_account` re-exports make, freeze and
+# fund the test USDC, so the suite takes no SPL crate of its own; `metadata` names
+# Metaplex and its metadata account for the launches (pepper_curve enables it too).
+anchor-spl = { version = "0.31.1", features = ["metadata"] }
+litesvm = "0.6"
+solana-sdk = "2.2"
+# Decodes the events `emit!` writes to the logs ("Program data: <base64>").
+base64 = "0.21"
+# LiteSVM's secp256r1 precompile links OpenSSL. Building it from source keeps
+# the suite free of system packages (libssl-dev, pkg-config) on any machine.
+openssl = { version = "0.10", features = ["vendored"] }

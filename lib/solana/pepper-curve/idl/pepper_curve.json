@@ -1,0 +1,7726 @@
+{
+  "address": "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ",
+  "metadata": {
+    "name": "pepper_curve",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Pepper (pepper.fan) on-chain bonding curve: strip-proof atomic creator and platform fee split, presale curve, creator vesting, and merkle dividend distributor. Graduation hands off to a Raydium CPMM pool.",
+    "repository": "https://github.com/Pepperoni-team/custom-program"
+  },
+  "instructions": [
+    {
+      "name": "buy",
+      "discriminator": [
+        102,
+        6,
+        61,
+        18,
+        1,
+        218,
+        235,
+        234
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "curve"
+          ]
+        },
+        {
+          "name": "sol_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  111,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "curve"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "buyer_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "buyer"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "fanex",
+          "docs": [
+            "and Fanex's share of the raise, in one transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "sol_in",
+          "type": "u64"
+        },
+        {
+          "name": "min_tokens_out",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "buy_exact_in",
+      "docs": [
+        "Spend at most `usdc_in` µUSDC for at least `min_tokens_out` tokens: the",
+        "math crate's `quote_buy`, moved exactly by `transfer_checked`, over 13",
+        "fixed accounts in the order a router's metas are built in. A partial fill",
+        "at graduation charges less than `usdc_in`."
+      ],
+      "discriminator": [
+        250,
+        234,
+        13,
+        123,
+        213,
+        156,
+        19,
+        236
+      ],
+      "accounts": [
+        {
+          "name": "user_transfer_authority",
+          "docs": [
+            "0. The user, or a router's program authority: the only signer, and not the fee payer."
+          ],
+          "signer": true
+        },
+        {
+          "name": "user_source_usdc",
+          "docs": [
+            "1. The USDC that pays, owned by account 0."
+          ],
+          "writable": true
+        },
+        {
+          "name": "user_destination_token",
+          "docs": [
+            "2. Where the tokens go: any owner, but inside the launch window only account 0's associated",
+            "token account of the mint (`LaunchDestinationNotOwnAta`, checked in the handler)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "3. The USDC side's config: its pause, its mint and its fee account."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "4. A `CurveUsdc` by its type: a SOL `Curve` here is refused by its discriminator (3002)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_vault",
+          "docs": [
+            "5. The curve's reserve, a PDA token account whose authority is the curve. Its balance is never",
+            "read: the price runs on the curve's counters, so USDC sent straight to it moves nothing."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_vault",
+          "docs": [
+            "6. The tokens for sale: the curve PDA's associated token account of the mint."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "curve"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "fee_usdc_account",
+          "docs": [
+            "7. The fee wallet's USDC account: the 1% fee and Fanex's raise share, in one transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "creator_usdc_account",
+          "docs": [
+            "8. The creator's USDC account, where the creator's raise share is paid. Required, by the",
+            "curve's counters, exactly while the creator's cap is open (`creator_usdc_account_required`,",
+            "`CreatorUsdcAccountInvalid` without it); otherwise accepted if passed, still bound to the",
+            "curve's record, and paid only a non-zero share."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "9. The USDC mint the config names, for `transfer_checked`."
+          ]
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "10. The curve's token mint, for `transfer_checked`."
+          ]
+        },
+        {
+          "name": "launch_guard_waiver",
+          "docs": [
+            "11. The curve's `LaunchGuardWaiver`, read only where the launch cap would refuse",
+            "(`validation::launch_guard_waived`: the program's account, the waiver's discriminator, the",
+            "curve's mint, its PDA), as `buy` reads its waiver; anything else passed here lifts nothing. A",
+            "typed account would be read and seed-checked whenever passed."
+          ],
+          "optional": true
+        },
+        {
+          "name": "token_program",
+          "docs": [
+            "12. Classic SPL Token: USDC and the curve's token are both classic mints."
+          ],
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "usdc_in",
+          "type": "u64"
+        },
+        {
+          "name": "min_tokens_out",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "claim_dividend",
+      "discriminator": [
+        15,
+        29,
+        207,
+        120,
+        153,
+        178,
+        164,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "claimant",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "rent_payer",
+          "docs": [
+            "Funds the `ClaimStatus` rent (~0.00128 SOL). In the ordinary flow this",
+            "is the Fanex sponsor wallet, which already co-signs the claim tx as its",
+            "fee payer — so a holder pays NOTHING to claim, and a 0-SOL wallet is no",
+            "longer stuck. The client falls back to `rent_payer = claimant` when no",
+            "sponsor key is configured; the program accepts any signer here because",
+            "paying rent grants no authority — the proof and the seeds still bind",
+            "everything to `claimant`."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "distributor",
+          "writable": true
+        },
+        {
+          "name": "claim_status",
+          "docs": [
+            "Existence marks this wallet as having claimed. `init` fails if it already",
+            "exists → a wallet can claim its allocation exactly once."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  108,
+                  97,
+                  105,
+                  109
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "distributor"
+              },
+              {
+                "kind": "account",
+                "path": "claimant"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "proof",
+          "type": {
+            "vec": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "claim_dividend_v2",
+      "discriminator": [
+        12,
+        36,
+        227,
+        143,
+        154,
+        12,
+        88,
+        101
+      ],
+      "accounts": [
+        {
+          "name": "claimant",
+          "docs": [
+            "Signs, as in v1: the claim is a pull, and only the holder pulls. Who pays",
+            "the fee is the transaction's business; there is no rent to pay."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "distributor",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "index",
+          "type": "u32"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "proof",
+          "type": {
+            "vec": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "claim_vesting",
+      "discriminator": [
+        134,
+        160,
+        202,
+        203,
+        151,
+        219,
+        16,
+        125
+      ],
+      "accounts": [
+        {
+          "name": "beneficiary",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "curve",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "curve",
+            "vesting"
+          ]
+        },
+        {
+          "name": "vesting",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vesting_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "beneficiary_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "beneficiary"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_vesting_usdc",
+      "docs": [
+        "`claim_vesting` on a `CurveUsdc`: the same schedule and the same lock,",
+        "a curve created from 2026-11-01 released once its pool exists",
+        "(PoolCreated or Graduated); the beneficiary's token account must exist,",
+        "and the tokens move by `transfer_checked`."
+      ],
+      "discriminator": [
+        211,
+        119,
+        55,
+        195,
+        223,
+        166,
+        241,
+        69
+      ],
+      "accounts": [
+        {
+          "name": "beneficiary",
+          "signer": true
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "A `CurveUsdc` by its type: a SOL `Curve` here is refused by its discriminator (3002), as",
+            "the SOL `claim_vesting` refuses this one."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "curve",
+            "vesting"
+          ]
+        },
+        {
+          "name": "vesting",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vesting_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "beneficiary_token_account",
+          "docs": [
+            "The beneficiary's associated token account of the mint, still owned by the beneficiary;",
+            "missing, the claim is refused (`AccountNotInitialized`), never opened at their expense."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "beneficiary"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_claim_status",
+      "discriminator": [
+        163,
+        214,
+        191,
+        165,
+        245,
+        188,
+        17,
+        185
+      ],
+      "accounts": [
+        {
+          "name": "claim_status",
+          "docs": [
+            "pre-upgrade, 88-byte with `rent_payer`) and `Account<ClaimStatus>` can",
+            "only read the new one; owner, discriminator and seeds are all verified",
+            "in the handler."
+          ],
+          "writable": true
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "DEAD (its account closed): while the distributor lives, the ClaimStatus",
+            "is the double-claim guard and closing it would re-open the claim."
+          ]
+        },
+        {
+          "name": "rent_recipient",
+          "docs": [
+            "on the new format, `claimant` on the legacy one — so a permissionless",
+            "caller can trigger the refund but never redirect it."
+          ],
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_creator_raise_usdc",
+      "docs": [
+        "Close a USDC curve's creator raise at what it has received, signed by `UsdcConfig.admin`:",
+        "its buys then need no creator USDC account, so one frozen or lost stops nothing. Bonding",
+        "only, never paused."
+      ],
+      "discriminator": [
+        119,
+        80,
+        229,
+        110,
+        194,
+        75,
+        39,
+        220
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "`UsdcConfig.admin` (`Unauthorized` for any other key, the pauser included)."
+          ],
+          "signer": true
+        },
+        {
+          "name": "usdc_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "A `CurveUsdc` by its type and its seeds: a SOL `Curve` is refused by its discriminator (3002)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_distributor",
+      "discriminator": [
+        202,
+        56,
+        180,
+        143,
+        46,
+        104,
+        106,
+        112
+      ],
+      "accounts": [
+        {
+          "name": "distributor",
+          "writable": true
+        },
+        {
+          "name": "funder",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "distributor"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_distributor_v2",
+      "discriminator": [
+        136,
+        148,
+        140,
+        2,
+        53,
+        247,
+        154,
+        232
+      ],
+      "accounts": [
+        {
+          "name": "distributor",
+          "writable": true
+        },
+        {
+          "name": "funder",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "distributor"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_expired_distributor",
+      "docs": [
+        "Close an expired v1 month to its recorded funder, permissionless, so no month blocks its",
+        "address past its expiry."
+      ],
+      "discriminator": [
+        56,
+        16,
+        191,
+        24,
+        62,
+        161,
+        210,
+        57
+      ],
+      "accounts": [
+        {
+          "name": "distributor",
+          "docs": [
+            "A v1 month, closed to its recorded funder."
+          ],
+          "writable": true
+        },
+        {
+          "name": "funder",
+          "docs": [
+            "lamports and need not sign."
+          ],
+          "writable": true,
+          "relations": [
+            "distributor"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_expired_distributor_v2",
+      "docs": [
+        "`close_expired_distributor` for a v2 month."
+      ],
+      "discriminator": [
+        31,
+        100,
+        148,
+        149,
+        196,
+        115,
+        172,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "distributor",
+          "docs": [
+            "A v2 month, closed to its recorded funder."
+          ],
+          "writable": true
+        },
+        {
+          "name": "funder",
+          "docs": [
+            "lamports and need not sign."
+          ],
+          "writable": true,
+          "relations": [
+            "distributor"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_curve",
+      "discriminator": [
+        169,
+        235,
+        221,
+        223,
+        65,
+        109,
+        120,
+        183
+      ],
+      "accounts": [
+        {
+          "name": "launcher",
+          "docs": [
+            "Pays for all account creation and signs the tx. In creator mode this is",
+            "the creator themselves; in admin-concierge mode this is the admin",
+            "launching on the creator's behalf."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator",
+          "docs": [
+            "every buy and beneficiary of the vested 2%. Stored as `curve.creator` and",
+            "later enforced by `buy`/`sell`/`claim_vesting`. MAY differ from `launcher`",
+            "(admin-concierge). No signature is required: whoever pays the create tx",
+            "designates the creator wallet."
+          ]
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "New SPL mint (fresh keypair, signs for its own init). Authority is set to",
+            "the curve PDA, then revoked after the one-time supply mint."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sol_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  111,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vesting",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_vault",
+          "docs": [
+            "Holds the curve-sale + migration tokens (ATA of the curve PDA)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "curve"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vesting_vault",
+          "docs": [
+            "Holds the vested creator tokens (PDA token account of the curve PDA)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "metadata",
+          "docs": [
+            "the Metaplex CPI in the handler derives + validates it against `mint` and",
+            "creates it. Mutable because the CPI initializes it."
+          ],
+          "writable": true
+        },
+        {
+          "name": "metadata_update_authority",
+          "docs": [
+            "`config.admin` (2026-10-24, the fee-wallet split, docs/ops/KEY-ROTATION.md",
+            "§1e), the key that can fix name/symbol/uri later, the upgrade Squad's vault",
+            "once `GlobalConfig.admin` moves there (docs/security/MULTISIG.md §6), never",
+            "the receive-only fee wallet. It was `config.fanex_fee_wallet` until then."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "CreateCurveParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_curve_usdc",
+      "docs": [
+        "Launch a USDC curve, paid and signed by `UsdcConfig.launcher` alone (the",
+        "sponsor): today's checks in µUSDC, the creator's USDC ATA with a creator",
+        "split, the supply into the two vaults, the Metaplex metadata under",
+        "`UsdcConfig.admin`, the mint authority revoked. No USDC moves."
+      ],
+      "discriminator": [
+        164,
+        156,
+        21,
+        138,
+        125,
+        142,
+        155,
+        221
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "docs": [
+            "The sponsor, `UsdcConfig.launcher` (`Unauthorized` for any other key): signs and pays every",
+            "rent, so a creator spends no SOL and no stranger launches terms the screens never state."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator",
+          "docs": [
+            "need not sign. With a creator split it may not be the fan-led placeholder",
+            "(`PlaceholderCannotRaise`), and its USDC ATA is the one the split is paid into."
+          ]
+        },
+        {
+          "name": "usdc_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The new token, a fresh keypair signing for its own `init`: its mint authority the curve PDA,",
+            "revoked after the one-time mint, and no freeze authority."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "At `[\"curve\", mint]`, where a SOL `Curve` would sit: a mint has one or the other."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_vault",
+          "docs": [
+            "The curve's USDC reserve: a token account of `usdc_mint` at its own PDA, the curve its",
+            "authority, not an ATA (§10.2)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vesting",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_vault",
+          "docs": [
+            "The tokens for sale and for the pool, as today: the curve PDA's associated account."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "curve"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vesting_vault",
+          "docs": [
+            "The creator's vested tokens, as today."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator_usdc_account",
+          "docs": [
+            "The creator's USDC associated token account, closable by the payer alone: required with a",
+            "creator split and refused without one (`CreatorUsdcAccountInvalid` either way, checked in",
+            "the handler by `creator_usdc_account_to_store`). Absent, it is passed as the program's own",
+            "id. Only read: the launch transaction opens and hardens it before this instruction."
+          ],
+          "optional": true
+        },
+        {
+          "name": "metadata",
+          "docs": [
+            "checks it against the mint, and creates it."
+          ],
+          "writable": true
+        },
+        {
+          "name": "metadata_update_authority",
+          "docs": [
+            "before the first USDC launch (Rick, 2026-10-22), where a SOL launch names the fee wallet.",
+            "Metaplex keeps it for good, so the hot key that signed `initialize_usdc_config` hands the",
+            "admin over first."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_metadata_program",
+          "docs": [
+            "`Program<Metadata>` checks it is executable with the accounts, before the handler, so no",
+            "refusal below could run where Metaplex is not loaded."
+          ],
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "CreateCurveUsdcParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "graduate",
+      "discriminator": [
+        45,
+        235,
+        225,
+        181,
+        17,
+        218,
+        64,
+        130
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "curve"
+          ]
+        },
+        {
+          "name": "sol_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  111,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "curve"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "keeper_sol_dest",
+          "writable": true
+        },
+        {
+          "name": "keeper_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "graduate_usdc_lock",
+      "docs": [
+        "Lock a pooled curve's whole LP in Raydium's LP lock, by CPI: the pool creator's",
+        "LP balance, the LP mint and the pool's vaults as the pool's own `PoolState`",
+        "records them, the Fee Key to `UsdcConfig.lp_fee_owner`, the lock's rents paid by",
+        "the pool creator, funded by the caller, `extra_lamports` (at most 0.1 SOL) included,",
+        "and emptied back to it. Permissionless, gated by both USDC pauses; PoolCreated to",
+        "Graduated, the reserve counters zeroed."
+      ],
+      "discriminator": [
+        253,
+        181,
+        71,
+        238,
+        227,
+        1,
+        69,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "docs": [
+            "Anyone, the keeper by default: hands the pool creator what the lock's accounts cost, and",
+            "gets back what the lock does not spend."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "The USDC side's config: its pause, the lock and its authority, the Fee Key's owner."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "A `CurveUsdc` by its type: a SOL `Curve` here is refused by its discriminator (3002)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_creator",
+          "docs": [
+            "The pool's creator, `[\"pool_creator\", mint]`, the LP's owner since `graduate_usdc_pool`:",
+            "pays the lock's rents from what the caller hands it, and signs the CPI as the lock's payer",
+            "and as the liquidity's owner."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108,
+                  95,
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_creator_lp",
+          "docs": [
+            "the LP, and no other account the pool creator may own."
+          ],
+          "writable": true
+        },
+        {
+          "name": "lock_program",
+          "docs": [
+            "Raydium's LP lock, the program the LP goes into."
+          ]
+        },
+        {
+          "name": "lock_authority",
+          "docs": [
+            "PDA, the owner of its LP vault."
+          ]
+        },
+        {
+          "name": "fee_nft_owner"
+        },
+        {
+          "name": "fee_nft_mint",
+          "docs": [
+            "mint there with no seeds of its own, so the program signs for it."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  101,
+                  101,
+                  95,
+                  110,
+                  102,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fee_nft_account",
+          "docs": [
+            "lock creates and checks."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_state",
+          "docs": [
+            "the handler as the `PoolState` its CPMM wrote, whichever CPMM the config names now."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  112,
+                  109,
+                  109,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "locked_liquidity",
+          "docs": [
+            "lock creates and checks."
+          ],
+          "writable": true
+        },
+        {
+          "name": "lp_mint"
+        },
+        {
+          "name": "locked_lp_vault",
+          "docs": [
+            "when missing and checks."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_usdc_vault",
+          "writable": true
+        },
+        {
+          "name": "pool_token_vault",
+          "writable": true
+        },
+        {
+          "name": "metadata_account",
+          "docs": [
+            "it only when asked for metadata, never here (`with_metadata = false`), and does not check it",
+            "then (LiteSVM: any address passes), so the program binds it rather than hand the lock a",
+            "writable account the caller chose."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "fee_nft_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "extra_lamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "graduate_usdc_pool",
+      "docs": [
+        "Create a graduating curve's Raydium CPMM pool, by CPI, at the program's PDA",
+        "`[\"cpmm_pool\", mint]`: the counted reserves, never the vaults' balances, through",
+        "the pool creator, a system-owned PDA of ours that pays Raydium's rents and fee,",
+        "funded by the caller, `extra_lamports` (at most 0.1 SOL) included, and emptied back",
+        "to it. Permissionless, gated by both USDC pauses; Graduating to PoolCreated."
+      ],
+      "discriminator": [
+        11,
+        1,
+        178,
+        156,
+        195,
+        193,
+        200,
+        103
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "docs": [
+            "Anyone, the keeper by default: pays the pool creator's two ATAs where they do not exist yet,",
+            "and hands the pool creator what CPMM charges, getting back what it does not spend."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "The USDC side's config: its pause, its mint and the Raydium addresses the CPI goes to."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "A `CurveUsdc` by its type: a SOL `Curve` here is refused by its discriminator (3002)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_vault",
+          "docs": [
+            "The curve's USDC reserve, by its seeds: `real_usdc_reserves` leaves it, never its balance."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_vault",
+          "docs": [
+            "The curve's tokens, the curve PDA's associated account: `real_token_reserves +",
+            "migration_token_reserves` leave it, never its balance."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "curve"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The USDC mint the config names, for `transfer_checked` and the pool."
+          ]
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "The curve's token mint, for `transfer_checked` and the pool."
+          ]
+        },
+        {
+          "name": "pool_creator",
+          "docs": [
+            "The pool's creator, `[\"pool_creator\", mint]`: a system-owned PDA with no data, since CPMM",
+            "takes its rents and its fee from the creator's lamports by System transfers, which the curve,",
+            "an account with data, could not make. Signs the CPI."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108,
+                  95,
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_creator_usdc",
+          "docs": [
+            "The pool creator's USDC ATA: an ATA's address fixes its owner and its mint, so one a",
+            "stranger opened first is the same account, taken as it is. anchor-spl's CPI names the ATA it",
+            "derives from the pool creator and the mint, so any other account here fails it",
+            "(`MissingAccount`) before a token moves."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_creator_token",
+          "docs": [
+            "The pool creator's ATA of the curve's token, as `pool_creator_usdc`."
+          ],
+          "writable": true
+        },
+        {
+          "name": "cpmm_program",
+          "docs": [
+            "Raydium's CPMM, the program the reserves go into."
+          ]
+        },
+        {
+          "name": "amm_config",
+          "docs": [
+            "The CPMM's 1% fee tier, `usdc_config.raydium_amm_config`, still at 1% and creating pools."
+          ]
+        },
+        {
+          "name": "cpmm_authority"
+        },
+        {
+          "name": "pool_state",
+          "docs": [
+            "the program signing for it."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  112,
+                  109,
+                  109,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "lp_mint",
+          "writable": true
+        },
+        {
+          "name": "pool_creator_lp",
+          "docs": [
+            "creator and the LP mint), read after the CPI for the LP the pool minted."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_usdc_vault",
+          "writable": true
+        },
+        {
+          "name": "pool_token_vault",
+          "writable": true
+        },
+        {
+          "name": "create_pool_fee",
+          "docs": [
+            "(`create_pool_fee_reveiver::ID`), so the program takes it as given (2026-10-24): a pin to",
+            "`usdc_config.raydium_create_pool_fee` refused every graduation for the 48 hours a config",
+            "change takes, should Raydium move it, and the fee is the caller's lamports, never a curve's.",
+            "The wrapped-SOL account Raydium takes its pool-creation fee into."
+          ],
+          "writable": true
+        },
+        {
+          "name": "observation",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "docs": [
+            "Classic SPL Token: USDC and the curve's token are both classic mints, so it is CPMM's",
+            "`token_program`, `token_0_program` and `token_1_program` alike."
+          ],
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "extra_lamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "init_distributor",
+      "discriminator": [
+        4,
+        170,
+        72,
+        1,
+        58,
+        177,
+        150,
+        43
+      ],
+      "accounts": [
+        {
+          "name": "funder",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "The curve for `mint`. Derived from the mint, so a distributor can't be",
+            "opened for a non-existent curve. Until 2026-10-05 it also authorized the",
+            "creator as a v1 funder; a creator now funds only in v2, with Fanex's",
+            "approval (`InitDistributorV2::approver`). Kept so the account list, and",
+            "every client built on it, does not move."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "arg",
+                "path": "month"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "month",
+          "type": "i64"
+        },
+        {
+          "name": "merkle_root",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "total_amount",
+          "type": "u64"
+        },
+        {
+          "name": "expires_at",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "init_distributor_v2",
+      "discriminator": [
+        118,
+        112,
+        200,
+        135,
+        138,
+        204,
+        37,
+        74
+      ],
+      "accounts": [
+        {
+          "name": "funder",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "approver",
+          "docs": [
+            "Fanex's approval of what this month commits (2026-10-05): the signature of",
+            "`config.graduation_authority`, the server's key, since 2026-10-24 (the",
+            "fee-wallet split; the fee wallet's until then), given on the transaction",
+            "the server prepared, so the root, total and expiry are the ones Fanex",
+            "planned even when the creator funds and sends it. It approves only: it is",
+            "not written and pays nothing. Never a funder: the dividend payer and the",
+            "creator fund, so neither key alone, stolen, opens a month."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "The curve for `mint`, read only for the funder gate, as in `InitDistributor`."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "docs": [
+            "The same seeds as a v1 `Distributor`: a month takes one distributor,",
+            "whichever its version, and `init` fails while either exists. The funder",
+            "pays the registry once, inside this account's rent."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "arg",
+                "path": "month"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "month",
+          "type": "i64"
+        },
+        {
+          "name": "merkle_root",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "total_amount",
+          "type": "u64"
+        },
+        {
+          "name": "expires_at",
+          "type": "i64"
+        },
+        {
+          "name": "leaf_count",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "initialize_config",
+      "discriminator": [
+        208,
+        127,
+        21,
+        1,
+        194,
+        190,
+        196,
+        70
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fanex_fee_wallet",
+          "type": "pubkey"
+        },
+        {
+          "name": "graduation_authority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "initialize_usdc_config",
+      "docs": [
+        "Create the USDC side's config, signed by the program's upgrade authority as",
+        "its ProgramData records it, naming its first admin (a system-owned account,",
+        "the upgrade Squad's vault on mainnet): the USDC mint (6 decimals, set once),",
+        "the fee wallet's hardened USDC ATA, the keys of `params`, the Raydium fields",
+        "all-zero."
+      ],
+      "discriminator": [
+        229,
+        86,
+        154,
+        58,
+        232,
+        6,
+        129,
+        110
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "docs": [
+            "Pays the config's rent: on mainnet the vault itself, since a vault transaction carries no",
+            "other keypair's signature."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "upgrade_authority",
+          "docs": [
+            "The program's upgrade authority, as its ProgramData records it. Not `GlobalConfig.admin`."
+          ],
+          "signer": true
+        },
+        {
+          "name": "program_data",
+          "docs": [
+            "The program's ProgramData, the upgradeable loader's PDA of the program id (`ConstraintSeeds`",
+            "anywhere else, so another program's ProgramData, whoever holds it, is refused), owned by the",
+            "loader, whose `upgrade_authority_address` must be the signer: `Unauthorized` for any other",
+            "key, `GlobalConfig.admin` included, for an immutable program, which records none, and for a",
+            "program loaded without the upgradeable loader, which has no ProgramData. `set_usdc_raydium`'s",
+            "gate, read the same way."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  166,
+                  157,
+                  117,
+                  149,
+                  146,
+                  25,
+                  21,
+                  131,
+                  16,
+                  231,
+                  13,
+                  126,
+                  89,
+                  137,
+                  127,
+                  157,
+                  152,
+                  113,
+                  102,
+                  81,
+                  88,
+                  191,
+                  245,
+                  80,
+                  218,
+                  60,
+                  242,
+                  133,
+                  73,
+                  118,
+                  159,
+                  140
+                ]
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                168,
+                246,
+                145,
+                78,
+                136,
+                161,
+                176,
+                226,
+                16,
+                21,
+                62,
+                247,
+                99,
+                174,
+                43,
+                0,
+                194,
+                185,
+                61,
+                22,
+                193,
+                36,
+                210,
+                192,
+                83,
+                122,
+                16,
+                4,
+                128,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "name": "admin",
+          "docs": [
+            "The first `UsdcConfig.admin`: an account the system program owns, as a Squads vault is",
+            "(`AccountNotSystemOwned` otherwise, the all-zero key included, which is the system program's",
+            "own). The multisig account is the Squads program's and never signs: an admin handed to it",
+            "would be lost for good (MULTISIG.md §2)."
+          ]
+        },
+        {
+          "name": "global_config",
+          "docs": [
+            "Read for one key, the fee wallet the fee account must belong to."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "A plain `init`: a second initialize fails on the account already there."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "A classic SPL mint of 6 decimals (`ConstraintMintDecimals` otherwise), set once: no",
+            "instruction changes it after this one."
+          ]
+        },
+        {
+          "name": "fee_usdc_account",
+          "docs": [
+            "The fee wallet's USDC account: of `usdc_mint` (`ConstraintTokenMint` otherwise), owned by",
+            "`GlobalConfig.fanex_fee_wallet` (`AccountMismatch` otherwise), then held in the handler to",
+            "`fee_usdc_account_valid` (`FeeUsdcAccountInvalid`): the wallet's ATA, not frozen, closable",
+            "by this config's PDA alone."
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "InitializeUsdcConfigParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "sell",
+      "discriminator": [
+        51,
+        230,
+        133,
+        164,
+        1,
+        127,
+        131,
+        173
+      ],
+      "accounts": [
+        {
+          "name": "seller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "curve"
+          ]
+        },
+        {
+          "name": "sol_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  111,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "curve"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "seller_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "seller"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "fanex",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "token_in",
+          "type": "u64"
+        },
+        {
+          "name": "min_sol_out",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "sell_exact_in",
+      "docs": [
+        "Sell `tokens_in` for at least `min_usdc_out` µUSDC after the 1% fee: the",
+        "math crate's `quote_sell`, the proceeds and the fee out of `usdc_vault`",
+        "by `transfer_checked`, the curve signing, over 11 fixed accounts in the",
+        "order a router's metas are built in."
+      ],
+      "discriminator": [
+        149,
+        39,
+        222,
+        155,
+        211,
+        124,
+        152,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "user_transfer_authority",
+          "docs": [
+            "0. The user, or a router's program authority: the only signer, and not the fee payer."
+          ],
+          "signer": true
+        },
+        {
+          "name": "user_source_token",
+          "docs": [
+            "1. The tokens sold, owned by account 0: a delegate of the owner is refused."
+          ],
+          "writable": true
+        },
+        {
+          "name": "user_destination_usdc",
+          "docs": [
+            "2. Where the proceeds go: any USDC account, any owner, inside the launch window too (a sale",
+            "has no launch rule)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "3. The USDC side's config: its pause, its mint and its fee account."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "4. A `CurveUsdc` by its type: a SOL `Curve` here is refused by its discriminator (3002)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_vault",
+          "docs": [
+            "5. The curve's reserve, which pays the proceeds and the fee, the curve signing. Its balance is",
+            "never read: a sale is bounded by `real_usdc_reserves`, so USDC sent straight to it pays no one."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_vault",
+          "docs": [
+            "6. Where the tokens sold go back: the curve PDA's associated token account of the mint."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "curve"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "fee_usdc_account",
+          "docs": [
+            "7. The fee wallet's USDC account: the 1% fee, out of `usdc_vault`."
+          ],
+          "writable": true
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "8. The USDC mint the config names, for `transfer_checked`."
+          ]
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "9. The curve's token mint, for `transfer_checked`."
+          ]
+        },
+        {
+          "name": "token_program",
+          "docs": [
+            "10. Classic SPL Token: USDC and the curve's token are both classic mints."
+          ],
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "tokens_in",
+          "type": "u64"
+        },
+        {
+          "name": "min_usdc_out",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "set_curve_paused",
+      "discriminator": [
+        34,
+        213,
+        114,
+        14,
+        175,
+        229,
+        213,
+        114
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "curve",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "set_curve_usdc_paused",
+      "docs": [
+        "One USDC curve's pause, bound by its seeds, under the kill-switch's rule."
+      ],
+      "discriminator": [
+        197,
+        127,
+        206,
+        117,
+        38,
+        238,
+        65,
+        21
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The pauser or the admin: the handler decides which may write what."
+          ],
+          "signer": true
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "Read for its two keys alone."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "Bound by its seeds (`ConstraintSeeds` at any other address), unlike the SOL",
+            "`set_curve_paused`, which checks none; a SOL `Curve` fails its discriminator first (3002)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "CurveUsdc"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "set_distributor_funder",
+      "docs": [
+        "Hand a v1 month's close over to the dividend payer (2026-10-24, the",
+        "fee-wallet split): signed by its recorded funder, `new_funder` the payer",
+        "alone; nothing else moves."
+      ],
+      "discriminator": [
+        156,
+        140,
+        245,
+        89,
+        247,
+        183,
+        162,
+        1
+      ],
+      "accounts": [
+        {
+          "name": "funder",
+          "docs": [
+            "The month's recorded funder: only who funded a month hands its close over."
+          ],
+          "signer": true,
+          "relations": [
+            "distributor"
+          ]
+        },
+        {
+          "name": "distributor",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_funder",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "set_distributor_v2_funder",
+      "docs": [
+        "Hand a v2 month's close over to the dividend payer, as `set_distributor_funder` does a v1",
+        "month's: signed by its recorded funder, `new_funder` the payer alone; nothing else moves."
+      ],
+      "discriminator": [
+        185,
+        141,
+        109,
+        8,
+        235,
+        114,
+        106,
+        14
+      ],
+      "accounts": [
+        {
+          "name": "funder",
+          "docs": [
+            "The month's recorded funder: only who funded a month hands its close over."
+          ],
+          "signer": true,
+          "relations": [
+            "distributor"
+          ]
+        },
+        {
+          "name": "distributor",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_funder",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "set_launch_guard_authority",
+      "docs": [
+        "Name the key that may launch a curve without the launch cap",
+        "(docs/solana/PEPPER-CURVE-PROGRAM.md §5.2). All-zero lets nobody."
+      ],
+      "discriminator": [
+        18,
+        177,
+        204,
+        199,
+        218,
+        153,
+        255,
+        48
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "docs": [
+            "Pays `LaunchGuardConfig`'s rent the first time."
+          ],
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "launch_guard",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  97,
+                  117,
+                  110,
+                  99,
+                  104,
+                  95,
+                  103,
+                  117,
+                  97,
+                  114,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "authority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "set_paused",
+      "discriminator": [
+        91,
+        60,
+        125,
+        192,
+        176,
+        225,
+        166,
+        218
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "set_usdc_paused",
+      "docs": [
+        "The USDC side's kill-switch: the pauser or the admin pauses, only the",
+        "admin unpauses (`NotPauser`)."
+      ],
+      "discriminator": [
+        109,
+        156,
+        213,
+        13,
+        58,
+        67,
+        27,
+        53
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The pauser or the admin: the handler decides which may write what."
+          ],
+          "signer": true
+        },
+        {
+          "name": "usdc_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "set_usdc_raydium",
+      "docs": [
+        "Write the Raydium addresses a graduation sends a curve's reserves to,",
+        "each `None` kept as it is, signed by the program's upgrade authority",
+        "alone, as its ProgramData records it (`Unauthorized` for any other key,",
+        "`UsdcConfig.admin` included, and for an immutable program): none written",
+        "all-zero (`RaydiumNotSet`); when the CPMM or the tier changes, the",
+        "`amm_config` the one the config will hold, owned by its CPMM, still at 1%",
+        "(`GraduationFeeTierChanged`) and creating pools (`PoolCreationDisabled`)."
+      ],
+      "discriminator": [
+        139,
+        184,
+        190,
+        214,
+        23,
+        48,
+        215,
+        67
+      ],
+      "accounts": [
+        {
+          "name": "upgrade_authority",
+          "docs": [
+            "The program's upgrade authority, as its ProgramData records it. Not `UsdcConfig.admin`."
+          ],
+          "signer": true
+        },
+        {
+          "name": "program_data",
+          "docs": [
+            "The program's ProgramData, the upgradeable loader's PDA of the program id (`ConstraintSeeds`",
+            "anywhere else, so another program's ProgramData, whoever holds it, is refused), owned by the",
+            "loader, whose `upgrade_authority_address` must be the signer: `Unauthorized` for any other",
+            "key, for an immutable program, which records none, and for a program loaded without the",
+            "upgradeable loader, which has no ProgramData. Read by hand, not as Anchor's",
+            "`Account<ProgramData>`, whose bincode decoding made the program about 60 KB larger",
+            "(2026-10-23)."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  166,
+                  157,
+                  117,
+                  149,
+                  146,
+                  25,
+                  21,
+                  131,
+                  16,
+                  231,
+                  13,
+                  126,
+                  89,
+                  137,
+                  127,
+                  157,
+                  152,
+                  113,
+                  102,
+                  81,
+                  88,
+                  191,
+                  245,
+                  80,
+                  218,
+                  60,
+                  242,
+                  133,
+                  73,
+                  118,
+                  159,
+                  140
+                ]
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                168,
+                246,
+                145,
+                78,
+                136,
+                161,
+                176,
+                226,
+                16,
+                21,
+                62,
+                247,
+                99,
+                174,
+                43,
+                0,
+                194,
+                185,
+                61,
+                22,
+                193,
+                36,
+                210,
+                192,
+                83,
+                122,
+                16,
+                4,
+                128,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "name": "usdc_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "raydium_amm_config",
+          "docs": [
+            "The CPMM's 1% fee tier, passed when the CPMM or the tier changes (`AccountMismatch` when it",
+            "is missing then) and read only then: at the tier's address once written, owned by the CPMM",
+            "once written, an `AmmConfig` at 1% still creating pools. Typed as Raydium's account, it",
+            "would need Raydium's crate, which pins Anchor 1.0.2."
+          ],
+          "optional": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "SetUsdcRaydiumParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "set_vesting_beneficiary",
+      "docs": [
+        "Hand an unclaimed fan-led vesting allocation to the creator who proved",
+        "they own the channel. Refuses any vesting account whose beneficiary is",
+        "no longer the keyless placeholder, so a real creator's allocation is",
+        "unreachable from here."
+      ],
+      "discriminator": [
+        3,
+        33,
+        36,
+        172,
+        102,
+        184,
+        84,
+        124
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "vesting"
+          ]
+        },
+        {
+          "name": "vesting",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_beneficiary",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "sync_curve_creator",
+      "docs": [
+        "Copy a claimed fan-led vesting beneficiary into `Curve.creator`. Takes no",
+        "address: refuses unless `Curve.creator` is still the keyless placeholder",
+        "and the vesting has already been handed to a real wallet, so it can",
+        "neither touch a real creator nor write anything the vesting does not say."
+      ],
+      "discriminator": [
+        175,
+        10,
+        37,
+        159,
+        167,
+        166,
+        7,
+        148
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "vesting",
+            "curve"
+          ]
+        },
+        {
+          "name": "vesting",
+          "docs": [
+            "Read-only: the SOURCE of the value written. Never modified here."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "sync_curve_creator_usdc",
+      "docs": [
+        "`sync_curve_creator` on a `CurveUsdc`, signed by `GlobalConfig.admin`",
+        "as the SOL one: once, from the fan-led placeholder to the vesting",
+        "beneficiary a claim already set, taking no address."
+      ],
+      "discriminator": [
+        218,
+        115,
+        8,
+        11,
+        67,
+        217,
+        80,
+        166
+      ],
+      "accounts": [
+        {
+          "name": "global_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "global_config"
+          ]
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "vesting",
+            "curve"
+          ]
+        },
+        {
+          "name": "vesting",
+          "docs": [
+            "Read-only: the SOURCE of the value written. Never modified here."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "A `CurveUsdc` by its type: a SOL `Curve` here is refused by its discriminator (3002), as",
+            "the SOL `sync_curve_creator` refuses this one."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_config",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_admin",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_fanex_fee_wallet",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_graduation_authority",
+          "type": {
+            "option": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "update_usdc_config",
+      "docs": [
+        "Change the USDC config's keys, signed by `UsdcConfig.admin`. `None`, or",
+        "no `new_fee_usdc_account`, leaves a field as it is."
+      ],
+      "discriminator": [
+        21,
+        17,
+        124,
+        103,
+        114,
+        44,
+        164,
+        66
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "`UsdcConfig.admin`: the Squad's vault once handed over."
+          ],
+          "signer": true,
+          "relations": [
+            "usdc_config"
+          ]
+        },
+        {
+          "name": "usdc_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "global_config",
+          "docs": [
+            "Read for one key, the fee account's owner, as at init."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "new_fee_usdc_account",
+          "docs": [
+            "The new fee account, absent to keep the one there: held to the init's rule, of",
+            "`usdc_config.usdc_mint` (`ConstraintTokenMint`), owned by `GlobalConfig.fanex_fee_wallet`",
+            "(`AccountMismatch`), then `fee_usdc_account_valid` (`FeeUsdcAccountInvalid`). An account, not",
+            "an argument: an address alone could be checked for none of it."
+          ],
+          "optional": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_admin",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_pauser",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_migration_authority",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_lp_fee_owner",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_launcher",
+          "type": {
+            "option": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "usdc_pause_sol",
+      "docs": [
+        "The USDC pause of the whole SOL side (§10.3.3, Rick, 2026-10-23),",
+        "`GlobalConfig.paused = true`, signed by `UsdcConfig.pauser` alone. Takes",
+        "no value, so it cannot unpause: that stays `set_paused(false)`,",
+        "`GlobalConfig.admin`'s."
+      ],
+      "discriminator": [
+        58,
+        81,
+        147,
+        50,
+        254,
+        175,
+        11,
+        30
+      ],
+      "accounts": [
+        {
+          "name": "pauser",
+          "docs": [
+            "`UsdcConfig.pauser`, the only key this instruction takes. It pays nothing."
+          ],
+          "signer": true,
+          "relations": [
+            "usdc_config"
+          ]
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "Read for its pauser alone, bound by its seeds (Anchor's 2006 anywhere else)."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "global_config",
+          "docs": [
+            "The SOL side's config, bound by its seeds."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "usdc_pause_sol_curve",
+      "docs": [
+        "The USDC pause of one SOL curve, `Curve.paused = true`, bound by its",
+        "seeds, signed by `UsdcConfig.pauser` alone. Unpausing stays",
+        "`set_curve_paused(false)`."
+      ],
+      "discriminator": [
+        129,
+        176,
+        219,
+        191,
+        131,
+        127,
+        161,
+        177
+      ],
+      "accounts": [
+        {
+          "name": "pauser",
+          "docs": [
+            "`UsdcConfig.pauser`, the only key this instruction takes. It pays nothing."
+          ],
+          "signer": true,
+          "relations": [
+            "usdc_config"
+          ]
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "Read for its pauser alone, bound by its seeds (Anchor's 2006 anywhere else)."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "A SOL `Curve`, bound by its seeds `[\"curve\", curve.mint]` and its bump (Anchor's 2006 anywhere",
+            "else), unlike `set_curve_paused`, which checks none; a `CurveUsdc` fails its discriminator first",
+            "(3002), so a USDC curve is paused by `set_curve_usdc_paused` alone."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "curve.mint",
+                "account": "Curve"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "waive_launch_guard",
+      "docs": [
+        "Launch the mint's curve without the launch cap: signed by the launch",
+        "guard authority, before the curve exists (§5.2)."
+      ],
+      "discriminator": [
+        21,
+        204,
+        250,
+        32,
+        220,
+        108,
+        230,
+        181
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "docs": [
+            "The launcher: pays the waiver's rent, as it pays the launch."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "launch_guard",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  97,
+                  117,
+                  110,
+                  99,
+                  104,
+                  95,
+                  103,
+                  117,
+                  97,
+                  114,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "launch_guard"
+          ]
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "address is read, as the seed of the curve and of the waiver."
+          ]
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "its owner): a waiver is made with the launch, never on a live curve."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "waiver",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  97,
+                  117,
+                  110,
+                  99,
+                  104,
+                  95,
+                  103,
+                  117,
+                  97,
+                  114,
+                  100,
+                  95,
+                  119,
+                  97,
+                  105,
+                  118,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ClaimStatus",
+      "discriminator": [
+        22,
+        183,
+        249,
+        157,
+        247,
+        95,
+        150,
+        96
+      ]
+    },
+    {
+      "name": "Curve",
+      "discriminator": [
+        191,
+        180,
+        249,
+        66,
+        180,
+        71,
+        51,
+        182
+      ]
+    },
+    {
+      "name": "CurveUsdc",
+      "discriminator": [
+        208,
+        28,
+        161,
+        208,
+        98,
+        148,
+        66,
+        109
+      ]
+    },
+    {
+      "name": "Distributor",
+      "discriminator": [
+        90,
+        90,
+        217,
+        147,
+        6,
+        32,
+        135,
+        4
+      ]
+    },
+    {
+      "name": "DistributorV2",
+      "discriminator": [
+        89,
+        141,
+        51,
+        26,
+        17,
+        255,
+        214,
+        55
+      ]
+    },
+    {
+      "name": "GlobalConfig",
+      "discriminator": [
+        149,
+        8,
+        156,
+        202,
+        160,
+        252,
+        176,
+        217
+      ]
+    },
+    {
+      "name": "LaunchGuardConfig",
+      "discriminator": [
+        206,
+        134,
+        2,
+        251,
+        27,
+        16,
+        100,
+        9
+      ]
+    },
+    {
+      "name": "LaunchGuardWaiver",
+      "discriminator": [
+        105,
+        137,
+        63,
+        106,
+        7,
+        213,
+        166,
+        88
+      ]
+    },
+    {
+      "name": "SolVault",
+      "discriminator": [
+        21,
+        132,
+        230,
+        103,
+        19,
+        209,
+        129,
+        248
+      ]
+    },
+    {
+      "name": "UsdcConfig",
+      "discriminator": [
+        48,
+        197,
+        208,
+        34,
+        24,
+        38,
+        56,
+        253
+      ]
+    },
+    {
+      "name": "Vesting",
+      "discriminator": [
+        100,
+        149,
+        66,
+        138,
+        95,
+        200,
+        128,
+        241
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ClaimStatusClosed",
+      "discriminator": [
+        47,
+        148,
+        200,
+        237,
+        136,
+        75,
+        227,
+        137
+      ]
+    },
+    {
+      "name": "CreatorRaiseClosedUsdc",
+      "discriminator": [
+        25,
+        52,
+        247,
+        75,
+        132,
+        163,
+        242,
+        239
+      ]
+    },
+    {
+      "name": "CurveCreated",
+      "discriminator": [
+        207,
+        148,
+        202,
+        45,
+        236,
+        100,
+        171,
+        230
+      ]
+    },
+    {
+      "name": "CurveCreatedUsdc",
+      "discriminator": [
+        133,
+        85,
+        126,
+        60,
+        233,
+        201,
+        55,
+        184
+      ]
+    },
+    {
+      "name": "CurveCreatorSynced",
+      "discriminator": [
+        230,
+        28,
+        172,
+        82,
+        104,
+        52,
+        249,
+        11
+      ]
+    },
+    {
+      "name": "DistributorFunded",
+      "discriminator": [
+        94,
+        128,
+        53,
+        173,
+        242,
+        102,
+        62,
+        90
+      ]
+    },
+    {
+      "name": "DistributorFunderSet",
+      "discriminator": [
+        118,
+        70,
+        35,
+        181,
+        73,
+        209,
+        249,
+        126
+      ]
+    },
+    {
+      "name": "DividendClaimed",
+      "discriminator": [
+        32,
+        47,
+        71,
+        8,
+        176,
+        235,
+        196,
+        216
+      ]
+    },
+    {
+      "name": "Graduated",
+      "discriminator": [
+        51,
+        241,
+        66,
+        50,
+        140,
+        245,
+        156,
+        192
+      ]
+    },
+    {
+      "name": "GraduatedUsdc",
+      "discriminator": [
+        89,
+        200,
+        24,
+        217,
+        115,
+        32,
+        222,
+        109
+      ]
+    },
+    {
+      "name": "GraduationPoolCreated",
+      "discriminator": [
+        251,
+        89,
+        157,
+        23,
+        12,
+        180,
+        174,
+        69
+      ]
+    },
+    {
+      "name": "GraduationReady",
+      "discriminator": [
+        225,
+        53,
+        28,
+        227,
+        76,
+        125,
+        195,
+        142
+      ]
+    },
+    {
+      "name": "GraduationReadyUsdc",
+      "discriminator": [
+        218,
+        132,
+        181,
+        132,
+        145,
+        247,
+        210,
+        84
+      ]
+    },
+    {
+      "name": "Trade",
+      "discriminator": [
+        24,
+        254,
+        218,
+        152,
+        253,
+        43,
+        18,
+        81
+      ]
+    },
+    {
+      "name": "TradeUsdc",
+      "discriminator": [
+        130,
+        233,
+        100,
+        107,
+        224,
+        152,
+        155,
+        41
+      ]
+    },
+    {
+      "name": "UsdcConfigUpdated",
+      "discriminator": [
+        220,
+        238,
+        57,
+        216,
+        18,
+        151,
+        210,
+        119
+      ]
+    },
+    {
+      "name": "UsdcPauseSet",
+      "discriminator": [
+        63,
+        229,
+        69,
+        180,
+        203,
+        214,
+        76,
+        108
+      ]
+    },
+    {
+      "name": "UsdcPauseSolSet",
+      "discriminator": [
+        81,
+        40,
+        109,
+        161,
+        61,
+        75,
+        16,
+        72
+      ]
+    },
+    {
+      "name": "UsdcRaydiumSet",
+      "discriminator": [
+        18,
+        51,
+        148,
+        90,
+        27,
+        150,
+        41,
+        246
+      ]
+    },
+    {
+      "name": "VestingBeneficiarySet",
+      "discriminator": [
+        195,
+        202,
+        19,
+        222,
+        241,
+        88,
+        242,
+        178
+      ]
+    },
+    {
+      "name": "VestingReleased",
+      "discriminator": [
+        6,
+        77,
+        66,
+        76,
+        214,
+        185,
+        161,
+        191
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "GloballyPaused",
+      "msg": "Trading is globally halted by the Fanex kill-switch"
+    },
+    {
+      "code": 6001,
+      "name": "CurvePaused",
+      "msg": "This curve is paused"
+    },
+    {
+      "code": 6002,
+      "name": "NotBonding",
+      "msg": "Curve is not in the Bonding phase"
+    },
+    {
+      "code": 6003,
+      "name": "NotGraduatable",
+      "msg": "Curve has not reached its graduation threshold yet"
+    },
+    {
+      "code": 6004,
+      "name": "NotGraduating",
+      "msg": "Curve is not awaiting graduation"
+    },
+    {
+      "code": 6005,
+      "name": "MathOverflow",
+      "msg": "Numeric overflow"
+    },
+    {
+      "code": 6006,
+      "name": "ZeroAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6007,
+      "name": "SlippageExceeded",
+      "msg": "Slippage exceeded: output below the requested minimum"
+    },
+    {
+      "code": 6008,
+      "name": "CurveComplete",
+      "msg": "Curve token reserves are exhausted"
+    },
+    {
+      "code": 6009,
+      "name": "InsufficientReserves",
+      "msg": "Insufficient reserves in the curve vault"
+    },
+    {
+      "code": 6010,
+      "name": "CreatorTargetTooLow",
+      "msg": "Creator target below the minimum allowed"
+    },
+    {
+      "code": 6011,
+      "name": "CpmmSeedOutOfRange",
+      "msg": "CPMM seed outside the allowed range"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidSplitBps",
+      "msg": "Fee split basis points are invalid (must leave a positive curve share)"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidCaps",
+      "msg": "Creator + Fanex caps must equal the creator target"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidSupplyAllocation",
+      "msg": "Token supply allocation does not sum to the fixed total supply"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidVestingAllocation",
+      "msg": "Vesting allocation does not match the 2% rule"
+    },
+    {
+      "code": 6016,
+      "name": "AccountMismatch",
+      "msg": "A provided account did not match the value bound in curve/config state"
+    },
+    {
+      "code": 6017,
+      "name": "Unauthorized",
+      "msg": "Unauthorized: signer is not the required authority"
+    },
+    {
+      "code": 6018,
+      "name": "StringTooLong",
+      "msg": "String field exceeds its maximum length"
+    },
+    {
+      "code": 6019,
+      "name": "NothingToRelease",
+      "msg": "Nothing is currently releasable"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidProof",
+      "msg": "Merkle proof verification failed"
+    },
+    {
+      "code": 6021,
+      "name": "AlreadyClaimed",
+      "msg": "This dividend allocation has already been claimed"
+    },
+    {
+      "code": 6022,
+      "name": "ExceedsFundedTotal",
+      "msg": "Claim would exceed the distributor's funded total"
+    },
+    {
+      "code": 6023,
+      "name": "NotExpired",
+      "msg": "Distributor is not yet expired"
+    },
+    {
+      "code": 6024,
+      "name": "VestingNotReassignable",
+      "msg": "This vesting account is not reassignable: its beneficiary is not the fan-led placeholder"
+    },
+    {
+      "code": 6025,
+      "name": "ClaimStatusFormat",
+      "msg": "Not a ClaimStatus account this program recognises"
+    },
+    {
+      "code": 6026,
+      "name": "DistributorStillOpen",
+      "msg": "The distributor is still open; its ClaimStatus is the double-claim guard"
+    },
+    {
+      "code": 6027,
+      "name": "WrongRentRecipient",
+      "msg": "Rent must return to the recorded payer"
+    },
+    {
+      "code": 6028,
+      "name": "CurveCreatorNotSyncable",
+      "msg": "Curve creator can only be synced from the fan-led placeholder to an already-claimed vesting beneficiary"
+    },
+    {
+      "code": 6029,
+      "name": "PlaceholderCannotRaise",
+      "msg": "A curve whose creator is the keyless fan-led placeholder cannot take a creator fundraise split"
+    },
+    {
+      "code": 6030,
+      "name": "InvalidLeafCount",
+      "msg": "A claim registry needs between 1 and the maximum number of leaves"
+    },
+    {
+      "code": 6031,
+      "name": "InvalidLeafIndex",
+      "msg": "Leaf index is outside this distributor's claim registry"
+    },
+    {
+      "code": 6032,
+      "name": "ExpiryTooFar",
+      "msg": "A distributor may expire at most 400 days from now"
+    },
+    {
+      "code": 6033,
+      "name": "LaunchWalletCapExceeded",
+      "msg": "In the first five minutes after launch a wallet may hold at most 1% of the supply"
+    },
+    {
+      "code": 6034,
+      "name": "LaunchGuardAfterLaunch",
+      "msg": "A curve may be launched without the launch cap only before it exists"
+    },
+    {
+      "code": 6035,
+      "name": "VestingLockedUntilGraduation",
+      "msg": "A curve launched from 2026-11-01 releases its vesting only once it has graduated"
+    },
+    {
+      "code": 6036,
+      "name": "LaunchDestinationNotOwnAta",
+      "msg": "In the first five minutes after launch a buy delivers only to the signer's associated token account"
+    },
+    {
+      "code": 6037,
+      "name": "CreatorUsdcAccountInvalid",
+      "msg": "The creator's USDC account must be the creator's own unfrozen USDC associated token account, closable only by the launch's payer"
+    },
+    {
+      "code": 6038,
+      "name": "NotPauser",
+      "msg": "Only the pauser or the admin may pause, and only the admin may unpause"
+    },
+    {
+      "code": 6039,
+      "name": "GraduationFeeTierChanged",
+      "msg": "The pinned Raydium fee tier no longer charges 1%"
+    },
+    {
+      "code": 6040,
+      "name": "PoolNotCreated",
+      "msg": "The Raydium pool has not been created yet"
+    },
+    {
+      "code": 6041,
+      "name": "RaydiumNotSet",
+      "msg": "The Raydium addresses of the USDC config are not set"
+    },
+    {
+      "code": 6042,
+      "name": "PoolCreationDisabled",
+      "msg": "The pinned Raydium fee tier no longer lets a pool be created"
+    },
+    {
+      "code": 6043,
+      "name": "LpFeeOwnerUnset",
+      "msg": "The Fee Key's owner of the USDC config may not be all-zero"
+    },
+    {
+      "code": 6044,
+      "name": "GraduationExtraFundingTooLarge",
+      "msg": "A graduation's extra funding is past its bound"
+    },
+    {
+      "code": 6045,
+      "name": "FeeUsdcAccountInvalid",
+      "msg": "The fee account must be the fee wallet's unfrozen USDC associated token account, closable only by the USDC config"
+    },
+    {
+      "code": 6046,
+      "name": "AdminUnset",
+      "msg": "The admin may not be all-zero"
+    },
+    {
+      "code": 6047,
+      "name": "LaunchTermsOutOfBounds",
+      "msg": "A USDC launch's raise terms are off the 94/6 relation to its target and threshold, or its target is past the ceiling"
+    },
+    {
+      "code": 6048,
+      "name": "CreatePoolFeeTooHigh",
+      "msg": "Raydium's pool-creation fee is past the program's bound"
+    }
+  ],
+  "types": [
+    {
+      "name": "ClaimStatus",
+      "docs": [
+        "Marks a single (distributor, claimant) as claimed",
+        "(PDA: [CLAIM_SEED, distributor, claimant]). Existence == claimed.",
+        "",
+        "⚠️ Two formats exist on chain. Accounts created before the A+D upgrade are",
+        "56 bytes and carry no `rent_payer` — their rent was paid by the claimant.",
+        "`close_claim_status` refunds by format: new accounts to the recorded",
+        "`rent_payer`, legacy ones to the `claimant`. `Account<ClaimStatus>` only",
+        "deserializes the new format, which is fine everywhere except that close",
+        "path — it parses manually for exactly this reason."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "claimant",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "claimed_at",
+            "type": "i64"
+          },
+          {
+            "name": "rent_payer",
+            "docs": [
+              "Who funded this account's rent-exemption (the Fanex sponsor wallet in",
+              "the ordinary flow) — where the rent returns on close."
+            ],
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClaimStatusClosed",
+      "docs": [
+        "A fan-led vesting allocation was handed to the creator who claimed the",
+        "channel. Emitted at most once per curve — the placeholder guard makes a",
+        "second one impossible."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "claim_status",
+            "type": "pubkey"
+          },
+          {
+            "name": "refunded_to",
+            "type": "pubkey"
+          },
+          {
+            "name": "lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateCurveParams",
+      "docs": [
+        "Launch parameters. The curve *shape* (virtual reserves, supply split) is",
+        "computed off-chain by `lib/solana/presale-math.ts` and handed in here; the",
+        "program does not trust it blindly — it enforces every invariant below, so a",
+        "malformed launch can never be created on-chain."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator_target_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "cpmm_seed_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "creator_split_bps",
+            "type": "u64"
+          },
+          {
+            "name": "fanex_split_bps",
+            "type": "u64"
+          },
+          {
+            "name": "creator_cap_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "fanex_cap_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_sol_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "curve_token_supply",
+            "docs": [
+              "Tokens for sale on the curve (initial `real_token_reserves`)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "migration_token_supply",
+            "docs": [
+              "Tokens reserved to seed the Raydium CPMM at graduation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "vesting_token_supply",
+            "docs": [
+              "Tokens vested to the creator (2%-15% of total supply; see `validation`)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "vesting_cliff_seconds",
+            "docs": [
+              "Seconds before ANY vesting is releasable. `revenue` passes ~360d."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "vesting_duration_seconds",
+            "docs": [
+              "Linear release window after the cliff. `0` = lump-sum (today's behaviour)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateCurveUsdcParams",
+      "docs": [
+        "The launch's terms, computed by the server and checked here, as `CreateCurveParams` is: in µUSDC",
+        "where today's are in lamports, the two splits a u16 as `CurveUsdc` keeps them."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator_target_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "graduation_threshold_usdc",
+            "docs": [
+              "The curve's USDC that ends the bonding phase and seeds the pool: today's `cpmm_seed_lamports`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "creator_split_bps",
+            "type": "u16"
+          },
+          {
+            "name": "fanex_split_bps",
+            "type": "u16"
+          },
+          {
+            "name": "creator_cap_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "fanex_cap_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_usdc_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "curve_token_supply",
+            "docs": [
+              "Tokens for sale on the curve (the first `real_token_reserves`)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "migration_token_supply",
+            "docs": [
+              "Tokens kept to seed the pool at graduation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "vesting_token_supply",
+            "docs": [
+              "Tokens vested to the creator."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "vesting_cliff_seconds",
+            "type": "i64"
+          },
+          {
+            "name": "vesting_duration_seconds",
+            "type": "i64"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "docs": [
+              "At most `MAX_USDC_SYMBOL_LEN` (10) bytes, Metaplex's own limit."
+            ],
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreatorRaiseClosedUsdc",
+      "docs": [
+        "80 bytes: `close_creator_raise_usdc`, `UsdcConfig.admin` closing a USDC curve's creator raise at",
+        "what it has received, so its buys no longer need the creator's USDC account (one frozen or lost",
+        "would stop them for good). `creator_cap_usdc` is the cap after the close, the creator's received."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator_cap_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Curve",
+      "docs": [
+        "Per-token bonding curve (PDA: [CURVE_SEED, mint])."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "docs": [
+              "The SPL mint this curve trades."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "docs": [
+              "Creator wallet — receives the 94% atomic split + vesting."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "phase",
+            "type": {
+              "defined": {
+                "name": "CurvePhase"
+              }
+            }
+          },
+          {
+            "name": "creator_target_lamports",
+            "docs": [
+              "Gross creator target in lamports (includes the 6% Fanex fee). >= 16 SOL."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "cpmm_seed_lamports",
+            "docs": [
+              "SOL routed into the curve that triggers graduation + seeds the CPMM."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "creator_split_bps",
+            "docs": [
+              "Per-buy split, applied to the buyer's SOL until the caps below fill."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fanex_split_bps",
+            "type": "u64"
+          },
+          {
+            "name": "creator_cap_lamports",
+            "docs": [
+              "Hard caps: total creator/Fanex SOL ever taken (0.94×target / 0.06×target)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fanex_cap_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_sol_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "real_sol_reserves",
+            "docs": [
+              "SOL actually collected into the curve (withdrawable at graduation)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "real_token_reserves",
+            "docs": [
+              "Tokens remaining for sale on the curve."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "migration_token_reserves",
+            "docs": [
+              "Tokens reserved to seed the Raydium CPMM at graduation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "creator_received_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "fanex_received_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "paused",
+            "docs": [
+              "Per-curve pause (independent of the global kill-switch)."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "graduated_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "sol_vault_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurveCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator_target_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "cpmm_seed_lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurveCreatedUsdc",
+      "docs": [
+        "88 bytes."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator_target_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "graduation_threshold_usdc",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurveCreatorSynced",
+      "docs": [
+        "`Curve.creator` moved off the fan-led placeholder, copied from the vesting",
+        "beneficiary a claim already set (`sync_curve_creator`)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "previous",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_creator",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurvePhase",
+      "docs": [
+        "Bonding-curve lifecycle. Mirrors `solana_curves.current_phase` off-chain."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Bonding"
+          },
+          {
+            "name": "Graduating"
+          },
+          {
+            "name": "Graduated"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurveUsdc",
+      "docs": [
+        "A curve priced in USDC (PDA: [CURVE_SEED, mint], the address a SOL `Curve`",
+        "would take: a mint has one or the other), 354 bytes on chain (8 + 346).",
+        "Another account type, so every SOL instruction refuses it by its",
+        "discriminator (3002) and every USDC instruction refuses a `Curve` alike.",
+        "USDC amounts in µUSDC, token amounts in base units; each field keeps its",
+        "SOL twin's meaning. Unlike `Curve`, the bumps come first."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "docs": [
+              "Layout version: 1."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "usdc_vault_bump",
+            "docs": [
+              "The bump of the curve's USDC vault, [USDC_VAULT_SEED, mint]."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "phase",
+            "docs": [
+              "A raw u8 read through `constants::PHASE_*` (0 Bonding, 1 Graduating,",
+              "2 Graduated, 3 PoolCreated), never `CurvePhase`, which stays the SOL",
+              "enum as it is."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "paused",
+            "docs": [
+              "Per-curve pause: stops this curve's two swaps and its graduation."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "migrated",
+            "docs": [
+              "A curve converted from SOL (the migration, USDC curve design §10.10)."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "docs": [
+              "As `Curve.creator`: the fee beneficiary, the fan-led placeholder until",
+              "the claim."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "creator_usdc_account",
+            "docs": [
+              "Where the creator's raise split is paid; all-zero when",
+              "`creator_split_bps` is 0."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "creator_split_bps",
+            "docs": [
+              "Narrowed from `Curve`'s u64: validation keeps each under 10 000."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "fanex_split_bps",
+            "type": "u16"
+          },
+          {
+            "name": "creator_target_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "graduation_threshold_usdc",
+            "docs": [
+              "The pool seed that triggers the graduation: `Curve.cpmm_seed_lamports`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "creator_cap_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "fanex_cap_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_usdc_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "real_usdc_reserves",
+            "docs": [
+              "A counter: the vault's balance is never read for a price, so a donation",
+              "to the vault moves nothing."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "real_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "migration_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "creator_received_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "fanex_received_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "A migrated curve keeps its SOL birth."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "graduated_at",
+            "type": "i64"
+          },
+          {
+            "name": "migrated_at",
+            "docs": [
+              "0 for a curve born in USDC."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Distributor",
+      "docs": [
+        "A funded monthly dividend distribution (PDA: [DISTRIBUTOR_SEED, mint, month]).",
+        "Holds the SOL to be claimed; `merkle_root` commits to (claimant, amount)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "docs": [
+              "Off-chain period key (e.g. YYYYMM as a little-endian u32 in an i64)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "merkle_root",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "claimed_amount",
+            "type": "u64"
+          },
+          {
+            "name": "funder",
+            "docs": [
+              "Who funded it (allowed to reclaim leftovers after expiry)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Unix time after which the funder may reclaim unclaimed SOL."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DistributorFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DistributorFunderSet",
+      "docs": [
+        "A v1 month's close handed over (`set_distributor_funder`, 2026-10-24): `funder`",
+        "closes it from now on, in `previous`'s place."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "previous",
+            "type": "pubkey"
+          },
+          {
+            "name": "funder",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DistributorV2",
+      "docs": [
+        "A funded monthly dividend distribution that records its claims itself",
+        "(PDA: [DISTRIBUTOR_SEED, mint, month], the same address a v1 `Distributor`",
+        "would take, so a month has one distributor whichever its version).",
+        "",
+        "One bit per Merkle leaf, set by `claim_dividend_v2`: a claim creates no",
+        "account, so it costs only the network fee. The funder pays the bitmap once,",
+        "inside this account's rent, and gets it back at close. The v1 fields come",
+        "first, at the v1 offsets, so an off-chain reader that needs only totals,",
+        "funder and expiry decodes both versions alike; the discriminator tells them",
+        "apart, and every instruction refuses the other version's account."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "docs": [
+              "Off-chain period key (YYYYMM), as in `Distributor`."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "merkle_root",
+            "docs": [
+              "Root over v2 leaves (`math::dividend_leaf_v2`): each leaf binds its index."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "claimed_amount",
+            "type": "u64"
+          },
+          {
+            "name": "funder",
+            "docs": [
+              "Who funded it (allowed to close it, as in `Distributor`)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "leaf_count",
+            "docs": [
+              "Leaves the root commits to; `claimed` holds one bit for each."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "claimed",
+            "docs": [
+              "Bit `index % 8` of byte `index / 8` is set once leaf `index` has claimed",
+              "(`validation::leaf_bit`). Exactly `ceil(leaf_count / 8)` bytes."
+            ],
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DividendClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "claimant",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GlobalConfig",
+      "docs": [
+        "Singleton program config (PDA: [CONFIG_SEED])."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "docs": [
+              "Admin authority allowed to update config + toggle the global pause; since",
+              "2026-10-24 (the fee-wallet split) also the Metaplex update authority of",
+              "every SOL token launched (`create_curve`)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "fanex_fee_wallet",
+            "docs": [
+              "Where `buy` and `sell` pay Fanex: the 1% platform swap fee on every trade",
+              "and a buy's share of the raise. Read by those two alone since 2026-10-24",
+              "(the fee-wallet split): receive-only, it signs and authorizes nothing."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "graduation_authority",
+            "docs": [
+              "Keeper authority permitted to call `graduate` (release liquidity); since",
+              "2026-10-24 also the approver of every v2 dividend month and the only",
+              "funder of a v1 one."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "paused",
+            "docs": [
+              "On-chain hard kill-switch. When true, create/buy/sell/distribute halt."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Graduated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "sol_released",
+            "type": "u64"
+          },
+          {
+            "name": "tokens_released",
+            "type": "u64"
+          },
+          {
+            "name": "keeper",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GraduatedUsdc",
+      "docs": [
+        "112 bytes: `graduate_usdc_lock`, the second step."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "pool_state",
+            "type": "pubkey"
+          },
+          {
+            "name": "lp_locked",
+            "type": "u64"
+          },
+          {
+            "name": "fee_nft_mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GraduationPoolCreated",
+      "docs": [
+        "96 bytes: `graduate_usdc_pool`, the first graduation step."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "pool_state",
+            "type": "pubkey"
+          },
+          {
+            "name": "usdc_seeded",
+            "type": "u64"
+          },
+          {
+            "name": "tokens_seeded",
+            "type": "u64"
+          },
+          {
+            "name": "lp_amount",
+            "docs": [
+              "Read from the LP account after the CPI."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GraduationReady",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "real_sol_reserves",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GraduationReadyUsdc",
+      "docs": [
+        "48 bytes: the buy that froze the curve at its threshold."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "real_usdc_reserves",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeUsdcConfigParams",
+      "docs": [
+        "The keys `initialize_usdc_config` writes beside its accounts: every role but the admin, which is",
+        "an account so that its owner is checked. The USDC mint and the fee account come as accounts too,",
+        "so the program checks what they are."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pauser",
+            "docs": [
+              "May only pause: a hot key, so a pause stays fast."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "migration_authority",
+            "docs": [
+              "Signs the migration permits of the SOL curves (§10.10); all-zero, nobody."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "lp_fee_owner",
+            "docs": [
+              "Receives a graduated pool's Fee Key, so it harvests the LP fees (§10.3.9); never all-zero",
+              "(`LpFeeOwnerUnset`)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "launcher",
+            "docs": [
+              "The only payer `create_curve_usdc` takes: the sponsor (Rick, 2026-10-22, §10.3.4)."
+            ],
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LaunchGuardConfig",
+      "docs": [
+        "Who may launch a curve without the launch cap (PDA: [LAUNCH_GUARD_SEED],",
+        "2026-10-14), set by `config.admin` through `set_launch_guard_authority`.",
+        "An all-zero `authority` lets nobody: no key signs for it."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LaunchGuardWaiver",
+      "docs": [
+        "A curve launched without the launch cap (PDA: [LAUNCH_GUARD_WAIVER_SEED,",
+        "mint], 2026-10-14). Only `waive_launch_guard` makes one, signed by",
+        "`LaunchGuardConfig.authority`, before the curve exists; `buy` skips the cap",
+        "when it is passed as an extra account (`validation::launch_guard_waived`).",
+        "Never closed."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SetUsdcRaydiumParams",
+      "docs": [
+        "The Raydium addresses to write, each `None` to keep the one the config holds: the first call",
+        "names all five, a later one only what Raydium moved."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raydium_cpmm_program",
+            "docs": [
+              "Raydium's CPMM program: mainnet `CPMMoo8L…`, devnet `DRaycpLY…`."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "raydium_amm_config",
+            "docs": [
+              "The CPMM's 1% fee tier: mainnet index 1 `G95xxie3…`, devnet index 3."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "raydium_create_pool_fee",
+            "docs": [
+              "The account CPMM's `initialize` takes its pool-creation fee into: CPMM binds it itself, so",
+              "only clients read it."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "raydium_lock_program",
+            "docs": [
+              "Raydium's LP lock program: mainnet `LockrWmn…`, devnet `DRay25Us…`."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "raydium_lock_authority",
+            "docs": [
+              "The LP lock's authority PDA."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SolVault",
+      "docs": [
+        "Program-owned lamport vault for a curve's SOL reserves",
+        "(PDA: [SOL_VAULT_SEED, mint]). Holds rent + `real_sol_reserves`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Trade",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "trader",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_buy",
+            "docs": [
+              "true = buy (SOL in, tokens out); false = sell (tokens in, SOL out)."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "creator_fee",
+            "type": "u64"
+          },
+          {
+            "name": "fanex_fee",
+            "type": "u64"
+          },
+          {
+            "name": "platform_fee",
+            "docs": [
+              "1% platform swap fee paid to Fanex (separate from the fundraise share)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "real_sol_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "real_token_reserves",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TradeUsdc",
+      "docs": [
+        "161 bytes. ⚠️ Neither `authority` nor `token_owner` is the end user of a",
+        "routed trade: in a router's shared-accounts route both are the router's",
+        "authority. The indexer records a trade only when `authority` signed it and",
+        "owns the destination (buy) or the source (sale), and drops any other."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Account 0 of the swap, its signer."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_owner",
+            "docs": [
+              "The owner of the destination token account (buy) or the source (sale)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "is_buy",
+            "docs": [
+              "true = buy (USDC in, tokens out); false = sell (tokens in, USDC out)."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "usdc_amount",
+            "docs": [
+              "On a buy everything charged; on a sale the gross, before the fee, as",
+              "`Trade.sol_amount`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "creator_fee",
+            "type": "u64"
+          },
+          {
+            "name": "fanex_fee",
+            "type": "u64"
+          },
+          {
+            "name": "platform_fee",
+            "docs": [
+              "The 1% platform swap fee."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "real_usdc_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "real_token_reserves",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcConfig",
+      "docs": [
+        "The USDC curve's config (PDA: [USDC_CONFIG_SEED]), 491 bytes on chain",
+        "(8 + 483). `GlobalConfig` has no spare byte, hence a second config; the USDC",
+        "side reads `GlobalConfig` for a key only, never for money, pauses or fees."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "docs": [
+              "Layout version: 1."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "paused",
+            "docs": [
+              "The USDC side's kill-switch: stops `create_curve_usdc`, both swaps and",
+              "both graduation steps, never the vesting or the admin instructions."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "admin",
+            "docs": [
+              "Changes the config and unpauses (the Squad's vault once handed over);",
+              "the Metaplex update authority of every token launched on the USDC curve."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "pauser",
+            "docs": [
+              "The USDC pause's one key: may only pause, the USDC side and, through",
+              "`usdc_pause_sol` and `usdc_pause_sol_curve`, the SOL side; a hot key,",
+              "so a pause stays fast."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "migration_authority",
+            "docs": [
+              "Signs the migration permits of the SOL curves; all-zero, nobody."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "usdc_mint",
+            "docs": [
+              "Set once, at `initialize_usdc_config`."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_usdc_account",
+            "docs": [
+              "The fee wallet's USDC account: every fee and Fanex share lands there.",
+              "Its associated account, not frozen, closable only by this config's PDA",
+              "(the internal audit, 2026-10-29: `validation::fee_usdc_account_valid`), so",
+              "the fee wallet sweeps it and never closes it under the swaps."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "lp_fee_owner",
+            "docs": [
+              "Receives a graduated pool's Fee Key, so it harvests the LP fees."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_cpmm_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_amm_config",
+            "docs": [
+              "The 1% fee tier the graduation seeds its pool on."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_create_pool_fee",
+            "docs": [
+              "The account Raydium's `initialize` takes its pool-creation fee into."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_lock_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_lock_authority",
+            "docs": [
+              "The LP lock's authority PDA."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "launcher",
+            "docs": [
+              "The only key `create_curve_usdc` takes as its payer: the sponsor."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "128 until `launcher` took 32 of them (2026-10-22)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                96
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcConfigUpdated",
+      "docs": [
+        "200 bytes: the config's keys after `initialize_usdc_config` or",
+        "`update_usdc_config`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "pauser",
+            "type": "pubkey"
+          },
+          {
+            "name": "migration_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_usdc_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "lp_fee_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "launcher",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcPauseSet",
+      "docs": [
+        "73 bytes."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "curve",
+            "docs": [
+              "All-zero for the global pause."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcPauseSolSet",
+      "docs": [
+        "72 bytes: `usdc_pause_sol` or `usdc_pause_sol_curve`, the USDC pause of the SOL",
+        "side, signed by `UsdcConfig.pauser`. The SOL pauses of `GlobalConfig.admin`,",
+        "`set_paused` and `set_curve_paused`, emit nothing, so this names only the",
+        "pauser's. There is no `paused` field: these two only ever write `true`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "curve",
+            "docs": [
+              "The SOL `Curve` paused; all-zero for the whole SOL side (`GlobalConfig.paused`)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcRaydiumSet",
+      "docs": [
+        "200 bytes: `set_usdc_raydium`, the five addresses as set."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raydium_cpmm_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_amm_config",
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_create_pool_fee",
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_lock_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "raydium_lock_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vesting",
+      "docs": [
+        "Creator vesting schedule (PDA: [VESTING_SEED, mint])."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "beneficiary",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "released_amount",
+            "type": "u64"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "cliff_seconds",
+            "type": "i64"
+          },
+          {
+            "name": "duration_seconds",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VestingBeneficiarySet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "previous",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_beneficiary",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VestingReleased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "beneficiary",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

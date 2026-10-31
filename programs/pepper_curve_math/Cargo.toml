@@ -1,0 +1,12 @@
+[package]
+name = "pepper_curve_math"
+version = "0.1.0"
+description = "The bonding curve's arithmetic, with no Anchor or Solana dependency: one set of functions for pepper_curve, its Jupiter SDK and the golden vectors (USDC curve design, section 10.4)."
+edition = "2021"
+license = "MIT"
+publish = false
+
+[lib]
+name = "pepper_curve_math"
+
+[dependencies]

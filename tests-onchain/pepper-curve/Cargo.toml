@@ -1,0 +1,33 @@
+[package]
+name = "pepper-curve-onchain-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Standalone: not a member of the root workspace, so the in-process validator
+# LiteSVM pulls in never enters the programs' Cargo.lock or their host unit tests.
+# Run by scripts/ci-onchain-tests.sh, which builds the .so from this tree first, or by hand
+# after a `cargo-build-sbf` (docs/solana/PEPPER-CURVE-PROGRAM.md §13).
+[workspace]
+
+[dev-dependencies]
+pepper_curve = { path = "../../programs/pepper_curve", features = ["no-entrypoint"] }
+anchor-lang = "0.31.1"
+# The SPL mint and token accounts a tradeable curve is written with (launch_cap.rs),
+# and the Metaplex account create_curve writes (metaplex_create_curve.rs); the
+# program enables `metadata` too, so the lock is the same. Its `spl_token` and
+# `spl_associated_token_account` re-exports also make, freeze and fund the test
+# USDC (tests/common/mod.rs), so the suite takes no SPL crate of its own.
+anchor-spl = { version = "0.31.1", features = ["metadata"] }
+litesvm = "0.6"
+solana-sdk = "2.2"
+# Decodes the events `emit!` writes to the logs ("Program data: <base64>"), as the
+# pepper-raise suite does.
+base64 = "0.21"
+# The golden vectors (programs/pepper_curve_math/vectors/curve-v1.json), read into
+# the math crate's own types, which the USDC handlers move exactly.
+serde_json = "1"
+pepper_curve_math = { path = "../../programs/pepper_curve_math" }
+# LiteSVM's secp256r1 precompile links OpenSSL. Building it from source keeps
+# the suite free of system packages (libssl-dev, pkg-config) on any machine.
+openssl = { version = "0.10", features = ["vendored"] }

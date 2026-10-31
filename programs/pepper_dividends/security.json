@@ -1,0 +1,10 @@
+{
+  "name": "Pepper Dividends",
+  "logo": "https://raw.githubusercontent.com/Pepperoni-team/custom-program/main/assets/pepper-logo.png",
+  "description": "Monthly dividends of Pepper tokens (pepper.fan), paid in USDC: a month's USDC sits in its own vault against a Merkle root, each holder claims their amount into their own USDC account, and what nobody claimed goes back to its funder.",
+  "project_url": "https://pepper.fan",
+  "contacts": ["link:https://github.com/Pepperoni-team/custom-program/security/advisories/new"],
+  "policy": "https://github.com/Pepperoni-team/custom-program#security",
+  "preferred_languages": ["en", "it"],
+  "source_code": "https://github.com/Pepperoni-team/custom-program"
+}

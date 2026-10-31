@@ -1,0 +1,31 @@
+[package]
+name = "pepper_curve"
+version = "0.1.0"
+description = "Pepper (pepper.fan) on-chain bonding curve: strip-proof atomic creator and platform fee split, presale curve, creator vesting, and merkle dividend distributor. Graduation hands off to a Raydium CPMM pool."
+repository = "https://github.com/Pepperoni-team/custom-program"
+homepage = "https://pepper.fan"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "pepper_curve"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = { version = "0.31.1", features = ["init-if-needed"] }
+# `metadata` enables the Metaplex Token Metadata CPI wrappers used by
+# create_curve (name/symbol/logo). Adds to the default features (token,
+# associated_token, …) rather than replacing them.
+anchor-spl = { version = "0.31.1", features = ["metadata"] }
+# The curve's arithmetic with no Anchor or Solana dependency: the USDC handlers call its
+# quote_buy / quote_sell and move what they return; the SOL handlers keep math.rs
+# (USDC curve design §10.4). Its errors map onto FanexError in errors.rs.
+pepper_curve_math = { path = "../pepper_curve_math" }
