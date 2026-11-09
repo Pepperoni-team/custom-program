@@ -111,6 +111,106 @@ pub enum FanexError {
     LaunchTermsOutOfBounds,
     #[msg("Raydium's pool-creation fee is past the program's bound")]
     CreatePoolFeeTooHigh,
+    // A creator's own claim of a fan-led USDC market (2026-11-05): no approver set yet.
+    #[msg("No key approves a creator's claim of a fan-led market yet")]
+    ClaimApproverUnset,
+    // The vault's undo of a self-claim (2026-11-09): not self-claimed, moved since, or vested.
+    #[msg("This market's claim cannot be undone: not a self-claim, or its vesting has begun")]
+    ClaimNotRevocable,
+    // ── The raise (pepper_raise, moved into this program by N+3; docs/solana/PEPPER-RAISE-PROGRAM.md §7) ──
+    // At explicit discriminant 1000, so codes 7000 and up (the migration's 900 block left with it, N+3),
+    // in the order the separate program
+    // numbered them from 6000: the TS client reads them as one block (lib/solana/pepper-raise/errors.ts).
+    // The six whose names this enum already held take a `Raise` prefix, so the raise never answers
+    // with a curve code. Append-only, like every block above.
+    #[msg("Raises are globally paused")]
+    RaiseGloballyPaused = 1000,
+    #[msg("Signer is not authorized for this action")]
+    RaiseUnauthorized,
+    #[msg("Numeric overflow")]
+    RaiseMathOverflow,
+    #[msg("Amount must be greater than zero")]
+    RaiseZeroAmount,
+    #[msg("Tiers are invalid")]
+    InvalidTiers,
+    #[msg("Share ceded is outside the allowed range")]
+    InvalidShare,
+    #[msg("Term is outside the allowed range")]
+    InvalidTerm,
+    #[msg("Deadline is outside the allowed raise duration")]
+    InvalidDeadline,
+    #[msg("Minimum is outside the allowed range")]
+    InvalidMinimum,
+    #[msg("Raise is not raising")]
+    NotRaising,
+    #[msg("Raise is not refunding")]
+    NotRefunding,
+    #[msg("Raise is not active")]
+    NotActive,
+    #[msg("Raise deadline has passed")]
+    RaiseExpired,
+    #[msg("Raise is still open")]
+    RaiseStillOpen,
+    #[msg("Nothing left to buy at this budget")]
+    NothingToBuy,
+    #[msg("Fewer quota units than the requested minimum")]
+    RaiseSlippageExceeded,
+    #[msg("Purchase below the minimum amount")]
+    BelowMinimumPurchase,
+    #[msg("Per-wallet limit exceeded")]
+    WalletLimitExceeded,
+    #[msg("Months must be declared and settled in order")]
+    MonthOutOfOrder,
+    #[msg("Month is outside the raise term")]
+    MonthOutOfTerm,
+    #[msg("Month cannot be declared before the 15th of the next month")]
+    DeclarationTooEarly,
+    #[msg("Month is not due yet")]
+    NotDue,
+    #[msg("Month is already settled")]
+    MonthAlreadyFinalized,
+    #[msg("Pay the oldest open month first")]
+    NotOldestOpenMonth,
+    #[msg("Nothing is owed")]
+    NothingOwed,
+    #[msg("Open months must be paid first")]
+    OpenMonthsFirst,
+    #[msg("Guarantee cannot be released yet")]
+    GuaranteeNotReleasable,
+    #[msg("Claim below the minimum")]
+    ClaimTooSmall,
+    #[msg("Not enough quota units")]
+    InsufficientUnits,
+    #[msg("Price outside the caller's limit")]
+    PriceOutsideLimit,
+    #[msg("Raise cannot be closed yet")]
+    NotClosable,
+    #[msg("Position is not empty")]
+    PositionNotEmpty,
+    #[msg("Account does not match the expected one")]
+    RaiseAccountMismatch,
+    #[msg("Pool fee above its 3% ceiling")]
+    FeeTooHigh,
+    #[msg("This raise records no rent payer: it was created before the rent return")]
+    RentPayerUnknown,
+    #[msg("This month is still needed: it must be settled and behind the payment pointer")]
+    MonthNotClosable,
+    #[msg("This raise is not finished: it is still raising or active, or a position, a month or an open month is left")]
+    RaiseNotFinished,
+    #[msg("Only the finalized oldest month of a closed raise without quotas can be extinguished")]
+    MonthNotExtinguishable,
+    // The raise's internal audit of 2026-10-29.
+    #[msg("Launch fee above its ceiling")]
+    LaunchFeeTooHigh,
+    #[msg("The admin moves in two steps: propose_admin, then accept_admin signed by the new admin")]
+    AdminMovesInTwoSteps,
+    #[msg("This month can no longer be re-declared: it is due or settled, not the last declared, or the new due is below what was paid")]
+    MonthNotRedeclarable,
+    #[msg("The pool holds every quota: none can be bought from it")]
+    PoolHoldsEveryQuota,
+    // N+3's second internal audit round (2026-11-05, Rick: «Niente acquisti al floor»).
+    #[msg("The pool sells only while its price is at least the fans' share of its USDC")]
+    PoolPriceUnderShare,
 }
 
 /// The math crate refuses with the program's own codes: a USDC handler maps a `quote_buy` or
@@ -245,6 +345,19 @@ mod graduation_error_tests {
             (FanexError::AdminUnset, 6046, "AdminUnset"),
             (FanexError::LaunchTermsOutOfBounds, 6047, "LaunchTermsOutOfBounds"),
             (FanexError::CreatePoolFeeTooHigh, 6048, "CreatePoolFeeTooHigh"),
+        ];
+        for (error, code, name) in cases {
+            assert_eq!(u32::from(error), code, "{name}");
+            assert_eq!(error.name(), name);
+        }
+    }
+
+    /// Appended after 6048 by the creator's own claim of a fan-led market (2026-11-05).
+    #[test]
+    fn the_fan_led_claim_s_error_follows_6048() {
+        let cases = [
+            (FanexError::ClaimApproverUnset, 6049, "ClaimApproverUnset"),
+            (FanexError::ClaimNotRevocable, 6050, "ClaimNotRevocable"),
         ];
         for (error, code, name) in cases {
             assert_eq!(u32::from(error), code, "{name}");

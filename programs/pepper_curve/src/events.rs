@@ -521,3 +521,89 @@ mod audit_fix_event_tests {
         }
     }
 }
+
+// ── N+3: the creator's own claim of a fan-led USDC market (2026-11-05) ──
+
+/// 72 bytes: `set_claim_approver` changed the key that co-signs a creator's claim of a fan-led
+/// market (all-zero: nobody). The claim itself emits `VestingBeneficiarySet` and
+/// `CurveCreatorSynced`, as the admin's two steps do.
+#[event]
+pub struct ClaimApproverSet {
+    pub previous: Pubkey,
+    pub new_approver: Pubkey,
+}
+
+/// 104 bytes: `revoke_fan_led_usdc` put a self-claimed market back on the fan-led placeholder
+/// (2026-11-09): `previous` the owner the claim had named, `by` the admin that undid it.
+#[event]
+pub struct FanLedClaimRevoked {
+    pub mint: Pubkey,
+    pub previous: Pubkey,
+    pub by: Pubkey,
+}
+
+#[cfg(test)]
+mod fan_led_claim_event_tests {
+    use super::*;
+    use anchor_lang::{Discriminator, Event};
+
+    #[test]
+    fn claim_approver_set_is_72_bytes_with_a_discriminator_of_its_own() {
+        let previous = Pubkey::new_from_array([1; 32]);
+        let new_approver = Pubkey::new_from_array([2; 32]);
+        let event = ClaimApproverSet { previous, new_approver };
+        let mut expected = ClaimApproverSet::DISCRIMINATOR.to_vec();
+        expected.extend_from_slice(&previous.to_bytes());
+        expected.extend_from_slice(&new_approver.to_bytes());
+        assert_eq!(event.data(), expected);
+        assert_eq!(event.data().len(), 72);
+        let others: [&[u8]; 20] = [
+            CurveCreated::DISCRIMINATOR,
+            Trade::DISCRIMINATOR,
+            GraduationReady::DISCRIMINATOR,
+            Graduated::DISCRIMINATOR,
+            VestingReleased::DISCRIMINATOR,
+            DistributorFunded::DISCRIMINATOR,
+            DividendClaimed::DISCRIMINATOR,
+            ClaimStatusClosed::DISCRIMINATOR,
+            VestingBeneficiarySet::DISCRIMINATOR,
+            CurveCreatorSynced::DISCRIMINATOR,
+            CurveCreatedUsdc::DISCRIMINATOR,
+            TradeUsdc::DISCRIMINATOR,
+            GraduationReadyUsdc::DISCRIMINATOR,
+            GraduationPoolCreated::DISCRIMINATOR,
+            GraduatedUsdc::DISCRIMINATOR,
+            UsdcConfigUpdated::DISCRIMINATOR,
+            UsdcPauseSet::DISCRIMINATOR,
+            UsdcRaydiumSet::DISCRIMINATOR,
+            UsdcPauseSolSet::DISCRIMINATOR,
+            CreatorRaiseClosedUsdc::DISCRIMINATOR,
+        ];
+        for other in others {
+            assert_ne!(ClaimApproverSet::DISCRIMINATOR, other);
+        }
+    }
+
+    #[test]
+    fn fan_led_claim_revoked_is_104_bytes_with_a_discriminator_of_its_own() {
+        let [mint, previous, by] = [1u8, 2, 3].map(|b| Pubkey::new_from_array([b; 32]));
+        let event = FanLedClaimRevoked { mint, previous, by };
+        let mut expected = FanLedClaimRevoked::DISCRIMINATOR.to_vec();
+        for key in [mint, previous, by] {
+            expected.extend_from_slice(&key.to_bytes());
+        }
+        assert_eq!(event.data(), expected);
+        assert_eq!(event.data().len(), 104);
+        let others: [&[u8]; 6] = [
+            ClaimApproverSet::DISCRIMINATOR,
+            VestingBeneficiarySet::DISCRIMINATOR,
+            CurveCreatorSynced::DISCRIMINATOR,
+            UsdcConfigUpdated::DISCRIMINATOR,
+            CreatorRaiseClosedUsdc::DISCRIMINATOR,
+            UsdcPauseSolSet::DISCRIMINATOR,
+        ];
+        for other in others {
+            assert_ne!(FanLedClaimRevoked::DISCRIMINATOR, other);
+        }
+    }
+}

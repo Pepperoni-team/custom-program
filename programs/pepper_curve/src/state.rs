@@ -232,8 +232,8 @@ pub struct UsdcConfig {
     /// the Metaplex update authority of every token launched on the USDC curve.
     pub admin: Pubkey,
     /// The USDC pause's one key: may only pause, the USDC side and, through
-    /// `usdc_pause_sol` and `usdc_pause_sol_curve`, the SOL side; a hot key,
-    /// so a pause stays fast.
+    /// `usdc_pause_sol` and `usdc_pause_sol_curve`, the SOL side, and through
+    /// `usdc_pause_raise` the raise; a hot key, so a pause stays fast.
     pub pauser: Pubkey,
     /// Signs the migration permits of the SOL curves; all-zero, nobody.
     pub migration_authority: Pubkey,
@@ -259,8 +259,13 @@ pub struct UsdcConfig {
     pub raydium_lock_authority: Pubkey,
     /// The only key `create_curve_usdc` takes as its payer: the sponsor.
     pub launcher: Pubkey,
-    /// 128 until `launcher` took 32 of them (2026-10-22).
-    pub reserved: [u8; 96],
+    /// Approves a creator's own claim of a fan-led USDC market (`claim_fan_led_usdc`, Rick,
+    /// 2026-11-05): a server key, set by the admin (`set_claim_approver`); all-zero, nobody, which is
+    /// what every config written before N+3 reads here (these 32 bytes were reserved zeros).
+    pub claim_approver: Pubkey,
+    /// 128 until `launcher` took 32 of them (2026-10-22), 96 until `claim_approver` took 32 more
+    /// (2026-11-05).
+    pub reserved: [u8; 64],
 }
 
 impl UsdcConfig {
@@ -328,7 +333,13 @@ pub struct CurveUsdc {
     pub graduated_at: i64,
     /// 0 for a curve born in USDC.
     pub migrated_at: i64,
-    pub reserved: [u8; 128],
+    /// When `claim_fan_led_usdc` handed the market to its creator (N+3, 2026-11-05): the mark
+    /// `revoke_fan_led_usdc` needs to undo that claim. 0 for every other curve, the ones the admin's
+    /// two steps handed over included, and after an undo; every curve written before N+3 reads 0 here
+    /// (these 8 bytes were reserved zeros).
+    pub claimed_at: i64,
+    /// 128 until `claimed_at` took 8 of them (2026-11-09).
+    pub reserved: [u8; 120],
 }
 
 #[cfg(test)]
@@ -365,14 +376,14 @@ mod usdc_layout_tests {
     /// A change here is a layout break for every account already on chain:
     /// take the bytes from `reserved` instead. Counted by hand, field by field
     /// (Pubkey 32, u64/i64 8, u16 2, u8/bool 1, [u8; n] n):
-    /// UsdcConfig 3 x 1 + 12 x 32 + 96 = 483; CurveUsdc 6 x 1 + 3 x 32 + 2 x 2
-    /// + 14 x 8 + 128 = 346. On chain, the 8-byte discriminator first.
+    /// UsdcConfig 3 x 1 + 13 x 32 + 64 = 483; CurveUsdc 6 x 1 + 3 x 32 + 2 x 2
+    /// + 15 x 8 + 120 = 346. On chain, the 8-byte discriminator first.
     #[test]
     fn the_usdc_layouts_are_pinned() {
         assert_eq!(UsdcConfig::INIT_SPACE, 483);
-        assert_eq!(3 + 12 * 32 + 96, 483);
+        assert_eq!(3 + 13 * 32 + 64, 483);
         assert_eq!(CurveUsdc::INIT_SPACE, 346);
-        assert_eq!(6 + 3 * 32 + 2 * 2 + 14 * 8 + 128, 346);
+        assert_eq!(6 + 3 * 32 + 2 * 2 + 15 * 8 + 120, 346);
         assert_eq!(8 + UsdcConfig::INIT_SPACE, 491);
         assert_eq!(8 + CurveUsdc::INIT_SPACE, 354);
     }
@@ -409,7 +420,8 @@ mod usdc_layout_tests {
             raydium_lock_program: key(10),
             raydium_lock_authority: key(11),
             launcher: key(12),
-            reserved: [0xAB; 96],
+            claim_approver: key(13),
+            reserved: [0xAB; 64],
         }
     }
 
@@ -437,7 +449,8 @@ mod usdc_layout_tests {
                 ("raydium_lock_program", 299, k(10)),
                 ("raydium_lock_authority", 331, k(11)),
                 ("launcher", 363, k(12)),
-                ("reserved", 395, vec![0xAB; 96]),
+                ("claim_approver", 395, k(13)),
+                ("reserved", 427, vec![0xAB; 64]),
             ],
         );
     }
@@ -469,7 +482,8 @@ mod usdc_layout_tests {
             created_at: -0x2222_2222_2222_2201,
             graduated_at: 0x2222_2222_2222_2202,
             migrated_at: 0x2222_2222_2222_2203,
-            reserved: [0xCD; 128],
+            claimed_at: 0x2222_2222_2222_2204,
+            reserved: [0xCD; 120],
         }
     }
 
@@ -509,7 +523,8 @@ mod usdc_layout_tests {
                 ("created_at", 202, i(-0x2222_2222_2222_2201)),
                 ("graduated_at", 210, i(0x2222_2222_2222_2202)),
                 ("migrated_at", 218, i(0x2222_2222_2222_2203)),
-                ("reserved", 226, vec![0xCD; 128]),
+                ("claimed_at", 226, i(0x2222_2222_2222_2204)),
+                ("reserved", 234, vec![0xCD; 120]),
             ],
         );
     }
@@ -517,13 +532,16 @@ mod usdc_layout_tests {
     #[test]
     fn an_all_zero_account_decodes_with_every_reserved_byte() {
         // As `initialize_usdc_config` and `create_curve_usdc` will find the
-        // account: zeroed, `reserved` included.
+        // account: zeroed, `reserved` included. A config written before N+3
+        // held zeros where `claim_approver` now sits, so it reads as nobody's.
         let config = UsdcConfig::try_from_slice(&[0u8; UsdcConfig::INIT_SPACE]).unwrap();
-        assert_eq!(config.reserved.len(), 96);
+        assert_eq!(config.reserved.len(), 64);
         assert_eq!(config.launcher, Pubkey::default());
-        assert_eq!(32 + config.reserved.len(), 128);
+        assert_eq!(config.claim_approver, Pubkey::default());
+        assert_eq!(32 + 32 + config.reserved.len(), 128);
         let curve = CurveUsdc::try_from_slice(&[0u8; CurveUsdc::INIT_SPACE]).unwrap();
-        assert_eq!(curve.reserved.len(), 128);
+        assert_eq!(curve.reserved.len(), 120);
+        assert_eq!(curve.claimed_at, 0, "a curve written before N+3 reads as never self-claimed");
         assert_eq!(curve.phase, crate::constants::PHASE_BONDING);
     }
 
@@ -658,7 +676,8 @@ mod curve_usdc_math_tests {
             created_at: 1_800_000_012,
             graduated_at: 13,
             migrated_at: 14,
-            reserved: [0; 128],
+            claimed_at: 0,
+            reserved: [0; 120],
         }
     }
 

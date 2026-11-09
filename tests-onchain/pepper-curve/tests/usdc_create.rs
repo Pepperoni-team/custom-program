@@ -357,7 +357,9 @@ fn an_equity_launch_writes_the_curve_its_vaults_its_vesting_and_the_metaplex_met
     assert_eq!((curve.creator_received_usdc, curve.fanex_received_usdc), (0, 0));
     assert_eq!(curve.created_at, OCT_5_2026);
     assert_eq!((curve.graduated_at, curve.migrated_at), (0, 0));
-    assert_eq!(curve.reserved, [0; 128]);
+    // Born never self-claimed: nothing for the vault's undo to reach (2026-11-09).
+    assert_eq!(curve.claimed_at, 0);
+    assert_eq!(curve.reserved, [0; 120]);
 
     // The supply in the two vaults, both the curve PDA's; the USDC vault empty, at the address its
     // stored bump gives back: no USDC moves at launch.
@@ -529,6 +531,77 @@ impl Launch {
         ixs.push(self.create_ix(&mint.pubkey(), creator, None, equity()));
         self.send(&ixs, &[mint])
     }
+
+    /// `buy_exact_in` of `usdc_in` on an equity curve (no creator account), `wallet` paying from
+    /// `source` into `destination`, with the curve's waiver passed or not.
+    fn equity_buy_ix(&self, mint: &Pubkey, wallet: &Pubkey, source: &Pubkey, destination: &Pubkey, usdc_in: u64, waiver: bool) -> Instruction {
+        let curve = curve_pda(mint);
+        ix(
+            pepper_curve::accounts::BuyExactIn {
+                user_transfer_authority: *wallet,
+                user_source_usdc: *source,
+                user_destination_token: *destination,
+                usdc_config: usdc_config_pda(),
+                curve,
+                usdc_vault: usdc_vault_pda(mint),
+                token_vault: ata(&curve, mint),
+                fee_usdc_account: self.config.fee_usdc_account,
+                creator_usdc_account: None,
+                usdc_mint: self.config.usdc_mint,
+                token_mint: *mint,
+                launch_guard_waiver: waiver.then(|| waiver_pda(mint)),
+                token_program: spl_token::ID,
+            },
+            pepper_curve::instruction::BuyExactIn { usdc_in, min_tokens_out: 0 },
+        )
+    }
+}
+
+/// The launch cap's switch on a USDC launch, end to end (`PEPPER_LAUNCH_GUARD_DISABLED=true`; the
+/// mega check of 2026-11-02, which found `usdc_buy.rs` proving the waiver on curves written into the
+/// bank alone): a waiver another key signs is refused and writes nothing; the launch guard's own,
+/// before the curve exists, lands; the real `create_curve_usdc` then lands on that mint; and inside
+/// the five minutes a buy past 1% of the supply is refused without the waiver and taken with it.
+#[test]
+fn a_waived_usdc_launch_lands_and_its_buy_past_the_cap_passes_with_the_waiver_alone() {
+    let mut launch = launch_env(true);
+    let admin = launch.env.admin.insecure_clone();
+    let guard = Keypair::new();
+    launch.env.set_launch_guard_authority_by(&admin, &guard.pubkey()).unwrap();
+    let sponsor = launch.sponsor.insecure_clone();
+    let mint = Keypair::new();
+
+    let stranger = Keypair::new();
+    expect_err(launch.env.waive(&sponsor, &stranger, &mint.pubkey()), code(FanexError::Unauthorized));
+    assert!(!launch.env.exists(&waiver_pda(&mint.pubkey())));
+
+    launch.env.waive(&sponsor, &guard, &mint.pubkey()).expect("the guard's waiver lands before the curve exists");
+    let creator = launch.creator();
+    launch.try_launch_with_mint(&mint, &creator).expect("the waived launch lands");
+    let mint = mint.pubkey();
+    let curve: CurveUsdc = launch.env.fetch(&curve_pda(&mint));
+    assert_eq!(curve.created_at, OCT_5_2026, "the bank's clock is the launch's: inside the window");
+
+    // 200 USDC at the launch's price (5,000 USDC over 100M tokens) is about 3.9M tokens, past the 1M cap.
+    let wallet = launch.env.funded_wallet(SOL);
+    let source = launch.env.usdc_account(&wallet.pubkey());
+    launch.env.mint_usdc(&source, 200 * USDC);
+    let open = spl_associated_token_account::instruction::create_associated_token_account_idempotent(
+        &sponsor.pubkey(),
+        &wallet.pubkey(),
+        &mint,
+        &spl_token::ID,
+    );
+    launch.send(&[open], &[]).unwrap();
+    let destination = ata(&wallet.pubkey(), &mint);
+
+    let capped = launch.equity_buy_ix(&mint, &wallet.pubkey(), &source, &destination, 200 * USDC, false);
+    expect_err(launch.send_paid_by(&wallet, &[capped], &[]).map(|_| ()), code(FanexError::LaunchWalletCapExceeded));
+    assert_eq!(launch.env.token_amount(&destination), 0);
+
+    let waived = launch.equity_buy_ix(&mint, &wallet.pubkey(), &source, &destination, 200 * USDC, true);
+    launch.send_paid_by(&wallet, &[waived], &[]).expect("the curve's waiver lifts the cap");
+    assert!(launch.env.token_amount(&destination) > LAUNCH_WALLET_CAP);
 }
 
 // ── Refusals, without Metaplex loaded ───────────────────────────────────────

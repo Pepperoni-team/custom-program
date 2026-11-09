@@ -12,6 +12,11 @@
 //! and its vault are written into the bank, as `vesting_lock.rs` writes them, so
 //! a phase or a clock is set by hand; `usdc_create.rs` pins the `Vesting` a
 //! `create_curve_usdc` launch writes.
+//!
+//! `claim_fan_led_usdc` (N+3, Rick, 2026-11-05) is the hand-over's two steps in
+//! one, signed by the creator and co-signed by `UsdcConfig.claim_approver`, which
+//! `set_claim_approver` writes, signed by `UsdcConfig.admin`. `revoke_fan_led_usdc`
+//! (2026-11-09) is the vault's undo of such a claim while nothing has vested.
 
 mod common;
 
@@ -23,7 +28,7 @@ use anchor_spl::token::spl_token;
 use common::*;
 use pepper_curve::constants::*;
 use pepper_curve::errors::FanexError;
-use pepper_curve::events::{CurveCreatorSynced, VestingBeneficiarySet, VestingReleased};
+use pepper_curve::events::{ClaimApproverSet, CurveCreatorSynced, FanLedClaimRevoked, VestingBeneficiarySet, VestingReleased};
 use pepper_curve::instructions::set_vesting_beneficiary::fan_led_placeholder;
 use pepper_curve::state::{Curve, CurveUsdc, Vesting};
 use pepper_curve_math::CurveState;
@@ -506,4 +511,393 @@ fn sync_curve_creator_usdc_refuses_a_sol_curve_and_the_sol_sync_takes_it() {
 
     sync_sol(&mut env, &mint).unwrap();
     assert_eq!(env.fetch::<Curve>(&curve_pda(&mint)).creator, creator);
+}
+
+// ── N+3: the creator's own claim, co-signed by the approver key (2026-11-05) ──
+
+fn claim_fan_led_ix(creator: &Pubkey, approver: &Pubkey, mint: &Pubkey) -> Instruction {
+    ix(
+        pepper_curve::accounts::ClaimFanLedUsdc {
+            creator: *creator,
+            approver: *approver,
+            usdc_config: usdc_config_pda(),
+            mint: *mint,
+            vesting: vesting_pda(mint),
+            curve: curve_pda(mint),
+        },
+        pepper_curve::instruction::ClaimFanLedUsdc {},
+    )
+}
+
+/// `claim_fan_led_usdc` signed by `creator` and `approver`, the admin paying the fee as the sponsor
+/// pays it in the app.
+fn claim_fan_led(env: &mut Env, creator: &Keypair, approver: &Keypair, mint: &Pubkey) -> Result<Vec<String>, TransactionError> {
+    let claim = claim_fan_led_ix(&creator.pubkey(), &approver.pubkey(), mint);
+    if creator.pubkey() == approver.pubkey() {
+        return env.send_logged(&[claim], &[creator]);
+    }
+    env.send_logged(&[claim], &[creator, approver])
+}
+
+/// `set_claim_approver(new_approver)` signed by `admin`.
+fn set_approver(env: &mut Env, admin: &Keypair, new_approver: Pubkey) -> Result<Vec<String>, TransactionError> {
+    let set = ix(
+        pepper_curve::accounts::SetClaimApprover { admin: admin.pubkey(), usdc_config: usdc_config_pda() },
+        pepper_curve::instruction::SetClaimApprover { new_approver },
+    );
+    env.send_logged(&[set], &[admin])
+}
+
+/// The harness's `UsdcConfig` written into the bank, `approver` its claim approver.
+fn approver_set(env: &mut Env, approver: Pubkey) {
+    let mut config = env.usdc_config();
+    config.claim_approver = approver;
+    env.put_usdc_config(&config);
+}
+
+/// The vesting's beneficiary and start, and the curve's creator: what a claim writes.
+fn claim_state(env: &Env, mint: &Pubkey) -> (Pubkey, i64, Pubkey) {
+    let vesting: Vesting = env.fetch(&vesting_pda(mint));
+    (vesting.beneficiary, vesting.start_time, env.fetch::<CurveUsdc>(&curve_pda(mint)).creator)
+}
+
+#[test]
+fn the_creator_claims_a_fan_led_market_in_one_instruction_the_approver_co_signs() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = fan_led_usdc_curve(&mut env);
+    let creator = env.creator.insecure_clone();
+    let claimed_at = LOCK + 10 * DAY;
+    env.set_time(claimed_at);
+
+    let logs = claim_fan_led(&mut env, &creator, &approver, &mint).unwrap();
+
+    assert_eq!(claim_state(&env, &mint), (creator.pubkey(), claimed_at, creator.pubkey()));
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).claimed_at, claimed_at, "the mark the vault's undo reads");
+    let vesting: Vesting = env.fetch(&vesting_pda(&mint));
+    assert_eq!((vesting.total_amount, vesting.released_amount), (TOTAL, 0));
+    // The two events the admin's two steps emit, one each.
+    let set = events_of::<VestingBeneficiarySet>(&logs);
+    assert_eq!(set.len(), 1);
+    assert_eq!((set[0].mint, set[0].previous, set[0].new_beneficiary), (mint, fan_led_placeholder(), creator.pubkey()));
+    let synced = events_of::<CurveCreatorSynced>(&logs);
+    assert_eq!(synced.len(), 1);
+    assert_eq!((synced[0].mint, synced[0].previous, synced[0].new_creator), (mint, fan_led_placeholder(), creator.pubkey()));
+
+    // The cliff counts from the claim, then the creator claims the vesting as any creator does.
+    env.set_time(claimed_at + DAY - 1);
+    expect_err(discarded(claim_usdc(&mut env, &mint, &creator)), code(FanexError::NothingToRelease));
+    env.set_time(claimed_at + DAY);
+    claim_usdc(&mut env, &mint, &creator).unwrap();
+    assert_eq!(env.token_amount(&ata(&creator.pubkey(), &mint)), TOTAL);
+}
+
+#[test]
+fn a_claimed_market_is_never_claimed_again_by_either_path() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = fan_led_usdc_curve(&mut env);
+    let creator = env.creator.insecure_clone();
+    claim_fan_led(&mut env, &creator, &approver, &mint).unwrap();
+    let claimed = claim_state(&env, &mint);
+
+    let other = Keypair::new();
+    expect_err(discarded(claim_fan_led(&mut env, &other, &approver, &mint)), code(FanexError::VestingNotReassignable));
+    expect_err(discarded(set_beneficiary(&mut env, &mint, other.pubkey())), code(FanexError::VestingNotReassignable));
+    expect_err(discarded(sync_usdc(&mut env, &mint)), code(FanexError::CurveCreatorNotSyncable));
+    assert_eq!(claim_state(&env, &mint), claimed);
+}
+
+#[test]
+fn refuses_a_market_a_real_creator_launched() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = creators_usdc_curve(&mut env, LOCK - DAY, PHASE_BONDING);
+    let before = claim_state(&env, &mint);
+
+    let other = Keypair::new();
+    expect_err(discarded(claim_fan_led(&mut env, &other, &approver, &mint)), code(FanexError::VestingNotReassignable));
+    assert_eq!(claim_state(&env, &mint), before);
+}
+
+#[test]
+fn refuses_a_market_the_admin_has_half_handed_over_and_the_admin_s_sync_finishes_it() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = fan_led_usdc_curve(&mut env);
+    let creator = env.creator.insecure_clone();
+    set_beneficiary(&mut env, &mint, creator.pubkey()).unwrap();
+
+    expect_err(discarded(claim_fan_led(&mut env, &creator, &approver, &mint)), code(FanexError::VestingNotReassignable));
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, fan_led_placeholder());
+
+    sync_usdc(&mut env, &mint).unwrap();
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, creator.pubkey());
+}
+
+#[test]
+fn no_approver_set_refuses_every_claim() {
+    let mut env = Env::new();
+    // The harness's config, as `initialize_usdc_config` leaves it: no approver.
+    let config = env.usdc_config();
+    assert_eq!(config.claim_approver, Pubkey::default());
+    env.put_usdc_config(&config);
+    let mint = fan_led_usdc_curve(&mut env);
+    let creator = env.creator.insecure_clone();
+    let before = claim_state(&env, &mint);
+
+    for approver in [Keypair::new(), env.admin.insecure_clone()] {
+        expect_err(discarded(claim_fan_led(&mut env, &creator, &approver, &mint)), code(FanexError::ClaimApproverUnset));
+    }
+    assert_eq!(code(FanexError::ClaimApproverUnset), 6049);
+    assert_eq!(claim_state(&env, &mint), before);
+}
+
+#[test]
+fn only_the_approver_set_co_signs_never_an_admin() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = fan_led_usdc_curve(&mut env);
+    let creator = env.creator.insecure_clone();
+    let before = claim_state(&env, &mint);
+
+    // `GlobalConfig.admin` is also the harness's `UsdcConfig.admin`.
+    for wrong in [Keypair::new(), env.admin.insecure_clone(), creator.insecure_clone()] {
+        expect_err(discarded(claim_fan_led(&mut env, &creator, &wrong, &mint)), code(FanexError::Unauthorized));
+    }
+    assert_eq!(claim_state(&env, &mint), before);
+}
+
+#[test]
+fn the_creator_and_the_approver_must_both_sign() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = fan_led_usdc_curve(&mut env);
+    let creator = env.creator.insecure_clone();
+    let before = claim_state(&env, &mint);
+
+    // The approver alone, naming a creator who does not sign: no allocation goes to a key unproven.
+    let mut unsigned_creator = claim_fan_led_ix(&creator.pubkey(), &approver.pubkey(), &mint);
+    unsigned_creator.accounts[0].is_signer = false;
+    expect_err(discarded(env.send_logged(&[unsigned_creator], &[&approver])), ACCOUNT_NOT_SIGNER);
+    // The creator alone, naming the approver without its signature.
+    let mut unsigned_approver = claim_fan_led_ix(&creator.pubkey(), &approver.pubkey(), &mint);
+    unsigned_approver.accounts[1].is_signer = false;
+    expect_err(discarded(env.send_logged(&[unsigned_approver], &[&creator])), ACCOUNT_NOT_SIGNER);
+    assert_eq!(claim_state(&env, &mint), before);
+}
+
+#[test]
+fn a_pause_stops_no_claim() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    let mut config = env.usdc_config();
+    config.claim_approver = approver.pubkey();
+    config.paused = true;
+    env.put_usdc_config(&config);
+    let mint = fan_led_usdc_curve(&mut env);
+    let mut curve: CurveUsdc = env.fetch(&curve_pda(&mint));
+    curve.paused = true;
+    env.put(curve_pda(&mint), account_data(&curve, CurveUsdc::INIT_SPACE), pepper_curve::ID);
+    let creator = env.creator.insecure_clone();
+
+    claim_fan_led(&mut env, &creator, &approver, &mint).unwrap();
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, creator.pubkey());
+}
+
+#[test]
+fn the_claim_refuses_a_sol_curve() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = sol_curve(&mut env, LOCK - DAY, fan_led_placeholder(), fan_led_placeholder());
+    let creator = env.creator.insecure_clone();
+
+    expect_err(discarded(claim_fan_led(&mut env, &creator, &approver, &mint)), ACCOUNT_DISCRIMINATOR_MISMATCH);
+    assert_eq!(env.fetch::<Vesting>(&vesting_pda(&mint)).beneficiary, fan_led_placeholder());
+}
+
+#[test]
+fn only_the_usdc_admin_sets_the_approver_and_nothing_else_moves() {
+    let mut env = Env::new();
+    // The USDC side's admin is the Squad's vault after the hand-over, another key than GlobalConfig's.
+    let vault = Keypair::new();
+    let mut config = env.usdc_config();
+    config.admin = vault.pubkey();
+    env.put_usdc_config(&config);
+    let approver = Pubkey::new_unique();
+
+    for wrong in [env.admin.insecure_clone(), Keypair::new()] {
+        expect_err(discarded(set_approver(&mut env, &wrong, approver)), code(FanexError::Unauthorized));
+    }
+    assert_eq!(env.fetch::<pepper_curve::state::UsdcConfig>(&usdc_config_pda()).claim_approver, Pubkey::default());
+
+    let logs = set_approver(&mut env, &vault, approver).unwrap();
+
+    let expected = pepper_curve::state::UsdcConfig { claim_approver: approver, ..config };
+    assert_eq!(
+        env.svm.get_account(&usdc_config_pda()).unwrap().data,
+        account_data(&expected, pepper_curve::state::UsdcConfig::INIT_SPACE),
+        "only the approver's 32 bytes moved"
+    );
+    let set = events_of::<ClaimApproverSet>(&logs);
+    assert_eq!(set.len(), 1);
+    assert_eq!((set[0].previous, set[0].new_approver), (Pubkey::default(), approver));
+}
+
+#[test]
+fn a_new_approver_retires_the_old_and_all_zero_turns_the_claim_off() {
+    let mut env = Env::new();
+    let old = Keypair::new();
+    approver_set(&mut env, old.pubkey());
+    let admin = env.admin.insecure_clone();
+    let new = Keypair::new();
+    let mint = fan_led_usdc_curve(&mut env);
+    let creator = env.creator.insecure_clone();
+
+    let logs = set_approver(&mut env, &admin, new.pubkey()).unwrap();
+    let set: ClaimApproverSet = event(&logs);
+    assert_eq!((set.previous, set.new_approver), (old.pubkey(), new.pubkey()));
+    expect_err(discarded(claim_fan_led(&mut env, &creator, &old, &mint)), code(FanexError::Unauthorized));
+
+    set_approver(&mut env, &admin, Pubkey::default()).unwrap();
+    expect_err(discarded(claim_fan_led(&mut env, &creator, &new, &mint)), code(FanexError::ClaimApproverUnset));
+
+    set_approver(&mut env, &admin, new.pubkey()).unwrap();
+    claim_fan_led(&mut env, &creator, &new, &mint).unwrap();
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, creator.pubkey());
+}
+
+// ── N+3: the vault's undo of a self-claim, while nothing has vested (2026-11-09) ──
+
+fn revoke_ix(admin: &Pubkey, mint: &Pubkey) -> Instruction {
+    ix(
+        pepper_curve::accounts::RevokeFanLedUsdc {
+            admin: *admin,
+            usdc_config: usdc_config_pda(),
+            mint: *mint,
+            vesting: vesting_pda(mint),
+            curve: curve_pda(mint),
+        },
+        pepper_curve::instruction::RevokeFanLedUsdc {},
+    )
+}
+
+/// `revoke_fan_led_usdc` signed by `signer`, the admin paying the fee.
+fn revoke_by(env: &mut Env, signer: &Keypair, mint: &Pubkey) -> Result<Vec<String>, TransactionError> {
+    let revoke = revoke_ix(&signer.pubkey(), mint);
+    env.send_logged(&[revoke], &[signer])
+}
+
+/// A fan-led market the approver let `thief` claim at `at`, the harness's admin also `UsdcConfig.admin`.
+fn self_claimed(env: &mut Env, thief: &Keypair, at: i64) -> (Pubkey, Keypair) {
+    let approver = Keypair::new();
+    approver_set(env, approver.pubkey());
+    let mint = fan_led_usdc_curve(env);
+    env.set_time(at);
+    claim_fan_led(env, thief, &approver, &mint).unwrap();
+    (mint, approver)
+}
+
+#[test]
+fn the_vault_undoes_a_self_claim_and_the_real_owner_claims_the_market_again() {
+    let mut env = Env::new();
+    let thief = Keypair::new();
+    let stolen_at = LOCK + 10 * DAY;
+    let (mint, approver) = self_claimed(&mut env, &thief, stolen_at);
+    let admin = env.admin.insecure_clone();
+    env.set_time(stolen_at + DAY - 1);
+
+    let logs = revoke_by(&mut env, &admin, &mint).unwrap();
+
+    let placeholder = fan_led_placeholder();
+    let vesting: Vesting = env.fetch(&vesting_pda(&mint));
+    let curve: CurveUsdc = env.fetch(&curve_pda(&mint));
+    assert_eq!((vesting.beneficiary, curve.creator, curve.claimed_at), (placeholder, placeholder, 0));
+    assert_eq!((vesting.total_amount, vesting.released_amount), (TOTAL, 0));
+    let revoked = events_of::<FanLedClaimRevoked>(&logs);
+    assert_eq!(revoked.len(), 1);
+    assert_eq!((revoked[0].mint, revoked[0].previous, revoked[0].by), (mint, thief.pubkey(), admin.pubkey()));
+    // Nothing to undo twice.
+    expect_err(discarded(revoke_by(&mut env, &admin, &mint)), code(FanexError::ClaimNotRevocable));
+    assert_eq!(code(FanexError::ClaimNotRevocable), 6050);
+
+    // The real owner claims it the usual way, and the clock starts from their claim.
+    let owner = env.creator.insecure_clone();
+    let owned_at = stolen_at + 2 * DAY;
+    env.set_time(owned_at);
+    claim_fan_led(&mut env, &owner, &approver, &mint).unwrap();
+    assert_eq!(claim_state(&env, &mint), (owner.pubkey(), owned_at, owner.pubkey()));
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).claimed_at, owned_at);
+}
+
+#[test]
+fn the_undo_reaches_no_market_a_self_claim_did_not_hand_over() {
+    let mut env = Env::new();
+    let admin = env.admin.insecure_clone();
+    approver_set(&mut env, Keypair::new().pubkey());
+
+    // Still the placeholder's.
+    let unclaimed = fan_led_usdc_curve(&mut env);
+    expect_err(discarded(revoke_by(&mut env, &admin, &unclaimed)), code(FanexError::ClaimNotRevocable));
+
+    // A real creator's launch.
+    let launched = creators_usdc_curve(&mut env, LOCK - DAY, PHASE_BONDING);
+    let before = claim_state(&env, &launched);
+    expect_err(discarded(revoke_by(&mut env, &admin, &launched)), code(FanexError::ClaimNotRevocable));
+    assert_eq!(claim_state(&env, &launched), before);
+
+    // Handed over by the admin's two steps, which write no mark.
+    let handed = fan_led_usdc_curve(&mut env);
+    let creator = env.creator.pubkey();
+    set_beneficiary(&mut env, &handed, creator).unwrap();
+    sync_usdc(&mut env, &handed).unwrap();
+    expect_err(discarded(revoke_by(&mut env, &admin, &handed)), code(FanexError::ClaimNotRevocable));
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&handed)).creator, creator);
+}
+
+#[test]
+fn the_undo_stops_once_the_claimed_vesting_has_vested() {
+    let mut env = Env::new();
+    let thief = Keypair::new();
+    let stolen_at = LOCK + 10 * DAY;
+    let (mint, _) = self_claimed(&mut env, &thief, stolen_at);
+    let admin = env.admin.insecure_clone();
+
+    // The harness's vesting: a one-day cliff, released whole, counted from the claim.
+    env.set_time(stolen_at + DAY);
+    expect_err(discarded(revoke_by(&mut env, &admin, &mint)), code(FanexError::ClaimNotRevocable));
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, thief.pubkey());
+
+    env.set_time(stolen_at + DAY - 1);
+    revoke_by(&mut env, &admin, &mint).unwrap();
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, fan_led_placeholder());
+}
+
+#[test]
+fn only_the_usdc_admin_undoes_a_claim_never_the_global_admin_or_the_approver() {
+    let mut env = Env::new();
+    let thief = Keypair::new();
+    let stolen_at = LOCK + 10 * DAY;
+    let (mint, approver) = self_claimed(&mut env, &thief, stolen_at);
+    // The USDC side's admin is the Squad's vault after the hand-over, another key than GlobalConfig's.
+    let vault = Keypair::new();
+    let mut config: pepper_curve::state::UsdcConfig = env.fetch(&usdc_config_pda());
+    config.admin = vault.pubkey();
+    env.put_usdc_config(&config);
+    env.set_time(stolen_at + 1);
+
+    for wrong in [env.admin.insecure_clone(), approver, thief.insecure_clone(), Keypair::new()] {
+        expect_err(discarded(revoke_by(&mut env, &wrong, &mint)), code(FanexError::Unauthorized));
+    }
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, thief.pubkey());
+
+    revoke_by(&mut env, &vault, &mint).unwrap();
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, fan_led_placeholder());
 }

@@ -9,6 +9,84 @@
   },
   "instructions": [
     {
+      "name": "accept_admin",
+      "discriminator": [
+        112,
+        42,
+        45,
+        90,
+        116,
+        181,
+        13,
+        170
+      ],
+      "accounts": [
+        {
+          "name": "new_admin",
+          "docs": [
+            "The admin proposed, signing for itself: a key nobody can sign for never becomes the admin."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pending_admin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "buy",
       "discriminator": [
         102,
@@ -591,6 +669,439 @@
       ]
     },
     {
+      "name": "buy_from_pool",
+      "discriminator": [
+        118,
+        108,
+        243,
+        198,
+        19,
+        184,
+        41,
+        246
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "buyer",
+          "signer": true
+        },
+        {
+          "name": "attester",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "pool_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "buyer_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "buyer_usdc",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "units",
+          "type": "u64"
+        },
+        {
+          "name": "max_in",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "buy_quotas",
+      "discriminator": [
+        246,
+        141,
+        179,
+        185,
+        70,
+        117,
+        107,
+        229
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "buyer",
+          "signer": true
+        },
+        {
+          "name": "attester",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "buyer_usdc",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "max_cost",
+          "type": "u64"
+        },
+        {
+          "name": "min_units",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "cancel_raise",
+      "discriminator": [
+        93,
+        123,
+        204,
+        79,
+        107,
+        196,
+        120,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "relations": [
+            "raise"
+          ]
+        },
+        {
+          "name": "raise",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim",
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "position",
+          "writable": true
+        },
+        {
+          "name": "owner_usdc",
+          "writable": true
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "claim_dividend",
       "discriminator": [
         15,
@@ -731,6 +1242,121 @@
           }
         }
       ]
+    },
+    {
+      "name": "claim_fan_led_usdc",
+      "docs": [
+        "`set_vesting_beneficiary` and `sync_curve_creator_usdc` in one, signed by the creator, who",
+        "becomes the owner, and co-signed by `UsdcConfig.claim_approver`: from the fan-led",
+        "placeholder only, both or neither."
+      ],
+      "discriminator": [
+        147,
+        108,
+        217,
+        133,
+        33,
+        55,
+        185,
+        92
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "docs": [
+            "The creator who proved they own the channel: the vesting's and the curve's new owner."
+          ],
+          "signer": true
+        },
+        {
+          "name": "approver",
+          "docs": [
+            "`UsdcConfig.claim_approver`, checked in the handler: `ClaimApproverUnset` while it is",
+            "all-zero, `Unauthorized` for any other key."
+          ],
+          "signer": true
+        },
+        {
+          "name": "usdc_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "vesting",
+            "curve"
+          ]
+        },
+        {
+          "name": "vesting",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "A `CurveUsdc` by its type: a SOL `Curve` is refused by its discriminator (3002)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
     },
     {
       "name": "claim_vesting",
@@ -1394,6 +2020,463 @@
       "args": []
     },
     {
+      "name": "close_month",
+      "discriminator": [
+        220,
+        137,
+        26,
+        99,
+        56,
+        155,
+        147,
+        36
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "relations": [
+            "month_account"
+          ]
+        },
+        {
+          "name": "month_account",
+          "writable": true
+        },
+        {
+          "name": "rent_payer",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_position",
+      "discriminator": [
+        123,
+        134,
+        81,
+        0,
+        49,
+        68,
+        98,
+        98
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "position",
+          "writable": true
+        },
+        {
+          "name": "rent_payer",
+          "writable": true
+        },
+        {
+          "name": "owner_usdc",
+          "docs": [
+            "What the position is still owed can only land in its owner's associated USDC account, the",
+            "one its wallet shows (the internal audit of 2026-10-29); for the pool's own position, which",
+            "is paid nothing here, a vault of the raise."
+          ],
+          "writable": true
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_raise",
+      "discriminator": [
+        98,
+        161,
+        86,
+        205,
+        151,
+        68,
+        24,
+        43
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "pool_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "guarantee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator_usdc",
+          "docs": [
+            "The creator's associated USDC account (the internal audit of 2026-10-29)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_raise_accounts",
+      "discriminator": [
+        118,
+        121,
+        194,
+        130,
+        59,
+        73,
+        161,
+        15
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "rent_payer",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "guarantee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fee_usdc",
+          "docs": [
+            "Whatever is left in a vault can only land in the fee wallet's account (the binding `fund_month`",
+            "uses for `fee_usdc`)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "create_curve",
       "discriminator": [
         169,
@@ -2033,6 +3116,744 @@
               "name": "CreateCurveUsdcParams"
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "create_raise",
+      "docs": [
+        "`max_launch_fee`: the most the creator agrees to pay, the fee its transaction was built on",
+        "(internal audit of 2026-10-29)."
+      ],
+      "discriminator": [
+        234,
+        185,
+        148,
+        199,
+        102,
+        231,
+        133,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "docs": [
+            "Pays every account's rent: the Fanex raise sponsor wallet (spec §6.6)."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator",
+          "signer": true
+        },
+        {
+          "name": "attester",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "arg",
+                "path": "params.raise_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "guarantee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator_usdc",
+          "writable": true
+        },
+        {
+          "name": "fee_usdc",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "RaiseParams"
+            }
+          }
+        },
+        {
+          "name": "max_launch_fee",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "declare_month",
+      "discriminator": [
+        191,
+        129,
+        226,
+        66,
+        161,
+        196,
+        37,
+        36
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "attester",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "month_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  110,
+                  116,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              },
+              {
+                "kind": "arg",
+                "path": "month"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "month",
+          "type": "u32"
+        },
+        {
+          "name": "due",
+          "type": "u64"
+        },
+        {
+          "name": "estimated",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "finalize",
+      "discriminator": [
+        171,
+        61,
+        218,
+        56,
+        127,
+        115,
+        12,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "pool_position",
+          "docs": [
+            "The pool's position, owned by the raise PDA itself."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "guarantee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator_usdc",
+          "docs": [
+            "The creator's associated USDC account (the internal audit of 2026-10-29)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "fee_usdc",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "fund_direct",
+      "discriminator": [
+        179,
+        213,
+        239,
+        155,
+        186,
+        249,
+        144,
+        242
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "relations": [
+            "raise"
+          ]
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "creator_usdc",
+          "writable": true
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fee_usdc",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "guarantee_vault",
+          "docs": [
+            "The guarantee a payment refills first, before a month not yet due",
+            "(2026-10-19). Appended, so every account before it keeps its place."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "fund_month",
+      "discriminator": [
+        96,
+        98,
+        255,
+        42,
+        123,
+        162,
+        166,
+        106
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "relations": [
+            "raise"
+          ]
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "relations": [
+            "month_account"
+          ]
+        },
+        {
+          "name": "month_account",
+          "writable": true
+        },
+        {
+          "name": "creator_usdc",
+          "writable": true
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fee_usdc",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "guarantee_vault",
+          "docs": [
+            "The guarantee a payment refills first, before a month not yet due",
+            "(2026-10-19). Appended, so every account before it keeps its place."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     },
@@ -3298,6 +5119,184 @@
       ]
     },
     {
+      "name": "initialize_raise_config",
+      "discriminator": [
+        71,
+        184,
+        190,
+        211,
+        185,
+        234,
+        19,
+        63
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "docs": [
+            "Pays the config's rent: on mainnet the vault itself, since a vault transaction carries no",
+            "other keypair's signature."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "upgrade_authority",
+          "docs": [
+            "This program's upgrade authority, as its ProgramData records it."
+          ],
+          "signer": true
+        },
+        {
+          "name": "program_data",
+          "docs": [
+            "`program_data_upgrade_authority`. The program's ProgramData, the upgradeable loader's PDA",
+            "of the program id (`ConstraintSeeds` anywhere else, so another program's ProgramData is",
+            "refused), owned by the loader, whose recorded authority must be the signer:",
+            "`Unauthorized` for any other key, for an immutable program, which records none, and for a",
+            "program loaded without the upgradeable loader, which has no ProgramData."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  166,
+                  157,
+                  117,
+                  149,
+                  146,
+                  25,
+                  21,
+                  131,
+                  16,
+                  231,
+                  13,
+                  126,
+                  89,
+                  137,
+                  127,
+                  157,
+                  152,
+                  113,
+                  102,
+                  81,
+                  88,
+                  191,
+                  245,
+                  80,
+                  218,
+                  60,
+                  242,
+                  133,
+                  73,
+                  118,
+                  159,
+                  140
+                ]
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                168,
+                246,
+                145,
+                78,
+                136,
+                161,
+                176,
+                226,
+                16,
+                21,
+                62,
+                247,
+                99,
+                174,
+                43,
+                0,
+                194,
+                185,
+                61,
+                22,
+                193,
+                36,
+                210,
+                192,
+                83,
+                122,
+                16,
+                4,
+                128,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "name": "admin",
+          "docs": [
+            "The admin: an account the system program owns, as a Squads vault is (`AccountNotSystemOwned`",
+            "otherwise, the all-zero key included). The multisig account is the Squads program's and never",
+            "signs: an admin handed to it would be lost for ever (MULTISIG.md §2)."
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "attester",
+          "type": "pubkey"
+        },
+        {
+          "name": "fee_wallet",
+          "type": "pubkey"
+        },
+        {
+          "name": "usdc_mint",
+          "type": "pubkey"
+        },
+        {
+          "name": "launch_fee",
+          "type": "u64"
+        },
+        {
+          "name": "pool_fee_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
       "name": "initialize_usdc_config",
       "docs": [
         "Create the USDC side's config, signed by the program's upgrade authority as",
@@ -3510,6 +5509,554 @@
           }
         }
       ]
+    },
+    {
+      "name": "propose_admin",
+      "discriminator": [
+        121,
+        214,
+        199,
+        212,
+        87,
+        39,
+        117,
+        234
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pending_admin",
+          "docs": [
+            "The proposal, written again by a later one: proposing the admin itself and accepting it",
+            "withdraws one."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "new_admin",
+          "docs": [
+            "The next admin, held to `initialize_config`'s rule: an account the system program owns",
+            "(`AccountNotSystemOwned` otherwise, the all-zero key and a multisig account included)."
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "redeclare_month",
+      "docs": [
+        "A declared month's due corrected before its due date (internal audit of 2026-10-29)."
+      ],
+      "discriminator": [
+        91,
+        38,
+        48,
+        165,
+        201,
+        156,
+        239,
+        200
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "docs": [
+            "The attester, lowering a due it declared too high (a keeper's fault), or the admin, either",
+            "way, correcting one a stolen attester key made; under the pause, the admin alone."
+          ],
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "relations": [
+            "month_account"
+          ]
+        },
+        {
+          "name": "month_account",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "due",
+          "type": "u64"
+        },
+        {
+          "name": "estimated",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "refund",
+      "discriminator": [
+        2,
+        96,
+        183,
+        251,
+        63,
+        208,
+        46,
+        46
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "position",
+          "writable": true
+        },
+        {
+          "name": "rent_payer",
+          "writable": true
+        },
+        {
+          "name": "owner_usdc",
+          "docs": [
+            "The refund can only land in the associated USDC account of the position's owner, the one",
+            "its wallet shows (the internal audit of 2026-10-29)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "release_guarantee",
+      "discriminator": [
+        145,
+        5,
+        2,
+        78,
+        58,
+        97,
+        34,
+        192
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "guarantee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator_usdc",
+          "docs": [
+            "The creator's associated USDC account (the internal audit of 2026-10-29)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "replenish_guarantee",
+      "discriminator": [
+        15,
+        23,
+        171,
+        220,
+        100,
+        227,
+        231,
+        233
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "relations": [
+            "raise"
+          ]
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "creator_usdc",
+          "writable": true
+        },
+        {
+          "name": "guarantee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "revoke_fan_led_usdc",
+      "docs": [
+        "Undo a `claim_fan_led_usdc`, signed by `UsdcConfig.admin`: the market back on the fan-led",
+        "placeholder while nothing of its vesting has vested, for its real owner to claim again. It",
+        "names no owner."
+      ],
+      "discriminator": [
+        180,
+        165,
+        232,
+        83,
+        207,
+        112,
+        124,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "`UsdcConfig.admin`: the upgrade Squad's vault."
+          ],
+          "signer": true,
+          "relations": [
+            "usdc_config"
+          ]
+        },
+        {
+          "name": "usdc_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "vesting",
+            "curve"
+          ]
+        },
+        {
+          "name": "vesting",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "A `CurveUsdc` by its type: a SOL `Curve` is refused by its discriminator (3002)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
     },
     {
       "name": "sell",
@@ -4062,6 +6609,218 @@
       ]
     },
     {
+      "name": "sell_to_pool",
+      "discriminator": [
+        3,
+        243,
+        152,
+        69,
+        67,
+        236,
+        19,
+        109
+      ],
+      "accounts": [
+        {
+          "name": "seller",
+          "signer": true
+        },
+        {
+          "name": "attester",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "position",
+          "writable": true
+        },
+        {
+          "name": "pool_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "seller_usdc",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "units",
+          "type": "u64"
+        },
+        {
+          "name": "min_out",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "set_claim_approver",
+      "docs": [
+        "Write `UsdcConfig.claim_approver`, signed by `UsdcConfig.admin`: the key that co-signs a",
+        "creator's claim; all-zero turns the claim off."
+      ],
+      "discriminator": [
+        167,
+        119,
+        87,
+        115,
+        199,
+        168,
+        27,
+        219
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "`UsdcConfig.admin`: the Squad's vault once handed over."
+          ],
+          "signer": true,
+          "relations": [
+            "usdc_config"
+          ]
+        },
+        {
+          "name": "usdc_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_approver",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
       "name": "set_curve_paused",
       "discriminator": [
         34,
@@ -4405,6 +7164,59 @@
       ]
     },
     {
+      "name": "set_raise_paused",
+      "discriminator": [
+        92,
+        32,
+        100,
+        158,
+        35,
+        68,
+        67,
+        93
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "set_usdc_paused",
       "docs": [
         "The USDC side's kill-switch: the pauser or the admin pauses, only the",
@@ -4708,6 +7520,251 @@
       ]
     },
     {
+      "name": "settle_month",
+      "discriminator": [
+        95,
+        13,
+        128,
+        21,
+        233,
+        237,
+        64,
+        200
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "relations": [
+            "month_account"
+          ]
+        },
+        {
+          "name": "month_account",
+          "writable": true
+        },
+        {
+          "name": "guarantee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  97,
+                  110,
+                  116,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fee_usdc",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "sweep_pool_earnings",
+      "discriminator": [
+        48,
+        101,
+        140,
+        114,
+        128,
+        237,
+        245,
+        155
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "raise",
+          "writable": true
+        },
+        {
+          "name": "pool_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payouts_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "raise"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "sync_curve_creator",
       "docs": [
         "Copy a claimed fan-led vesting beneficiary into `Curve.creator`. Takes no",
@@ -4976,6 +8033,85 @@
       ]
     },
     {
+      "name": "update_raise_config",
+      "discriminator": [
+        166,
+        106,
+        230,
+        25,
+        105,
+        78,
+        136,
+        75
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_admin",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_attester",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_fee_wallet",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_launch_fee",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "new_pool_fee_bps",
+          "type": {
+            "option": "u16"
+          }
+        }
+      ]
+    },
+    {
       "name": "update_usdc_config",
       "docs": [
         "Change the USDC config's keys, signed by `UsdcConfig.admin`. `None`, or",
@@ -5090,6 +8226,91 @@
           }
         }
       ]
+    },
+    {
+      "name": "usdc_pause_raise",
+      "docs": [
+        "The USDC pause of the raise (the product owner, 2026-11-05), `RaiseConfig.paused = true`,",
+        "signed by `UsdcConfig.pauser` alone. Takes no value, so it cannot unpause: that stays",
+        "`set_raise_paused(false)`, `RaiseConfig.admin`'s."
+      ],
+      "discriminator": [
+        229,
+        24,
+        6,
+        197,
+        77,
+        178,
+        192,
+        192
+      ],
+      "accounts": [
+        {
+          "name": "pauser",
+          "docs": [
+            "`UsdcConfig.pauser`, the only key this instruction takes. It pays nothing."
+          ],
+          "signer": true,
+          "relations": [
+            "usdc_config"
+          ]
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "Read for its pauser alone, bound by its seeds (Anchor's 2006 anywhere else)."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "raise_config",
+          "docs": [
+            "The raise's config, bound by its seeds."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  97,
+                  105,
+                  115,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
     },
     {
       "name": "usdc_pause_sol",
@@ -5384,6 +8605,36 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "write_off_month",
+      "discriminator": [
+        41,
+        143,
+        86,
+        152,
+        0,
+        42,
+        18,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "raise",
+          "writable": true,
+          "relations": [
+            "month_account"
+          ]
+        },
+        {
+          "name": "month_account"
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -5492,6 +8743,71 @@
       ]
     },
     {
+      "name": "Month",
+      "discriminator": [
+        10,
+        100,
+        184,
+        89,
+        129,
+        100,
+        118,
+        196
+      ]
+    },
+    {
+      "name": "PendingAdmin",
+      "discriminator": [
+        220,
+        45,
+        135,
+        16,
+        196,
+        153,
+        181,
+        56
+      ]
+    },
+    {
+      "name": "Position",
+      "discriminator": [
+        170,
+        188,
+        143,
+        228,
+        122,
+        64,
+        247,
+        208
+      ]
+    },
+    {
+      "name": "Raise",
+      "discriminator": [
+        253,
+        96,
+        15,
+        240,
+        65,
+        242,
+        192,
+        103
+      ]
+    },
+    {
+      "name": "RaiseConfig",
+      "discriminator": [
+        171,
+        194,
+        103,
+        55,
+        249,
+        30,
+        135,
+        56
+      ]
+    },
+    {
       "name": "SolVault",
       "discriminator": [
         21,
@@ -5533,6 +8849,32 @@
   ],
   "events": [
     {
+      "name": "BoughtFromPool",
+      "discriminator": [
+        227,
+        64,
+        248,
+        253,
+        246,
+        49,
+        114,
+        171
+      ]
+    },
+    {
+      "name": "ClaimApproverSet",
+      "discriminator": [
+        17,
+        147,
+        99,
+        160,
+        229,
+        197,
+        115,
+        214
+      ]
+    },
+    {
       "name": "ClaimStatusClosed",
       "discriminator": [
         47,
@@ -5543,6 +8885,19 @@
         75,
         227,
         137
+      ]
+    },
+    {
+      "name": "Claimed",
+      "discriminator": [
+        217,
+        192,
+        123,
+        72,
+        108,
+        150,
+        248,
+        33
       ]
     },
     {
@@ -5637,6 +8992,19 @@
       ]
     },
     {
+      "name": "FanLedClaimRevoked",
+      "discriminator": [
+        207,
+        9,
+        66,
+        79,
+        200,
+        2,
+        247,
+        150
+      ]
+    },
+    {
       "name": "Graduated",
       "discriminator": [
         51,
@@ -5699,6 +9067,214 @@
         247,
         210,
         84
+      ]
+    },
+    {
+      "name": "GuaranteeReleased",
+      "discriminator": [
+        122,
+        142,
+        166,
+        125,
+        197,
+        150,
+        58,
+        123
+      ]
+    },
+    {
+      "name": "GuaranteeReplenished",
+      "discriminator": [
+        235,
+        87,
+        126,
+        67,
+        161,
+        172,
+        233,
+        28
+      ]
+    },
+    {
+      "name": "MonthClosed",
+      "discriminator": [
+        209,
+        135,
+        175,
+        73,
+        192,
+        251,
+        189,
+        240
+      ]
+    },
+    {
+      "name": "MonthDeclared",
+      "discriminator": [
+        199,
+        252,
+        162,
+        167,
+        138,
+        124,
+        102,
+        53
+      ]
+    },
+    {
+      "name": "MonthFunded",
+      "discriminator": [
+        165,
+        183,
+        137,
+        145,
+        158,
+        51,
+        172,
+        152
+      ]
+    },
+    {
+      "name": "MonthSettled",
+      "discriminator": [
+        52,
+        39,
+        216,
+        26,
+        249,
+        241,
+        250,
+        76
+      ]
+    },
+    {
+      "name": "MonthWrittenOff",
+      "discriminator": [
+        181,
+        161,
+        57,
+        253,
+        189,
+        247,
+        27,
+        44
+      ]
+    },
+    {
+      "name": "PoolEarningsSwept",
+      "discriminator": [
+        221,
+        107,
+        20,
+        37,
+        220,
+        221,
+        40,
+        181
+      ]
+    },
+    {
+      "name": "QuotasBought",
+      "discriminator": [
+        141,
+        112,
+        15,
+        12,
+        134,
+        201,
+        4,
+        174
+      ]
+    },
+    {
+      "name": "RaiseAccountsClosed",
+      "discriminator": [
+        30,
+        43,
+        139,
+        184,
+        126,
+        205,
+        105,
+        93
+      ]
+    },
+    {
+      "name": "RaiseCancelled",
+      "discriminator": [
+        97,
+        36,
+        168,
+        231,
+        73,
+        9,
+        183,
+        237
+      ]
+    },
+    {
+      "name": "RaiseClosed",
+      "discriminator": [
+        19,
+        72,
+        107,
+        168,
+        31,
+        145,
+        8,
+        88
+      ]
+    },
+    {
+      "name": "RaiseCreated",
+      "discriminator": [
+        242,
+        93,
+        21,
+        59,
+        238,
+        47,
+        195,
+        85
+      ]
+    },
+    {
+      "name": "RaiseFinalized",
+      "discriminator": [
+        58,
+        94,
+        153,
+        234,
+        121,
+        124,
+        153,
+        161
+      ]
+    },
+    {
+      "name": "Refunded",
+      "discriminator": [
+        35,
+        103,
+        149,
+        246,
+        196,
+        123,
+        221,
+        99
+      ]
+    },
+    {
+      "name": "SoldToPool",
+      "discriminator": [
+        109,
+        125,
+        23,
+        70,
+        81,
+        114,
+        79,
+        171
       ]
     },
     {
@@ -6051,9 +9627,295 @@
       "code": 6048,
       "name": "CreatePoolFeeTooHigh",
       "msg": "Raydium's pool-creation fee is past the program's bound"
+    },
+    {
+      "code": 6049,
+      "name": "ClaimApproverUnset",
+      "msg": "No key approves a creator's claim of a fan-led market yet"
+    },
+    {
+      "code": 6050,
+      "name": "ClaimNotRevocable",
+      "msg": "This market's claim cannot be undone: not a self-claim, or its vesting has begun"
+    },
+    {
+      "code": 7000,
+      "name": "RaiseGloballyPaused",
+      "msg": "Raises are globally paused"
+    },
+    {
+      "code": 7001,
+      "name": "RaiseUnauthorized",
+      "msg": "Signer is not authorized for this action"
+    },
+    {
+      "code": 7002,
+      "name": "RaiseMathOverflow",
+      "msg": "Numeric overflow"
+    },
+    {
+      "code": 7003,
+      "name": "RaiseZeroAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 7004,
+      "name": "InvalidTiers",
+      "msg": "Tiers are invalid"
+    },
+    {
+      "code": 7005,
+      "name": "InvalidShare",
+      "msg": "Share ceded is outside the allowed range"
+    },
+    {
+      "code": 7006,
+      "name": "InvalidTerm",
+      "msg": "Term is outside the allowed range"
+    },
+    {
+      "code": 7007,
+      "name": "InvalidDeadline",
+      "msg": "Deadline is outside the allowed raise duration"
+    },
+    {
+      "code": 7008,
+      "name": "InvalidMinimum",
+      "msg": "Minimum is outside the allowed range"
+    },
+    {
+      "code": 7009,
+      "name": "NotRaising",
+      "msg": "Raise is not raising"
+    },
+    {
+      "code": 7010,
+      "name": "NotRefunding",
+      "msg": "Raise is not refunding"
+    },
+    {
+      "code": 7011,
+      "name": "NotActive",
+      "msg": "Raise is not active"
+    },
+    {
+      "code": 7012,
+      "name": "RaiseExpired",
+      "msg": "Raise deadline has passed"
+    },
+    {
+      "code": 7013,
+      "name": "RaiseStillOpen",
+      "msg": "Raise is still open"
+    },
+    {
+      "code": 7014,
+      "name": "NothingToBuy",
+      "msg": "Nothing left to buy at this budget"
+    },
+    {
+      "code": 7015,
+      "name": "RaiseSlippageExceeded",
+      "msg": "Fewer quota units than the requested minimum"
+    },
+    {
+      "code": 7016,
+      "name": "BelowMinimumPurchase",
+      "msg": "Purchase below the minimum amount"
+    },
+    {
+      "code": 7017,
+      "name": "WalletLimitExceeded",
+      "msg": "Per-wallet limit exceeded"
+    },
+    {
+      "code": 7018,
+      "name": "MonthOutOfOrder",
+      "msg": "Months must be declared and settled in order"
+    },
+    {
+      "code": 7019,
+      "name": "MonthOutOfTerm",
+      "msg": "Month is outside the raise term"
+    },
+    {
+      "code": 7020,
+      "name": "DeclarationTooEarly",
+      "msg": "Month cannot be declared before the 15th of the next month"
+    },
+    {
+      "code": 7021,
+      "name": "NotDue",
+      "msg": "Month is not due yet"
+    },
+    {
+      "code": 7022,
+      "name": "MonthAlreadyFinalized",
+      "msg": "Month is already settled"
+    },
+    {
+      "code": 7023,
+      "name": "NotOldestOpenMonth",
+      "msg": "Pay the oldest open month first"
+    },
+    {
+      "code": 7024,
+      "name": "NothingOwed",
+      "msg": "Nothing is owed"
+    },
+    {
+      "code": 7025,
+      "name": "OpenMonthsFirst",
+      "msg": "Open months must be paid first"
+    },
+    {
+      "code": 7026,
+      "name": "GuaranteeNotReleasable",
+      "msg": "Guarantee cannot be released yet"
+    },
+    {
+      "code": 7027,
+      "name": "ClaimTooSmall",
+      "msg": "Claim below the minimum"
+    },
+    {
+      "code": 7028,
+      "name": "InsufficientUnits",
+      "msg": "Not enough quota units"
+    },
+    {
+      "code": 7029,
+      "name": "PriceOutsideLimit",
+      "msg": "Price outside the caller's limit"
+    },
+    {
+      "code": 7030,
+      "name": "NotClosable",
+      "msg": "Raise cannot be closed yet"
+    },
+    {
+      "code": 7031,
+      "name": "PositionNotEmpty",
+      "msg": "Position is not empty"
+    },
+    {
+      "code": 7032,
+      "name": "RaiseAccountMismatch",
+      "msg": "Account does not match the expected one"
+    },
+    {
+      "code": 7033,
+      "name": "FeeTooHigh",
+      "msg": "Pool fee above its 3% ceiling"
+    },
+    {
+      "code": 7034,
+      "name": "RentPayerUnknown",
+      "msg": "This raise records no rent payer: it was created before the rent return"
+    },
+    {
+      "code": 7035,
+      "name": "MonthNotClosable",
+      "msg": "This month is still needed: it must be settled and behind the payment pointer"
+    },
+    {
+      "code": 7036,
+      "name": "RaiseNotFinished",
+      "msg": "This raise is not finished: it is still raising or active, or a position, a month or an open month is left"
+    },
+    {
+      "code": 7037,
+      "name": "MonthNotExtinguishable",
+      "msg": "Only the finalized oldest month of a closed raise without quotas can be extinguished"
+    },
+    {
+      "code": 7038,
+      "name": "LaunchFeeTooHigh",
+      "msg": "Launch fee above its ceiling"
+    },
+    {
+      "code": 7039,
+      "name": "AdminMovesInTwoSteps",
+      "msg": "The admin moves in two steps: propose_admin, then accept_admin signed by the new admin"
+    },
+    {
+      "code": 7040,
+      "name": "MonthNotRedeclarable",
+      "msg": "This month can no longer be re-declared: it is due or settled, not the last declared, or the new due is below what was paid"
+    },
+    {
+      "code": 7041,
+      "name": "PoolHoldsEveryQuota",
+      "msg": "The pool holds every quota: none can be bought from it"
+    },
+    {
+      "code": 7042,
+      "name": "PoolPriceUnderShare",
+      "msg": "The pool sells only while its price is at least the fans' share of its USDC"
     }
   ],
   "types": [
+    {
+      "name": "BoughtFromPool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "gross",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "cost",
+            "type": "u64"
+          },
+          {
+            "name": "pool_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "pool_units",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClaimApproverSet",
+      "docs": [
+        "72 bytes: `set_claim_approver` changed the key that co-signs a creator's claim of a fan-led",
+        "market (all-zero: nobody). The claim itself emits `VestingBeneficiarySet` and",
+        "`CurveCreatorSynced`, as the admin's two steps do."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "previous",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_approver",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
     {
       "name": "ClaimStatus",
       "docs": [
@@ -6113,6 +9975,26 @@
           },
           {
             "name": "lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Claimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
             "type": "u64"
           }
         ]
@@ -6706,11 +10588,24 @@
             "type": "i64"
           },
           {
+            "name": "claimed_at",
+            "docs": [
+              "When `claim_fan_led_usdc` handed the market to its creator (N+3, 2026-11-05): the mark",
+              "`revoke_fan_led_usdc` needs to undo that claim. 0 for every other curve, the ones the admin's",
+              "two steps handed over included, and after an undo; every curve written before N+3 reads 0 here",
+              "(these 8 bytes were reserved zeros)."
+            ],
+            "type": "i64"
+          },
+          {
             "name": "reserved",
+            "docs": [
+              "128 until `claimed_at` took 8 of them (2026-11-09)."
+            ],
             "type": {
               "array": [
                 "u8",
-                128
+                120
               ]
             }
           }
@@ -6929,6 +10824,30 @@
       }
     },
     {
+      "name": "FanLedClaimRevoked",
+      "docs": [
+        "104 bytes: `revoke_fan_led_usdc` put a self-claimed market back on the fan-led placeholder",
+        "(2026-11-09): `previous` the owner the claim had named, `by` the admin that undid it."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "previous",
+            "type": "pubkey"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
       "name": "GlobalConfig",
       "docs": [
         "Singleton program config (PDA: [CONFIG_SEED])."
@@ -7098,6 +11017,38 @@
       }
     },
     {
+      "name": "GuaranteeReleased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GuaranteeReplenished",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "InitializeUsdcConfigParams",
       "docs": [
         "The keys `initialize_usdc_config` writes beside its accounts: every role but the admin, which is",
@@ -7184,6 +11135,929 @@
       }
     },
     {
+      "name": "Month",
+      "docs": [
+        "One declared month (PDA: [MONTH_SEED, raise, month u32 LE])."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "u32"
+          },
+          {
+            "name": "due",
+            "type": "u64"
+          },
+          {
+            "name": "estimated",
+            "docs": [
+              "The due is an estimate (YouTube disconnected, video deleted or private)."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "paid",
+            "type": "u64"
+          },
+          {
+            "name": "paid_on_time",
+            "docs": [
+              "Paid by the creator before `due_ts`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "covered",
+            "type": "u64"
+          },
+          {
+            "name": "credited",
+            "docs": [
+              "Reached the fans' accumulator (after the 3%)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "due_ts",
+            "type": "i64"
+          },
+          {
+            "name": "finalized",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Room to grow without a layout break (internal audit of 2026-10-29): added before any `Month`",
+              "existed on a cluster (devnet held none on that day, mainnet no program), so no account breaks."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "MonthClosed",
+      "docs": [
+        "A finished month's account closed; `lamports` went back to the raise's rent payer."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "u32"
+          },
+          {
+            "name": "lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MonthDeclared",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "u32"
+          },
+          {
+            "name": "due",
+            "type": "u64"
+          },
+          {
+            "name": "estimated",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MonthFunded",
+      "docs": [
+        "`month == u32::MAX` marks a `fund_direct` payment."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "u32"
+          },
+          {
+            "name": "gross",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "credit",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MonthSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "u32"
+          },
+          {
+            "name": "covered",
+            "type": "u64"
+          },
+          {
+            "name": "on_time",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MonthWrittenOff",
+      "docs": [
+        "Extinguished debt, never a payment. The full financial snapshot survives the month's later close."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "u32"
+          },
+          {
+            "name": "due",
+            "type": "u64"
+          },
+          {
+            "name": "paid",
+            "type": "u64"
+          },
+          {
+            "name": "paid_on_time",
+            "type": "u64"
+          },
+          {
+            "name": "covered",
+            "type": "u64"
+          },
+          {
+            "name": "written_off",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PendingAdmin",
+      "docs": [
+        "An admin hand-over in progress (PDA: [PENDING_ADMIN_SEED]; the internal audit of 2026-10-29):",
+        "`propose_admin` writes it, the proposed key's own `accept_admin` makes it the admin and closes it.",
+        "Its own account, not fields of `RaiseConfig`: the separate program's devnet config already held its 140 bytes."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "docs": [
+              "The admin proposed: an account the system program owns, never yet the admin."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "payer",
+            "docs": [
+              "Paid this account's rent; gets it back when the proposal is accepted."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolEarningsSwept",
+      "docs": [
+        "The pool's own payouts moved into the pool; `pool_usdc` is the counter after."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "pool_usdc",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "docs": [
+        "A holding in a raise (PDA: [POSITION_SEED, raise, owner]). The pool's",
+        "position is owned by the raise PDA itself."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "paid",
+            "type": "u64"
+          },
+          {
+            "name": "debt",
+            "docs": [
+              "Where `units` accrue from: `accrual::entitled_ceil` when the holding",
+              "changes (`set_units`), then advanced to `accrual::entitled` by every",
+              "settlement that finds something owed (`accrual::settle`)."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "pending",
+            "type": "u64"
+          },
+          {
+            "name": "claimed",
+            "type": "u64"
+          },
+          {
+            "name": "rent_payer",
+            "docs": [
+              "Gets the rent back when the position closes."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "from_pool",
+            "docs": [
+              "Units of `units` bought from the exit pool and not sold back since (N+3's audit, Rick",
+              "2026-11-04): a sale sells them first, at the curve's price alone, and only the rest, bought in",
+              "the raise, at the seller's floor (`pool_math::sell_position`). Taken from `reserved`, 32 then."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                24
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "QuotasBought",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "cost",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Raise",
+      "docs": [
+        "One raise (PDA: [RAISE_SEED, creator, raise_id u64 LE])."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "raise_id",
+            "type": "u64"
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "RaiseState"
+              }
+            }
+          },
+          {
+            "name": "share_bps",
+            "type": "u16"
+          },
+          {
+            "name": "term_months",
+            "type": "u16"
+          },
+          {
+            "name": "deadline",
+            "type": "i64"
+          },
+          {
+            "name": "tier_count",
+            "type": "u8"
+          },
+          {
+            "name": "tiers",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "Tier"
+                  }
+                },
+                3
+              ]
+            }
+          },
+          {
+            "name": "max_units",
+            "docs": [
+              "Quota units at a full raise."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "min_creator_part",
+            "type": "u64"
+          },
+          {
+            "name": "fan_max",
+            "docs": [
+              "What fans pay at a full raise (the 110)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "sold_units",
+            "type": "u64"
+          },
+          {
+            "name": "fan_paid",
+            "type": "u64"
+          },
+          {
+            "name": "refunded",
+            "type": "u64"
+          },
+          {
+            "name": "creator_part",
+            "type": "u64"
+          },
+          {
+            "name": "units_outstanding",
+            "docs": [
+              "Units that receive payouts: every sold unit (the pool's included) while",
+              "active; the fans' only, once the close cancels the pool's."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "credited_total",
+            "docs": [
+              "Everything monthly payments and the guarantee credited to the fans'",
+              "accumulator; the close measures the rounding remainder against it."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "acc_per_unit",
+            "docs": [
+              "USDC owed per quota unit since the start, scaled by `accrual::ACC_SCALE`."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "first_month",
+            "type": "u32"
+          },
+          {
+            "name": "term_end_month",
+            "type": "u32"
+          },
+          {
+            "name": "last_declared_month",
+            "type": "u32"
+          },
+          {
+            "name": "last_finalized_month",
+            "type": "u32"
+          },
+          {
+            "name": "oldest_open_month",
+            "docs": [
+              "Oldest declared month not fully paid or explicitly written off; `last_declared_month + 1` when none."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "guarantee_usdc",
+            "docs": [
+              "The guarantee's USDC as every rule sees it: a counter, not the vault",
+              "balance, so USDC sent straight to the vault changes no rule (ruling P3)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "guarantee_owed",
+            "docs": [
+              "Drawn from the guarantee and not yet rebuilt by the creator."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "on_time_streak",
+            "type": "u8"
+          },
+          {
+            "name": "guarantee_released",
+            "type": "bool"
+          },
+          {
+            "name": "pool_usdc",
+            "docs": [
+              "The pool's USDC as the price sees it: a counter, not the vault balance."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "pool_units",
+            "docs": [
+              "Quota units the pool holds (its own `Position`, owned by this PDA)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "virtual_units",
+            "docs": [
+              "The virtual quota reserve that sets the starting price; never changes."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "finalized_at",
+            "type": "i64"
+          },
+          {
+            "name": "closed_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "escrow_bump",
+            "type": "u8"
+          },
+          {
+            "name": "guarantee_bump",
+            "type": "u8"
+          },
+          {
+            "name": "pool_bump",
+            "type": "u8"
+          },
+          {
+            "name": "payouts_bump",
+            "type": "u8"
+          },
+          {
+            "name": "rent_payer",
+            "docs": [
+              "The wallet that paid `create_raise`'s rent, where every account's rent of",
+              "this raise goes back. `Pubkey::default()` on a raise written before",
+              "2026-10-21: its rent stays where it is (`tracks_rent`)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "open_positions",
+            "docs": [
+              "`Position` accounts of this raise that exist, the pool's own included."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "live_months",
+            "docs": [
+              "`Month` accounts of this raise that exist."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "written_off_months",
+            "docs": [
+              "Room to grow without a layout break.",
+              "Term-month bitmap of explicit write-offs, including zero-due pointer advances (M-01)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                82
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RaiseAccountsClosed",
+      "docs": [
+        "The `Raise` and its four vaults closed. `leftover_usdc` was in the vaults (rounding dust, USDC sent",
+        "to one straight) and went to the fee wallet; `lamports` is every account's rent, back to the",
+        "raise's rent payer."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "leftover_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RaiseCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RaiseClosed",
+      "docs": [
+        "`distributed` went to the quotas fans still hold (the pool's USDC and the",
+        "rounding remainder); `to_creator` is the same money when the pool held",
+        "every quota."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "distributed",
+            "type": "u64"
+          },
+          {
+            "name": "to_creator",
+            "type": "u64"
+          },
+          {
+            "name": "guarantee_returned",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RaiseConfig",
+      "docs": [
+        "Singleton config (PDA: [RAISE_CONFIG_SEED])."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "docs": [
+              "May update the config and pause. A multisig before mainnet (spec §6.1). Named by the program's",
+              "upgrade authority at `initialize_config`, then moved only in two steps (`PendingAdmin`)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "attester",
+            "docs": [
+              "Fanex's server key: co-signs launches, purchases, pool trades and declarations."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_wallet",
+            "docs": [
+              "Owner of the USDC account that receives Fanex's fees."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "usdc_mint",
+            "docs": [
+              "The USDC mint. Not updatable: every vault is bound to it."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "launch_fee",
+            "docs": [
+              "Paid by the creator at launch, USDC base units (USD 5 at launch)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "pool_fee_bps",
+            "docs": [
+              "Fee on every pool trade, kept in the pool for the fans (amended spec D16):",
+              "one value for every raise, read at trade time, at most POOL_FEE_MAX_BPS."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "paused",
+            "docs": [
+              "Stops create, buy, declare, the attester's re-declaration and the two",
+              "pool trades. Never stops a refund, a payment, a settlement, a claim, a",
+              "sweep, a close or the admin's own corrections. Written by the admin",
+              "(`set_raise_paused`), and set to `true` by `UsdcConfig.pauser` too",
+              "(`usdc_pause_raise`, 2026-11-05), which never unpauses."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Room to grow without a layout break (N+3, Rick 2026-11-04): the config is born under",
+              "pepper_curve at its own seed, so the room costs nothing to add now and an upgrade later."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RaiseCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "raise_id",
+            "type": "u64"
+          },
+          {
+            "name": "fan_max",
+            "type": "u64"
+          },
+          {
+            "name": "creator_max",
+            "type": "u64"
+          },
+          {
+            "name": "deadline",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RaiseFinalized",
+      "docs": [
+        "On success `pool_usdc` and `virtual_units` open the exit pool; both are zero",
+        "when the raise turns to refunding."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "succeeded",
+            "type": "bool"
+          },
+          {
+            "name": "fan_paid",
+            "type": "u64"
+          },
+          {
+            "name": "creator_part",
+            "type": "u64"
+          },
+          {
+            "name": "pool_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_units",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RaiseParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise_id",
+            "type": "u64"
+          },
+          {
+            "name": "tier_count",
+            "type": "u8"
+          },
+          {
+            "name": "tiers",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "TierInput"
+                  }
+                },
+                3
+              ]
+            }
+          },
+          {
+            "name": "min_creator_part",
+            "type": "u64"
+          },
+          {
+            "name": "share_bps",
+            "type": "u16"
+          },
+          {
+            "name": "term_months",
+            "type": "u16"
+          },
+          {
+            "name": "deadline",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RaiseState",
+      "docs": [
+        "Lifecycle (spec §4.5)."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Raising"
+          },
+          {
+            "name": "Refunding"
+          },
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Closed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Refunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "SetUsdcRaydiumParams",
       "docs": [
         "The Raydium addresses to write, each `None` to keep the one the config holds: the first call",
@@ -7257,6 +12131,89 @@
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SoldToPool",
+      "docs": [
+        "`pool_usdc` and `pool_units` are the pool after the trade: with",
+        "`Raise.virtual_units` they give the new price."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "raise",
+            "type": "pubkey"
+          },
+          {
+            "name": "seller",
+            "type": "pubkey"
+          },
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "gross",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "net",
+            "type": "u64"
+          },
+          {
+            "name": "pool_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "pool_units",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tier",
+      "docs": [
+        "One price tier: `units` offered at `price` per whole quota, `sold` so far."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "sold",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TierInput",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "type": "u64"
           }
         ]
       }
@@ -7430,8 +12387,8 @@
             "name": "pauser",
             "docs": [
               "The USDC pause's one key: may only pause, the USDC side and, through",
-              "`usdc_pause_sol` and `usdc_pause_sol_curve`, the SOL side; a hot key,",
-              "so a pause stays fast."
+              "`usdc_pause_sol` and `usdc_pause_sol_curve`, the SOL side, and through",
+              "`usdc_pause_raise` the raise; a hot key, so a pause stays fast."
             ],
             "type": "pubkey"
           },
@@ -7503,14 +12460,24 @@
             "type": "pubkey"
           },
           {
+            "name": "claim_approver",
+            "docs": [
+              "Approves a creator's own claim of a fan-led USDC market (`claim_fan_led_usdc`, Rick,",
+              "2026-11-05): a server key, set by the admin (`set_claim_approver`); all-zero, nobody, which is",
+              "what every config written before N+3 reads here (these 32 bytes were reserved zeros)."
+            ],
+            "type": "pubkey"
+          },
+          {
             "name": "reserved",
             "docs": [
-              "128 until `launcher` took 32 of them (2026-10-22)."
+              "128 until `launcher` took 32 of them (2026-10-22), 96 until `claim_approver` took 32 more",
+              "(2026-11-05)."
             ],
             "type": {
               "array": [
                 "u8",
-                96
+                64
               ]
             }
           }

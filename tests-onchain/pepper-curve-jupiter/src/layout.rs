@@ -64,10 +64,12 @@ pub mod curve_usdc {
     pub const CREATED_AT: usize = 202;
     pub const GRADUATED_AT: usize = 210;
     pub const MIGRATED_AT: usize = 218;
-    pub const RESERVED: usize = 226;
+    /// N+3's mark of a creator's own claim (2026-11-09): no quote or swap reads it.
+    pub const CLAIMED_AT: usize = 226;
+    pub const RESERVED: usize = 234;
 
     /// Every field by its IDL name, in the order the program declares them.
-    pub const FIELDS: [(&str, usize); 26] = [
+    pub const FIELDS: [(&str, usize); 27] = [
         ("version", VERSION),
         ("bump", BUMP),
         ("usdc_vault_bump", USDC_VAULT_BUMP),
@@ -93,6 +95,7 @@ pub mod curve_usdc {
         ("created_at", CREATED_AT),
         ("graduated_at", GRADUATED_AT),
         ("migrated_at", MIGRATED_AT),
+        ("claimed_at", CLAIMED_AT),
         ("reserved", RESERVED),
     ];
 }
@@ -117,10 +120,13 @@ pub mod usdc_config {
     pub const RAYDIUM_LOCK_PROGRAM: usize = 299;
     pub const RAYDIUM_LOCK_AUTHORITY: usize = 331;
     pub const LAUNCHER: usize = 363;
-    pub const RESERVED: usize = 395;
+    /// N+3's key that co-signs a creator's claim of a fan-led market (2026-11-05): no quote or
+    /// swap reads it.
+    pub const CLAIM_APPROVER: usize = 395;
+    pub const RESERVED: usize = 427;
 
     /// Every field by its IDL name, in the order the program declares them.
-    pub const FIELDS: [(&str, usize); 16] = [
+    pub const FIELDS: [(&str, usize); 17] = [
         ("version", VERSION),
         ("bump", BUMP),
         ("paused", PAUSED),
@@ -136,6 +142,7 @@ pub mod usdc_config {
         ("raydium_lock_program", RAYDIUM_LOCK_PROGRAM),
         ("raydium_lock_authority", RAYDIUM_LOCK_AUTHORITY),
         ("launcher", LAUNCHER),
+        ("claim_approver", CLAIM_APPROVER),
         ("reserved", RESERVED),
     ];
 }
@@ -338,7 +345,7 @@ impl CurveUsdc {
         })
     }
 
-    /// The account data the program would hold for these fields, its 128 reserved bytes zero: for
+    /// The account data the program would hold for these fields, its claim mark and its 120 reserved bytes zero: for
     /// fixtures and tests (the parity suite writes its curves with it).
     pub fn to_account_data(&self) -> Vec<u8> {
         use curve_usdc::*;
@@ -437,8 +444,8 @@ impl UsdcConfig {
         })
     }
 
-    /// The account data the program would hold for these fields, its 96 reserved bytes zero: for
-    /// fixtures and tests.
+    /// The account data the program would hold for these fields, its claim approver and its 64
+    /// reserved bytes zero: for fixtures and tests.
     pub fn to_account_data(&self) -> Vec<u8> {
         use usdc_config::*;
         let mut data = vec![0u8; LEN];
@@ -613,7 +620,8 @@ pub(crate) mod tests {
         assert_eq!(&data[202..210], &(-0x2222_2222_2222_2201i64).to_le_bytes());
         assert_eq!(&data[210..218], &0x2222_2222_2222_2202i64.to_le_bytes());
         assert_eq!(&data[218..226], &0x2222_2222_2222_2203i64.to_le_bytes());
-        assert_eq!(&data[226..], &[0u8; 128]);
+        assert_eq!(&data[226..234], &[0u8; 8], "the claim mark, which no quote reads");
+        assert_eq!(&data[234..], &[0u8; 120]);
         assert_eq!(CurveUsdc::decode(&data), Ok(curve));
     }
 
@@ -631,7 +639,8 @@ pub(crate) mod tests {
                 "key at {offset}"
             );
         }
-        assert_eq!(&data[395..], &[0u8; 96]);
+        assert_eq!(&data[395..427], &[0u8; 32], "the claim approver, which no quote reads");
+        assert_eq!(&data[427..], &[0u8; 64]);
         assert_eq!(UsdcConfig::decode(&data), Ok(config));
     }
 

@@ -28,6 +28,10 @@ pub mod graduate_usdc_pool;
 pub mod graduate_usdc_lock;
 // A creator raise closed by the admin (the internal audit, 2026-10-29).
 pub mod close_creator_raise_usdc;
+// A creator's own claim of a fan-led market, co-signed by the approver key (N+3, 2026-11-05).
+pub mod claim_fan_led_usdc;
+// The vault's undo of a self-claim while nothing has vested (N+3, 2026-11-09).
+pub mod revoke_fan_led_usdc;
 
 pub use buy_exact_in::*;
 pub use claim_vesting_usdc::*;
@@ -40,3 +44,5 @@ pub use set_usdc_raydium::*;
 pub use graduate_usdc_pool::*;
 pub use graduate_usdc_lock::*;
 pub use close_creator_raise_usdc::*;
+pub use claim_fan_led_usdc::*;
+pub use revoke_fan_led_usdc::*;

@@ -1043,7 +1043,8 @@ impl Env {
             raydium_lock_program: Pubkey::default(),
             raydium_lock_authority: Pubkey::default(),
             launcher: admin,
-            reserved: [0; 96],
+            claim_approver: Pubkey::default(),
+            reserved: [0; 64],
         }
     }
 
@@ -1144,7 +1145,8 @@ impl Env {
             created_at: state.created_at,
             graduated_at: 0,
             migrated_at: 0,
-            reserved: [0; 128],
+            claimed_at: 0,
+            reserved: [0; 120],
         }
     }
 

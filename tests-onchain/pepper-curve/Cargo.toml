@@ -31,3 +31,10 @@ pepper_curve_math = { path = "../../programs/pepper_curve_math" }
 # LiteSVM's secp256r1 precompile links OpenSSL. Building it from source keeps
 # the suite free of system packages (libssl-dev, pkg-config) on any machine.
 openssl = { version = "0.10", features = ["vendored"] }
+# The migration's programs held to a deployment's checks (migration_programs.rs): the loader
+# environment LiteSVM 0.6.1 builds, from the same crates, with the stricter rules a deploy
+# applies, since LiteSVM's own loader compiles with `reject_broken_elfs` off and would load a
+# binary whose syscall it lacks. All three were in the lock already.
+solana-bpf-loader-program = "2.2"
+solana-program-runtime = "2.2"
+solana-compute-budget = "2.2"

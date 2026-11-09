@@ -1391,8 +1391,8 @@ dependencies = [
 
 [[package]]
 name = "jupiter-amm-interface"
-version = "0.6.1"
-source = "git+https://github.com/jup-ag/jupiter-amm-interface.git?rev=95bd18485e580625a39eb92a0c0ad2061579daad#95bd18485e580625a39eb92a0c0ad2061579daad"
+version = "0.7.0"
+source = "git+https://github.com/jup-ag/jupiter-amm-interface.git?rev=70f56e0495b7c818e4c38e37b2007656892ca2a1#70f56e0495b7c818e4c38e37b2007656892ca2a1"
 dependencies = [
  "ahash 0.8.12",
  "rust_decimal",
@@ -1409,7 +1409,7 @@ dependencies = [
 [[package]]
 name = "jupiter-amm-test-kit"
 version = "0.1.0"
-source = "git+https://github.com/jup-ag/jupiter-amm-interface.git?rev=95bd18485e580625a39eb92a0c0ad2061579daad#95bd18485e580625a39eb92a0c0ad2061579daad"
+source = "git+https://github.com/jup-ag/jupiter-amm-interface.git?rev=70f56e0495b7c818e4c38e37b2007656892ca2a1#70f56e0495b7c818e4c38e37b2007656892ca2a1"
 dependencies = [
  "base64",
  "bincode",

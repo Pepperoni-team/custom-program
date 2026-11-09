@@ -7,7 +7,7 @@ use anchor_spl::token::{self, TransferChecked};
 
 /// Moves `amount` base units of `mint`, a mint of `decimals`, from `from` to `to`; a zero amount
 /// moves nothing and calls nothing. `signer_seeds` is empty when `authority` signs the transaction
-/// itself, and names the PDA otherwise (the curve, for its vaults). A copy of `pepper_raise`'s
+/// itself, and names the PDA otherwise (the curve, for its vaults). A copy of the raise's
 /// `usdc_transfer` with the decimals a parameter, since the USDC side moves the curve's own token
 /// too (the vesting, the swaps' token leg).
 #[allow(clippy::too_many_arguments)]

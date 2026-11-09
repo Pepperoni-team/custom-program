@@ -2219,6 +2219,9 @@ dependencies = [
  "pepper_curve",
  "pepper_curve_math",
  "serde_json",
+ "solana-bpf-loader-program",
+ "solana-compute-budget",
+ "solana-program-runtime",
  "solana-sdk",
 ]
 

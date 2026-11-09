@@ -302,7 +302,9 @@ pub fn handler(ctx: Context<CreateCurveUsdc>, params: CreateCurveUsdcParams) -> 
     curve.created_at = now;
     curve.graduated_at = 0;
     curve.migrated_at = 0;
-    curve.reserved = [0; 128];
+    // Born claimed by its launcher, or the placeholder's: never a self-claim to undo.
+    curve.claimed_at = 0;
+    curve.reserved = [0; 120];
 
     // The vesting as today: the creator its beneficiary, counting from the launch.
     let vesting = &mut ctx.accounts.vesting;

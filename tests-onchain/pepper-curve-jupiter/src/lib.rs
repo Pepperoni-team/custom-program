@@ -1,6 +1,6 @@
 //! # pepper-curve-jupiter
 //!
-//! Jupiter's `Amm` interface (`jupiter-amm-interface` at `95bd184`) for Pepper's USDC bonding curve,
+//! Jupiter's `Amm` interface (`jupiter-amm-interface` 0.7.0) for Pepper's USDC bonding curve,
 //! `pepper_curve`'s `CurveUsdc` (USDC curve design §7, §10.5; docs/solana/PEPPER-CURVE-PROGRAM.md §14).
 //!
 //! - **The market** is one curve: `key` its PDA `["curve", mint]`, label «Pepper», its reserve mints
@@ -272,7 +272,7 @@ mod tests {
     use crate::layout::tests::key;
     use crate::layout::{curve_usdc, find_curve_address, find_usdc_vault_address, usdc_config};
     use crate::quote::tests::{curve_from_state, open_config, vector_cases};
-    use jupiter_amm_interface::FeeMode;
+    use jupiter_amm_interface::FlowType;
     use solana_account::Account;
     use solana_clock::Clock;
     use std::collections::HashMap;
@@ -344,7 +344,7 @@ mod tests {
             params: None,
         };
         let mut amm = PepperCurveAmm::from_keyed_account(&keyed, &clock_at(now)).unwrap();
-        amm.update(&provider(curve, config)).unwrap();
+        amm.update(provider(curve, config)).unwrap();
         amm
     }
 
@@ -354,7 +354,7 @@ mod tests {
             input_mint: input,
             output_mint: output,
             swap_mode: SwapMode::ExactIn,
-            fee_mode: FeeMode::Normal,
+            flow_type: FlowType::Binary,
         }
     }
 
@@ -418,6 +418,50 @@ mod tests {
             sale.fee_pct,
             Decimal::from(expected.platform_fee) / Decimal::from(expected.reserve_out)
         );
+    }
+
+    /// Jupiter quotes a market under each flow its router serves (`QuoteParams.flow_type`, the
+    /// interface's 0.7.0: its frontend, Ultra, a manual swap, whitelisted integrators, the paid and
+    /// the free API). The curve charges one fee whatever the flow, so every flow the interface
+    /// defines is quoted, a buy and a sale, exactly as the default one.
+    #[test]
+    fn every_flow_type_gets_the_default_flow_s_quote() {
+        let (curve, config) = market();
+        let curve = CurveUsdc {
+            real_usdc_reserves: 50_000_000,
+            ..curve
+        };
+        let amm = amm(&curve, &config, curve.created_at + 600);
+        let flows: Vec<FlowType> = (0..=u8::MAX)
+            .filter_map(|byte| FlowType::try_from(byte).ok())
+            .collect();
+        // A flow added by a later interface shows here, to be read before the pin moves to it.
+        assert_eq!(flows.len(), 6, "the flows of 0.7.0: {flows:?}");
+        assert_eq!(FlowType::default(), FlowType::Binary);
+        let fields = |q: Quote| {
+            (
+                q.in_amount,
+                q.out_amount,
+                q.fee_amount,
+                q.fee_mint,
+                q.fee_pct,
+            )
+        };
+        for (input, output, amount) in [
+            (USDC, curve.mint, 100_000_000),
+            (curve.mint, USDC, 1_000_000_000_000),
+        ] {
+            let default = fields(amm.quote(&params(amount, input, output)).unwrap());
+            for flow_type in &flows {
+                let quoted = amm
+                    .quote(&QuoteParams {
+                        flow_type: *flow_type,
+                        ..params(amount, input, output)
+                    })
+                    .unwrap_or_else(|e| panic!("{flow_type:?}: {e}"));
+                assert_eq!(fields(quoted), default, "{flow_type:?}");
+            }
+        }
     }
 
     #[test]
@@ -485,17 +529,17 @@ mod tests {
             paused: true,
             ..config
         };
-        amm.update(&provider(&curve, &paused)).unwrap();
+        amm.update(provider(&curve, &paused)).unwrap();
         assert!(!amm.is_active());
         assert!(amm.quote(&params(1_000_000, USDC, curve.mint)).is_err());
         let graduating = CurveUsdc { phase: 1, ..curve };
-        amm.update(&provider(&graduating, &config)).unwrap();
+        amm.update(provider(&graduating, &config)).unwrap();
         assert!(!amm.is_active());
         let moved = CurveUsdc {
             real_usdc_reserves: 7,
             ..curve
         };
-        amm.update(&provider(&moved, &config)).unwrap();
+        amm.update(provider(&moved, &config)).unwrap();
         assert!(amm.is_active());
         assert_eq!(amm.curve().real_usdc_reserves, 7);
         // A config another program owns is refused, and the last good one kept.

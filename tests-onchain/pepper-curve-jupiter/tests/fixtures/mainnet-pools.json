@@ -1,0 +1,33 @@
+{
+  "note": "Four of mainnet's live USDC curves, chosen by state on 2026-11-02 (two revenue curves inside their raise, two equity curves), which tests/mainnet_pools.rs snapshots into tests/fixtures/accounts/<curve>/. Mainnet holds no curve near graduation or past its creator's cap: those two states are devnet's (devnet-pools.json). New snapshots: delete a pool's folder, then the suite with RPC= on mainnet.",
+  "cluster": "mainnet",
+  "program": "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ",
+  "usdc_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "chosen_on": "2026-11-02",
+  "pools": [
+    {
+      "state": "revenue-inside-raise",
+      "symbol": "CICCO1",
+      "mint": "AwdWAFV9jqdmtEuMCCnuo8C9FmP3mBph5HYriMsERYdo",
+      "curve": "2gUkKjerLdwEhHoJaNw13cXWCsvYdN24ZHvQLJQGhfC4"
+    },
+    {
+      "state": "revenue-inside-raise-early",
+      "symbol": "MON3Y1",
+      "mint": "Gi6i7uwCnG2YYPEKjfx5TygodYnpNkvZtcWZXfXK1a2u",
+      "curve": "7RnfCdf88wVnMZwiC3fmQbZAPVXAyQaZyQ29z5aQUKZE"
+    },
+    {
+      "state": "equity",
+      "symbol": "MARCO",
+      "mint": "3JjFUZDAwgosFhrhq1sh2PUcMiBpe3MeQz5GFvKHtTMK",
+      "curve": "2kXyoLsHpizSHsbYiC2ZWSM5YJvTX9aiGBrQqo8Cqb6g"
+    },
+    {
+      "state": "equity-large-threshold",
+      "symbol": "PEWDIEPIE",
+      "mint": "DhXrea2C8ByoRnbNiVhXoXxUEFvAzwivTK7RdYJBeVEx",
+      "curve": "7JRfBNTGaXfy3Pf9vPJtHgFqf4GNsJ8gPkWNUSXyfa7c"
+    }
+  ]
+}

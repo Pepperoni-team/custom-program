@@ -49,8 +49,9 @@ fn launch(rng: &mut Rng) -> CurveState {
         let bps = |cap: u64| ((cap as f64) * 10_000.0 / total).round() as u64;
         (threshold, creator_cap, fanex_cap, bps(creator_cap), bps(fanex_cap))
     } else {
-        let bands = [6_900 * USDC, 13_000 * USDC, 25_000 * USDC, 42_000 * USDC];
-        (bands[(rng.next() % 4) as usize], 0, 0, 0, 0)
+        // The six bands of 2026-11-05 (`EQUITY_THRESHOLD_BANDS_USDC`, the launch rework's spec §4).
+        let bands = [5_000 * USDC, 6_900 * USDC, 13_000 * USDC, 25_000 * USDC, 42_069 * USDC, 69_420 * USDC];
+        (bands[(rng.next() % bands.len() as u64) as usize], 0, 0, 0, 0)
     };
     CurveState {
         virtual_reserve: (threshold as f64 * 0.2234).round() as u64,

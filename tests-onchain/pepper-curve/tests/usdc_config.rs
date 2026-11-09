@@ -257,11 +257,12 @@ fn the_upgrade_authority_initializes_the_config_naming_its_admin_with_each_key_i
     assert_eq!(c.fee_usdc_account, fee);
     assert_eq!(c.lp_fee_owner, params.lp_fee_owner);
     assert_eq!(c.launcher, params.launcher);
-    // The five Raydium fields stay all-zero until `set_usdc_raydium`, and so does `reserved`.
-    for field in [c.raydium_cpmm_program, c.raydium_amm_config, c.raydium_create_pool_fee, c.raydium_lock_program, c.raydium_lock_authority] {
+    // The five Raydium fields stay all-zero until `set_usdc_raydium`, the claim approver until
+    // `set_claim_approver` (N+3), and `reserved` for good.
+    for field in [c.raydium_cpmm_program, c.raydium_amm_config, c.raydium_create_pool_fee, c.raydium_lock_program, c.raydium_lock_authority, c.claim_approver] {
         assert_eq!(field, Pubkey::default());
     }
-    assert_eq!(c.reserved, [0u8; 96]);
+    assert_eq!(c.reserved, [0u8; 64]);
 
     let event: UsdcConfigUpdated = event(&logs);
     assert_keys(&event, &keys_of(&c));

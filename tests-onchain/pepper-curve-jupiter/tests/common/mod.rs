@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use jupiter_amm_interface::{
-    Amm, AmmContext, ClockRef, FeeMode, KeyedAccount, QuoteParams, SwapAndAccountMetas, SwapMode,
+    Amm, AmmContext, ClockRef, FlowType, KeyedAccount, QuoteParams, SwapAndAccountMetas, SwapMode,
     SwapParams,
 };
 use jupiter_amm_test_kit::{PoolSnapshot, PoolTest};
@@ -446,7 +446,8 @@ pub fn assert_swaps_move_their_quote(test: &PoolTest) -> Vec<jupiter_amm_interfa
                 input_mint: swap.input_mint,
                 output_mint: swap.output_mint,
                 swap_mode: SwapMode::ExactIn,
-                fee_mode: FeeMode::Normal,
+                // The kit's own default flow (assert_pool_parity quotes with it too).
+                flow_type: FlowType::default(),
             })
             .expect("quote");
         let SwapAndAccountMetas {

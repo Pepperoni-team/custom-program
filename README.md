@@ -6,7 +6,7 @@ dividends paid in USDC.
 
 | Program | Program ID | What it does |
 |---|---|---|
-| [`pepper_curve`](programs/pepper_curve) | `CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ` | The bonding curve: launch, buy and sell exact-in, every fee taken inside the trade, creator vesting, graduation to a Raydium CPMM pool with its LP locked, and the one-time migration of the live SOL curves to USDC |
+| [`pepper_curve`](programs/pepper_curve) | `CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ` | The bonding curve: launch, buy and sell exact-in, every fee taken inside the trade, creator vesting, graduation to a Raydium CPMM pool with its LP locked. A market a fan opened goes to its creator by the creator's own claim, co-signed by the platform, which the multisig can undo while nothing has vested. Since N+3 it also holds the video revenue raise (`programs/pepper_curve/src/raise/`): a raise in USDC, then the monthly revenue its holders receive, with a guarantee and an exit pool |
 | [`pepper_dividends`](programs/pepper_dividends) | `GdWxRsHF5wneNgLQmdoKS9Zcu6enMVzoVTe9EFaxJxcU` | Monthly holder dividends in USDC: each month's USDC sits in its own vault against a Merkle root, and each holder claims their own amount |
 | [`pepper_curve_math`](programs/pepper_curve_math) | (a library) | The curve's integer math, shared by the program and the Jupiter SDK, with test vectors |
 
@@ -21,7 +21,7 @@ are part of the deployed account layout and of the IDL every client decodes with
 
 | Program | Build | Executable hash (`solana-verify`) |
 |---|---|---|
-| `pepper_curve` | the verifiable build of this repository's `programs/pepper_curve` | `7d0b4fdee2c0f0f2b23c0c7783c69606e863ea34bab6341061a50487f10b679a` |
+| `pepper_curve` | N+3 since 2026-11-09: the verifiable build of this repository's `programs/pepper_curve` | `699109070811c9aff4c51bba212d70d90410974eb6bc32f709436387f8511564` |
 | `pepper_dividends` | the verifiable build of `programs/pepper_dividends` | `200a978c9f28a272a75f109856421217485c5b110a303d4cd4ad5f76ce702e08` |
 
 Both programs are upgradeable, and their upgrade authority is the vault of a

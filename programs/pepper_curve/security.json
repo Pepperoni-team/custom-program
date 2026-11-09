@@ -1,6 +1,6 @@
 {
   "name": "Pepper",
-  "logo": "https://raw.githubusercontent.com/Pepperoni-team/custom-program/main/assets/pepper-logo.png",
+  "logo": "https://pepper.fan/brand/icon-512-red.png",
   "description": "The bonding curve behind Pepper token launches (pepper.fan): a token trades on its curve until it graduates to a Raydium CPMM pool, every fee is taken inside the trade, and holder dividends are paid from an on-chain Merkle distributor.",
   "project_url": "https://pepper.fan",
   "contacts": ["link:https://github.com/Pepperoni-team/custom-program/security/advisories/new"],

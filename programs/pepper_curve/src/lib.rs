@@ -38,6 +38,9 @@
 //!     side, signed by `UsdcConfig.pauser` alone, outside the Squad's time lock:
 //!     pause only, unpausing stays `set_paused` / `set_curve_paused`,
 //!     `GlobalConfig.admin`'s
+//!   - `usdc_pause_raise` — the same pause of the raise (2026-11-05):
+//!     `RaiseConfig.paused = true`, unpausing stays `set_raise_paused`,
+//!     `RaiseConfig.admin`'s
 //!   - `claim_vesting_usdc` — the creator vesting of a `CurveUsdc`, by
 //!     `transfer_checked`, into a token account that must already exist
 //!   - `sync_curve_creator_usdc` — `sync_curve_creator` on a `CurveUsdc`,
@@ -64,6 +67,21 @@
 //!   - `set_distributor_v2_funder` — `set_distributor_funder` for a v2 month
 //!   - `close_expired_distributor` / `close_expired_distributor_v2` — an expired
 //!     month closed to its recorded funder by anyone
+//!
+//! The revenue raise (upgrade N+3; docs/solana/PEPPER-RAISE-PROGRAM.md), the separate
+//! `pepper_raise` program moved in whole before it reached mainnet: a fixed-price USDC raise for
+//! a video's revenue asset, its monthly payouts, its guarantee and its exit pool. Its accounts,
+//! seeds, events and rules live in `raise/`, its refusals in `FanexError` from 7000; it reads
+//! and writes no account of the curves, nor they its own. The four names the curves already held
+//! take a raise name: `initialize_raise_config`, `update_raise_config`, `set_raise_paused`,
+//! `buy_quotas`; its config's seed is `raise_config`. The other 22 keep the names they had:
+//!   - `propose_admin` / `accept_admin` — the raise admin's hand-over, in two steps
+//!   - `create_raise` / `cancel_raise` / `finalize` / `refund` — the launch and the raising
+//!   - `declare_month` / `redeclare_month` / `fund_month` / `fund_direct` / `settle_month` /
+//!     `write_off_month` — the monthly cycle
+//!   - `replenish_guarantee` / `release_guarantee` / `claim` — the guarantee and the payouts
+//!   - `sell_to_pool` / `buy_from_pool` / `sweep_pool_earnings` — the exit pool
+//!   - `close_raise` / `close_position` / `close_month` / `close_raise_accounts` — the end
 
 use anchor_lang::prelude::*;
 
@@ -77,8 +95,13 @@ pub mod raydium;
 pub mod state;
 pub mod transfer;
 pub mod validation;
+// The revenue raise (upgrade N+3), appended after N's modules: its own state, seeds, rules and
+// handlers (docs/solana/PEPPER-RAISE-PROGRAM.md).
+pub mod raise;
 
 use instructions::*;
+use raise::instructions::*;
+pub use raise::{RaiseParams, TierInput};
 
 declare_id!("CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ");
 
@@ -307,6 +330,13 @@ pub mod pepper_curve {
         instructions::usdc::usdc_pause::usdc_pause_sol_curve(ctx)
     }
 
+    /// The USDC pause of the raise (the product owner, 2026-11-05), `RaiseConfig.paused = true`,
+    /// signed by `UsdcConfig.pauser` alone. Takes no value, so it cannot unpause: that stays
+    /// `set_raise_paused(false)`, `RaiseConfig.admin`'s.
+    pub fn usdc_pause_raise(ctx: Context<UsdcPauseRaise>) -> Result<()> {
+        instructions::usdc::usdc_pause::usdc_pause_raise(ctx)
+    }
+
     // ── The USDC curve: the vesting claim and the fan-led sync (§10.3.7, §10.3.8) ──
     /// `claim_vesting` on a `CurveUsdc`: the same schedule and the same lock,
     /// a curve created from 2026-11-01 released once its pool exists
@@ -421,5 +451,158 @@ pub mod pepper_curve {
     /// `close_expired_distributor` for a v2 month.
     pub fn close_expired_distributor_v2(ctx: Context<CloseExpiredDistributorV2>) -> Result<()> {
         instructions::dividends::close_expired_distributor_v2(ctx)
+    }
+
+    // ── The creator's own claim of a fan-led USDC market (N+3, 2026-11-05) ──
+    /// Write `UsdcConfig.claim_approver`, signed by `UsdcConfig.admin`: the key that co-signs a
+    /// creator's claim; all-zero turns the claim off.
+    pub fn set_claim_approver(ctx: Context<SetClaimApprover>, new_approver: Pubkey) -> Result<()> {
+        instructions::usdc::usdc_config::set_claim_approver(ctx, new_approver)
+    }
+
+    /// `set_vesting_beneficiary` and `sync_curve_creator_usdc` in one, signed by the creator, who
+    /// becomes the owner, and co-signed by `UsdcConfig.claim_approver`: from the fan-led
+    /// placeholder only, both or neither.
+    pub fn claim_fan_led_usdc(ctx: Context<ClaimFanLedUsdc>) -> Result<()> {
+        instructions::usdc::claim_fan_led_usdc::handler(ctx)
+    }
+
+    /// Undo a `claim_fan_led_usdc`, signed by `UsdcConfig.admin`: the market back on the fan-led
+    /// placeholder while nothing of its vesting has vested, for its real owner to claim again. It
+    /// names no owner.
+    pub fn revoke_fan_led_usdc(ctx: Context<RevokeFanLedUsdc>) -> Result<()> {
+        instructions::usdc::revoke_fan_led_usdc::handler(ctx)
+    }
+
+    // ── The revenue raise (upgrade N+3; docs/solana/PEPPER-RAISE-PROGRAM.md) ──
+    // The separate `pepper_raise` program's 26 instructions, appended after every other one, their
+    // handlers in `raise/instructions/`. Four take a raise name, the curves holding theirs.
+
+    // Config / admin
+    pub fn initialize_raise_config(
+        ctx: Context<InitializeRaiseConfig>,
+        attester: Pubkey,
+        fee_wallet: Pubkey,
+        usdc_mint: Pubkey,
+        launch_fee: u64,
+        pool_fee_bps: u16,
+    ) -> Result<()> {
+        raise::instructions::admin::initialize_raise_config(ctx, attester, fee_wallet, usdc_mint, launch_fee, pool_fee_bps)
+    }
+
+    pub fn update_raise_config(
+        ctx: Context<UpdateRaiseConfig>,
+        new_admin: Option<Pubkey>,
+        new_attester: Option<Pubkey>,
+        new_fee_wallet: Option<Pubkey>,
+        new_launch_fee: Option<u64>,
+        new_pool_fee_bps: Option<u16>,
+    ) -> Result<()> {
+        raise::instructions::admin::update_raise_config(ctx, new_admin, new_attester, new_fee_wallet, new_launch_fee, new_pool_fee_bps)
+    }
+
+    pub fn set_raise_paused(ctx: Context<UpdateRaiseConfig>, paused: bool) -> Result<()> {
+        raise::instructions::admin::set_raise_paused(ctx, paused)
+    }
+
+    // The raise admin's hand-over, in two steps (internal audit of 2026-10-29)
+    pub fn propose_admin(ctx: Context<ProposeAdmin>) -> Result<()> {
+        raise::instructions::admin::propose_admin(ctx)
+    }
+
+    pub fn accept_admin(ctx: Context<AcceptAdmin>) -> Result<()> {
+        raise::instructions::admin::accept_admin(ctx)
+    }
+
+    // Launch and raising
+    /// `max_launch_fee`: the most the creator agrees to pay, the fee its transaction was built on
+    /// (internal audit of 2026-10-29).
+    pub fn create_raise(ctx: Context<CreateRaise>, params: RaiseParams, max_launch_fee: u64) -> Result<()> {
+        raise::instructions::launch::create_raise(ctx, params, max_launch_fee)
+    }
+
+    pub fn cancel_raise(ctx: Context<CancelRaise>) -> Result<()> {
+        raise::instructions::launch::cancel_raise(ctx)
+    }
+
+    pub fn buy_quotas(ctx: Context<BuyQuotas>, max_cost: u64, min_units: u64) -> Result<()> {
+        raise::instructions::buy::buy_quotas(ctx, max_cost, min_units)
+    }
+
+    pub fn finalize(ctx: Context<Finalize>) -> Result<()> {
+        raise::instructions::finalize::finalize(ctx)
+    }
+
+    pub fn refund(ctx: Context<Refund>) -> Result<()> {
+        raise::instructions::finalize::refund(ctx)
+    }
+
+    // Monthly cycle
+    pub fn declare_month(ctx: Context<DeclareMonth>, month: u32, due: u64, estimated: bool) -> Result<()> {
+        raise::instructions::months::declare_month(ctx, month, due, estimated)
+    }
+
+    /// A declared month's due corrected before its due date (internal audit of 2026-10-29).
+    pub fn redeclare_month(ctx: Context<RedeclareMonth>, due: u64, estimated: bool) -> Result<()> {
+        raise::instructions::months::redeclare_month(ctx, due, estimated)
+    }
+
+    pub fn fund_month(ctx: Context<FundMonth>, amount: u64) -> Result<()> {
+        raise::instructions::months::fund_month(ctx, amount)
+    }
+
+    pub fn fund_direct(ctx: Context<FundDirect>, amount: u64) -> Result<()> {
+        raise::instructions::months::fund_direct(ctx, amount)
+    }
+
+    pub fn settle_month(ctx: Context<SettleMonth>) -> Result<()> {
+        raise::instructions::months::settle_month(ctx)
+    }
+
+    pub fn replenish_guarantee(ctx: Context<ReplenishGuarantee>, amount: u64) -> Result<()> {
+        raise::instructions::guarantee::replenish_guarantee(ctx, amount)
+    }
+
+    pub fn release_guarantee(ctx: Context<ReleaseGuarantee>) -> Result<()> {
+        raise::instructions::guarantee::release_guarantee(ctx)
+    }
+
+    pub fn claim(ctx: Context<Claim>) -> Result<()> {
+        raise::instructions::claim::claim(ctx)
+    }
+
+    // Exit pool
+    pub fn sell_to_pool(ctx: Context<SellToPool>, units: u64, min_out: u64) -> Result<()> {
+        raise::instructions::pool::sell_to_pool(ctx, units, min_out)
+    }
+
+    pub fn buy_from_pool(ctx: Context<BuyFromPool>, units: u64, max_in: u64) -> Result<()> {
+        raise::instructions::pool::buy_from_pool(ctx, units, max_in)
+    }
+
+    pub fn sweep_pool_earnings(ctx: Context<SweepPoolEarnings>) -> Result<()> {
+        raise::instructions::pool::sweep_pool_earnings(ctx)
+    }
+
+    // End
+    pub fn close_raise(ctx: Context<CloseRaise>) -> Result<()> {
+        raise::instructions::close::close_raise(ctx)
+    }
+
+    pub fn close_position(ctx: Context<ClosePosition>) -> Result<()> {
+        raise::instructions::close::close_position(ctx)
+    }
+
+    // The rent of a finished raise (2026-10-21)
+    pub fn close_month(ctx: Context<CloseMonth>) -> Result<()> {
+        raise::instructions::rent::close_month(ctx)
+    }
+
+    pub fn write_off_month(ctx: Context<WriteOffMonth>) -> Result<()> {
+        raise::instructions::months::write_off_month(ctx)
+    }
+
+    pub fn close_raise_accounts(ctx: Context<CloseRaiseAccounts>) -> Result<()> {
+        raise::instructions::rent::close_raise_accounts(ctx)
     }
 }

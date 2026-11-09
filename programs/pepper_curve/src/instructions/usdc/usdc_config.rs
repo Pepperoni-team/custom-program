@@ -11,14 +11,16 @@
 //! fee wallet `GlobalConfig.fanex_fee_wallet` names, not frozen, and closable by this config's PDA
 //! alone (`validation::fee_usdc_account_valid`): every buy and every sale names it, so neither the
 //! admin key nor the fee wallet can stop the swaps through it. Both emit `UsdcConfigUpdated`, the
-//! config's keys as they stand after the write.
+//! config's keys as they stand after the write. `set_claim_approver` (N+3, 2026-11-05), also signed
+//! by `UsdcConfig.admin`, writes the one key `claim_fan_led_usdc` takes as its approver and emits
+//! `ClaimApproverSet`; init leaves it all-zero, so no claim passes until the admin sets one.
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::bpf_loader_upgradeable;
 use anchor_spl::token::{Mint, TokenAccount};
 
 use crate::constants::*;
 use crate::errors::FanexError;
-use crate::events::UsdcConfigUpdated;
+use crate::events::{ClaimApproverSet, UsdcConfigUpdated};
 use crate::instructions::usdc::set_usdc_raydium::program_data_upgrade_authority;
 use crate::state::*;
 use crate::validation::fee_usdc_account_valid;
@@ -151,6 +153,7 @@ pub fn initialize_usdc_config(
     config.raydium_lock_program = Pubkey::default();
     config.raydium_lock_authority = Pubkey::default();
     config.launcher = params.launcher;
+    config.claim_approver = Pubkey::default();
     emit!(keys_of(config));
     Ok(())
 }
@@ -235,6 +238,35 @@ pub fn update_usdc_config(
         config.launcher = launcher;
     }
     emit!(keys_of(config));
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct SetClaimApprover<'info> {
+    /// `UsdcConfig.admin`: the Squad's vault once handed over.
+    pub admin: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [USDC_CONFIG_SEED],
+        bump = usdc_config.bump,
+        has_one = admin @ FanexError::Unauthorized,
+    )]
+    pub usdc_config: Box<Account<'info, UsdcConfig>>,
+}
+
+/// Write the key that co-signs a creator's claim of a fan-led market (`claim_fan_led_usdc`), the
+/// server's: all-zero turns every claim off (`ClaimApproverUnset`), the admin's answer to a key
+/// lost or leaked. Apart from `update_usdc_config`, whose arguments and event every reader of the
+/// config already decodes.
+pub fn set_claim_approver(ctx: Context<SetClaimApprover>, new_approver: Pubkey) -> Result<()> {
+    let config = &mut ctx.accounts.usdc_config;
+    let previous = config.claim_approver;
+    config.claim_approver = new_approver;
+    emit!(ClaimApproverSet {
+        previous,
+        new_approver,
+    });
     Ok(())
 }
 
