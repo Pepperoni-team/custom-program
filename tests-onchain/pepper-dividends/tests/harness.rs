@@ -198,7 +198,8 @@ fn pepper_curves_own_sizes_offsets_and_discriminators_are_the_ones_constants_rs_
         created_at: 17,
         graduated_at: 18,
         migrated_at: 19,
-        reserved: [0; 128],
+        claimed_at: 0,
+        reserved: [0; 120],
     };
     for (data, len, offset) in [
         (account_data(&curve, Curve::INIT_SPACE), CURVE_LEN, CURVE_CREATOR_OFFSET),

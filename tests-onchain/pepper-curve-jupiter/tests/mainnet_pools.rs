@@ -1,7 +1,8 @@
 //! The parity suite on mainnet's live USDC curves (USDC curve design §10.5, §10.12): four curves of the
-//! program deployed on mainnet (N+2), chosen by state on 2026-11-02 and named in
+//! program deployed on mainnet, chosen by state on 2026-11-02 and named in
 //! `tests/fixtures/mainnet-pools.json`. Their accounts were snapshotted by Jupiter's kit through
-//! Helius into `tests/fixtures/accounts/<curve>/` and committed, so the suite runs offline; each swap
+//! Helius into `tests/fixtures/accounts/<curve>/` (again on 2026-11-11, under N+3, each curve still in
+//! the state it was chosen for) and committed, so the suite runs offline; each swap
 //! is asserted by the kit and by this suite's harness, on the program the kit loads
 //! (`tests/fixtures/pepper.so`): run it on mainnet's own bytes, dumped from the chain, to prove the SDK
 //! against what Jupiter would route to (`scripts/ci-onchain-tests.sh` copies this tree's build there,

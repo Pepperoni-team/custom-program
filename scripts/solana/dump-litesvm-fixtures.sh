@@ -7,7 +7,10 @@
 # what changed and moves the pin on purpose. The create-pool fee receiver's balance moves with every
 # Raydium pool created on mainnet, so its JSON, and its pin, change at every re-dump.
 #
-# ⚠️ Third-party code: Metaplex Token Metadata, Raydium's CPMM and Raydium's LP lock (closed source).
+# ⚠️ Third-party code: Metaplex Token Metadata, Raydium's CPMM and Raydium's LP lock (closed source);
+# for the migration (upgrade N+1, PEPPER-CURVE-PROGRAM.md «Migration (upgrade N+1)»), Jupiter v6 and
+# the three pools its route may take, Orca's Whirlpool, Raydium's CLMM and Meteora's DLMM, and the
+# token program mainnet runs (p-token).
 # Committed for the tests only, and kept out of every public mirror of this repository
 # (Pepperoni-team/custom-program, the Jupiter SDK's; Rick, 2026-10-22).
 #
@@ -34,6 +37,14 @@ PROGRAMS=(
   "mpl_token_metadata.so metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
   "raydium_cpmm.so CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
   "raydium_lp_lock.so LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE"
+  # The migration's (upgrade N+1): the router and the three venues of its one-hop route.
+  "jupiter_v6.so JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+  "orca_whirlpool.so whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc"
+  "raydium_clmm.so CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK"
+  "meteora_dlmm.so LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo"
+  # The token program mainnet runs at Tokenkeg's address (p-token, upgradeable-loader owned since
+  # slot 419 472 000), where LiteSVM bundles SPL Token 3.5.0: the migration route's compute units.
+  "p_token.so TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
 )
 ACCOUNTS=(
   "raydium_cpmm_amm_config.json G95xxie3XbkCqtE39GgQ9Ggc7xBC8Uceve7HFDEFApkc"

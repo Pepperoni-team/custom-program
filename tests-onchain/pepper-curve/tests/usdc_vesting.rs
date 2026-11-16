@@ -901,3 +901,183 @@ fn only_the_usdc_admin_undoes_a_claim_never_the_global_admin_or_the_approver() {
     revoke_by(&mut env, &vault, &mint).unwrap();
     assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, fan_led_placeholder());
 }
+
+// ── The internal audit's owed cases (INTERNAL-AUDIT-2026-10-29.md §9, written 2026-11-14) ──
+
+/// A fan-led market's vesting rewritten before its claim, its terms `cliff` and `duration`: the claim
+/// restarts its clock (`hand_over`), so the terms count from the claim.
+fn fan_led_terms(env: &mut Env, mint: Pubkey, cliff: i64, duration: i64) {
+    put_vesting(env, mint, fan_led_placeholder(), LOCK - DAY, cliff, duration);
+}
+
+#[test]
+fn the_undo_refuses_a_claimed_vesting_once_any_of_it_is_released() {
+    let mut env = Env::new();
+    let thief = Keypair::new();
+    let stolen_at = LOCK + 10 * DAY;
+    let (mint, _) = self_claimed(&mut env, &thief, stolen_at);
+    let admin = env.admin.insecure_clone();
+
+    // A real `claim_vesting_usdc` once the one-day cliff has passed: the harness's vesting, released whole.
+    env.set_time(stolen_at + DAY);
+    claim_usdc(&mut env, &mint, &thief).unwrap();
+    assert_eq!(env.token_amount(&ata(&thief.pubkey(), &mint)), TOTAL);
+    expect_err(discarded(revoke_by(&mut env, &admin, &mint)), code(FanexError::ClaimNotRevocable));
+
+    // The released amount refuses it alone: with the clock set back before the cliff, where the
+    // schedule has vested nothing, a vesting paid out is still not undone.
+    env.set_time(stolen_at + DAY - 1);
+    expect_err(discarded(revoke_by(&mut env, &admin, &mint)), code(FanexError::ClaimNotRevocable));
+    assert_eq!(claim_state(&env, &mint), (thief.pubkey(), stolen_at, thief.pubkey()));
+    assert_eq!(released(&env, &mint), TOTAL);
+}
+
+#[test]
+fn on_a_linear_schedule_the_undo_closes_at_the_first_unit_vested() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = fan_led_usdc_curve(&mut env);
+    // A 30-day cliff, then a 100-day ramp, counted from the claim.
+    fan_led_terms(&mut env, mint, 30 * DAY, 100 * DAY);
+    let thief = Keypair::new();
+    let stolen_at = LOCK + 10 * DAY;
+    env.set_time(stolen_at);
+    claim_fan_led(&mut env, &thief, &approver, &mint).unwrap();
+    let admin = env.admin.insecure_clone();
+
+    // One second past the cliff the ramp has vested its first units.
+    let first_vested = stolen_at + 30 * DAY + 1;
+    assert!(pepper_curve::math::vested_amount(TOTAL, stolen_at, 30 * DAY, 100 * DAY, first_vested) > 0);
+    env.set_time(first_vested);
+    expect_err(discarded(revoke_by(&mut env, &admin, &mint)), code(FanexError::ClaimNotRevocable));
+    assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, thief.pubkey());
+
+    // At the cliff itself the ramp has vested nothing: the undo still reaches it.
+    env.set_time(stolen_at + 30 * DAY);
+    revoke_by(&mut env, &admin, &mint).unwrap();
+    let placeholder = fan_led_placeholder();
+    assert_eq!((claim_state(&env, &mint).0, env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator), (placeholder, placeholder));
+}
+
+#[test]
+fn a_migrated_pooled_or_graduated_market_is_claimed_and_undone_as_a_bonding_one() {
+    for (migrated, phase) in [(true, PHASE_BONDING), (false, PHASE_POOL_CREATED), (false, PHASE_GRADUATED), (true, PHASE_GRADUATED)] {
+        let mut env = Env::new();
+        let approver = Keypair::new();
+        approver_set(&mut env, approver.pubkey());
+        let mint = fan_led_usdc_curve(&mut env);
+        let mut curve: CurveUsdc = env.fetch(&curve_pda(&mint));
+        curve.migrated = migrated;
+        curve.phase = phase;
+        env.put(curve_pda(&mint), account_data(&curve, CurveUsdc::INIT_SPACE), pepper_curve::ID);
+        let thief = Keypair::new();
+        let stolen_at = LOCK + 10 * DAY;
+        env.set_time(stolen_at);
+        claim_fan_led(&mut env, &thief, &approver, &mint).unwrap();
+        assert_eq!(claim_state(&env, &mint), (thief.pubkey(), stolen_at, thief.pubkey()), "migrated {migrated}, phase {phase}");
+
+        let admin = env.admin.insecure_clone();
+        env.set_time(stolen_at + DAY - 1);
+        revoke_by(&mut env, &admin, &mint).unwrap();
+        let placeholder = fan_led_placeholder();
+        let after: CurveUsdc = env.fetch(&curve_pda(&mint));
+        assert_eq!((claim_state(&env, &mint).0, after.creator, after.claimed_at), (placeholder, placeholder, 0), "migrated {migrated}, phase {phase}");
+        // The undo moved the owner alone: the phase and the migration mark stay.
+        assert_eq!((after.phase, after.migrated), (phase, migrated));
+
+        let owner = env.creator.insecure_clone();
+        claim_fan_led(&mut env, &owner, &approver, &mint).unwrap();
+        assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, owner.pubkey(), "migrated {migrated}, phase {phase}");
+    }
+}
+
+#[test]
+fn the_undo_refuses_a_sol_curve() {
+    let mut env = Env::new();
+    approver_set(&mut env, Keypair::new().pubkey());
+    let holder = Keypair::new();
+    // A SOL curve whose vesting and creator name one key, as a claim would leave them.
+    let mint = sol_curve(&mut env, LOCK - DAY, holder.pubkey(), holder.pubkey());
+    let admin = env.admin.insecure_clone();
+
+    expect_err(discarded(revoke_by(&mut env, &admin, &mint)), ACCOUNT_DISCRIMINATOR_MISMATCH);
+    assert_eq!(env.fetch::<Vesting>(&vesting_pda(&mint)).beneficiary, holder.pubkey());
+    assert_eq!(env.fetch::<Curve>(&curve_pda(&mint)).creator, holder.pubkey());
+}
+
+#[test]
+fn the_claim_and_the_undo_refuse_another_markets_vesting_or_curve() {
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mine = fan_led_usdc_curve(&mut env);
+    let other = fan_led_usdc_curve(&mut env);
+    let thief = Keypair::new();
+    let seeds = anchor_code(anchor_lang::error::ErrorCode::ConstraintSeeds);
+
+    // The claim of `mine` naming the other market's vesting (account 4) or curve (account 5).
+    for (index, substitute) in [(4, vesting_pda(&other)), (5, curve_pda(&other))] {
+        let mut claim = claim_fan_led_ix(&thief.pubkey(), &approver.pubkey(), &mine);
+        claim.accounts[index].pubkey = substitute;
+        expect_err(discarded(env.send_logged(&[claim], &[&thief, &approver])), seeds);
+    }
+    for mint in [mine, other] {
+        assert_eq!(claim_state(&env, &mint).0, fan_led_placeholder());
+    }
+
+    // Both claimed, then the undo of `mine` naming the other market's vesting (account 3) or curve (account 4).
+    claim_fan_led(&mut env, &thief, &approver, &mine).unwrap();
+    claim_fan_led(&mut env, &thief, &approver, &other).unwrap();
+    let admin = env.admin.insecure_clone();
+    for (index, substitute) in [(3, vesting_pda(&other)), (4, curve_pda(&other))] {
+        let mut revoke = revoke_ix(&admin.pubkey(), &mine);
+        revoke.accounts[index].pubkey = substitute;
+        expect_err(discarded(env.send_logged(&[revoke], &[&admin])), seeds);
+    }
+    for mint in [mine, other] {
+        assert_eq!(env.fetch::<CurveUsdc>(&curve_pda(&mint)).creator, thief.pubkey());
+    }
+}
+
+#[test]
+fn a_zero_cliff_vests_at_the_claim_so_the_undo_never_reaches_it() {
+    // I1: the program takes `cliff_seconds = 0` and the claim never checks it; the server launches
+    // with 90 days (`usdc-launch-params.ts`). A market launched with none is vested at its claim.
+    let mut env = Env::new();
+    let approver = Keypair::new();
+    approver_set(&mut env, approver.pubkey());
+    let mint = fan_led_usdc_curve(&mut env);
+    fan_led_terms(&mut env, mint, 0, 0);
+    let thief = Keypair::new();
+    let stolen_at = LOCK + 10 * DAY;
+    env.set_time(stolen_at);
+    claim_fan_led(&mut env, &thief, &approver, &mint).unwrap();
+    let admin = env.admin.insecure_clone();
+
+    // In the claim's own second: vested whole, so never undone, and the claimer takes it all.
+    expect_err(discarded(revoke_by(&mut env, &admin, &mint)), code(FanexError::ClaimNotRevocable));
+    claim_usdc(&mut env, &mint, &thief).unwrap();
+    assert_eq!(env.token_amount(&ata(&thief.pubkey(), &mint)), TOTAL);
+}
+
+#[test]
+fn after_an_undo_the_admins_two_steps_still_name_any_owner_and_leave_no_mark() {
+    // I2: «the vault names no owner» holds for the undo alone. `GlobalConfig.admin` (the vault on
+    // mainnet) still hands an undone market to any address by its two steps, which write no mark.
+    let mut env = Env::new();
+    let thief = Keypair::new();
+    let stolen_at = LOCK + 10 * DAY;
+    let (mint, _) = self_claimed(&mut env, &thief, stolen_at);
+    let admin = env.admin.insecure_clone();
+    env.set_time(stolen_at + 1);
+    revoke_by(&mut env, &admin, &mint).unwrap();
+
+    let anyone = Pubkey::new_unique();
+    set_beneficiary(&mut env, &mint, anyone).unwrap();
+    sync_usdc(&mut env, &mint).unwrap();
+    let curve: CurveUsdc = env.fetch(&curve_pda(&mint));
+    assert_eq!((claim_state(&env, &mint).0, curve.creator, curve.claimed_at), (anyone, anyone, 0));
+    // No mark, so the undo never reaches the admin's hand-over.
+    expect_err(discarded(revoke_by(&mut env, &admin, &mint)), code(FanexError::ClaimNotRevocable));
+}

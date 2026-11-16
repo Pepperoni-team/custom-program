@@ -54,9 +54,9 @@ use std::str::FromStr;
 
 const FIXTURE: &str = "swap_buy_messages.json";
 /// The fixture `usdc-swap-buy-fixtures.ts` wrote from the capture of 2026-10-23: a rewrite moves it on purpose
-/// (2026-11-06: the network's $0.05 beside the 1% on every curve trade, so each venue's top-up is its
-/// openings and that $0.05; 2026-11-05: the higher of 1% and $0.10, its openings alone).
-const FIXTURE_SHA256: &str = "4b13b1c64a4ff6f821d738c41acfa8135c70a82de491fce4d4c7e813d998c49c";
+/// (2026-11-16: the network's line at $0.10, so each venue's top-up is its openings and that $0.10; 2026-11-06:
+/// the network's $0.05 beside the 1% on every curve trade; 2026-11-05: the higher of 1% and $0.10, its openings alone).
+const FIXTURE_SHA256: &str = "e7db1315ae77f2d70a09cdbc9a94f3a570b9c4c7ed8145f698165dcf53676522";
 const LOOKUP_TABLE_PROGRAM: Pubkey = Pubkey::from_str_const("AddressLookupTab1e1111111111111111111111111");
 /// A transaction's ceiling on the wire, its signatures included.
 const PACKET_DATA_SIZE: usize = 1_232;

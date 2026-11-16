@@ -1332,7 +1332,8 @@ impl Env {
                 raydium_lock_program: Pubkey::new_unique(),
                 raydium_lock_authority: Pubkey::new_unique(),
                 launcher: sponsor.pubkey(),
-                reserved: [0; 96],
+                claim_approver: Pubkey::default(),
+                reserved: [0; 64],
             };
             self.put(usdc_config_pda(), account_data(&config, pepper_curve::state::UsdcConfig::INIT_SPACE), pepper_curve::ID);
         }
