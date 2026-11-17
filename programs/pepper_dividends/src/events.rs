@@ -1,5 +1,5 @@
 //! Events, one per state change an indexer has to see (spec §6). Named apart from
-//! `pepper_curve`'s and `pepper_raise`'s, so that no two share a discriminator:
+//! `pepper_curve`'s, the raise's inside it included, so that no two share a discriminator:
 //! `DistributorFunded` and `DividendClaimed` are `pepper_curve`'s own, and the
 //! tests below hold every name of both programs off ours. Their sizes, the
 //! 8-byte discriminator included, and their field order are pinned too, since
@@ -255,11 +255,12 @@ mod tests {
     }
 
     #[test]
-    fn no_event_shares_a_discriminator_with_pepper_curves_or_pepper_raises() {
+    fn no_event_shares_a_discriminator_with_pepper_curves_nor_its_raises() {
         let ours = event_names(include_str!("events.rs"));
         assert_eq!(ours.len(), 10, "{ours:?}");
         let curve = event_names(include_str!("../../pepper_curve/src/events.rs"));
-        let raise = event_names(include_str!("../../pepper_raise/src/events.rs"));
+        // The raise lives in pepper_curve since N+3, its events in their own file.
+        let raise = event_names(include_str!("../../pepper_curve/src/raise/events.rs"));
         // The reader is proven on names each file is known to hold.
         assert!(curve.iter().any(|n| n == "DistributorFunded") && curve.iter().any(|n| n == "DividendClaimed"));
         assert!(raise.iter().any(|n| n == "Claimed"));

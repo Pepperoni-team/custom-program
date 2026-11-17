@@ -1,0 +1,24 @@
+[package]
+name = "migration-route-probe"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "A throwaway probe for track M's M2, never deployed: calls Jupiter v6 by invoke_signed from a PDA's WSOL account, in LiteSVM only (docs/solana/PEPPER-CURVE-PROGRAM.md §18)."
+
+# Standalone: not a member of the root workspace, so N's build and its Cargo.lock never see it.
+# Built by scripts/ci-onchain-tests.sh for tests-onchain/pepper-curve/tests/migration_route.rs.
+[workspace]
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+# The version N's programs lock (Cargo.lock at the root), so the SBF toolchain that builds N builds this.
+solana-program = "=2.2.1"
+
+[lints.rust]
+# The cfgs solana-program's `entrypoint!` expands to.
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))', 'cfg(feature, values("custom-heap", "custom-panic"))'] }
+
+[profile.release]
+overflow-checks = true

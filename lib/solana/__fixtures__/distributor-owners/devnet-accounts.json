@@ -1,0 +1,42 @@
+{
+  "_comment": "Real devnet accounts, read on 2026-10-22 (slot 513851845), for the distributor decoder tests: one pepper_curve Distributor, which it reads, and accounts of 137 bytes or more that it must refuse (a pepper_curve Curve, and pepper_raise Position, Raise and RaiseConfig accounts), which the decoder of before 2026-10-22 read as v1 distributors. pepper_dividends' host tests read the Curve and the Distributor too, from programs/pepper_dividends/src/validation.rs. Public chain data.",
+  "cluster": "devnet",
+  "slot": 513851845,
+  "accounts": [
+    {
+      "address": "2cpfq76QvvGfyGwW9f6gUG6DShrrzrKry8PeG7vsZRr9",
+      "owner": "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ",
+      "account": "Distributor",
+      "size": 137,
+      "dataBase64": "WlrZkwYghwQCoas8mjPUiWr9ghXkB5gW2EXKRzZyiOUWrXUJ2KbdI24XAwAAAAAA6hbpz5n6DvxwUiXyFKJ1dH1JfZVMyZj2j8u2G94U7iIAh5MDAAAAAABaYgIAAAAA2KtnurDbiFO60tEwyC7ar3U+z5R8DKHCgs51Z+uzFdPw0qdsAAAAAP8="
+    },
+    {
+      "address": "mAxWV4hgkYLnvWLGxzGRqPSTD3jKDmCLpr9wxCmyYME",
+      "owner": "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ",
+      "account": "Curve",
+      "size": 196,
+      "dataBase64": "v7T5QrRHM7bG9VSoOlW+Rg7BxZrec5KTZqIal8mIhP80G03c1dmzaI2J6JdUqZgpdtIFSMhk81NY2pPWaFDNkArUk2XhWBVAAACgrLkDAAAAAPCClgUAAACwDgAAAAAAAPAAAAAAAAAAADB0gAMAAAAAcDg5AAAAAACGkz8BAAAAgGkeGzVcAAAAAAAAAAAAAACc6axeSwAAAIRGusINAAAAAAAAAAAAAAAAAAAAAAAAAMDQz2oAAAAAAAAAAAAAAAD//w=="
+    },
+    {
+      "address": "12xusqf6DyNEt214qRQZEi64YdxS8qWrKJAJe2VWPLmK",
+      "owner": "5MUtMqViMjLBFQhJ2k2ViWJdz2wWRv3PejpUs2cHGk6S",
+      "account": "Position",
+      "size": 185,
+      "dataBase64": "qryP5HpA99CfUMLBnhd+1shYVpp9QbNrXUXqNHIMeG+mkNGOMk2G2wcHXpN5Gc2GD5q7AnmKS0eRhH2Zibg1GHmk8CQm5D9Q4J2jAQAAAADgnaMBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGduJhAl9ja9wJhrlns6IgWDtfShhHVa7vroMyqg0Cg//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    },
+    {
+      "address": "KmybeAMYR8pvFGwCjuiSjaGcAsXr3ceyYqMD4ftgp1x",
+      "owner": "5MUtMqViMjLBFQhJ2k2ViWJdz2wWRv3PejpUs2cHGk6S",
+      "account": "Raise",
+      "size": 433,
+      "dataBase64": "/WAP8EHywGf7YdWN1oqQ4M1ph1CpUpf6QTXBE20IFjUiHD24HZ/i6h+cE1qhAQAAARAnGAB2k/RqAAAAAAJAS0wAAAAAAEBCDwAAAAAAQEtMAAAAAADA4eQAAAAAAODIEAAAAAAAsZAOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALTEBAAAAAG49KgEAAAAAYBBIAQAAAADx21oAAAAAANBQXAAAAAAA0FBcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//3+/v8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+    },
+    {
+      "address": "Fg7RbZw59qeBhkMU33crhkzaf5W2RPrvpJjKv2mEz8zj",
+      "owner": "5MUtMqViMjLBFQhJ2k2ViWJdz2wWRv3PejpUs2cHGk6S",
+      "account": "RaiseConfig",
+      "size": 148,
+      "dataBase64": "q8JnN/kehzjYq2e6sNuIU7rS0TDILtqvdT7PlHwMocKCznVn67MV0zAQThABU79W9lKHP0CjM4LB3qI5jwOmt9hTm2r/I2hk2KtnurDbiFO60tEwyC7ar3U+z5R8DKHCgs51Z+uzFdM7RCyzkSFX8TqTPQE0KC0DK1/+zQGi2/G3eQYI3wAup0BCDwAAAAAAZAAA/w=="
+    }
+  ]
+}

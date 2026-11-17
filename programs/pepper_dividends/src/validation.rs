@@ -1,6 +1,6 @@
 //! The program's rules on plain values, outside the handlers, where
 //! `cargo test --lib` reaches them with no `Context` (as in `pepper_curve` and
-//! `pepper_raise`). Each rule that refuses returns the error its handler
+//! its raise). Each rule that refuses returns the error its handler
 //! raises, so the tests pin the code a client sees.
 
 use anchor_lang::prelude::*;

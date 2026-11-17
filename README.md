@@ -50,23 +50,34 @@ The two hashes are equal when the clone is the source of the deployed binary; th
 
 - `programs/`: the two programs and the math crate.
 - `lib/solana/*/idl/`: the IDLs, equal to a fresh `anchor idl build`.
+- `lib/solana/__fixtures__/distributor-owners/`: real devnet accounts (public chain data) that
+  `pepper_dividends`' host tests decode.
 - `tests-onchain/pepper-curve`, `tests-onchain/pepper-dividends`: LiteSVM tests against the built `.so`
   files. Third-party programs the tests load (Raydium, Meteora, Orca, Jupiter, Metaplex, p-token) are not
   committed: dump them from mainnet with `scripts/solana/dump-litesvm-fixtures.sh` (read only, a mainnet RPC
   in `SOLANA_RPC`); the tests pin each file's sha256.
+- `tests-onchain/migration-route-probe`: a test-only program, never deployed, that the pepper-curve suite's
+  `migration_route.rs` loads to stand the migration's Jupiter route one invoke level deeper, as a caller above
+  `pepper_curve` would.
 - `tests-onchain/pepper-curve-jupiter`: the Jupiter SDK, an implementation of Jupiter's `Amm` trait that
   quotes a curve from its account and the config alone, with no network call, and builds the exact-in
   swap; its parity tests run the program's own swap in LiteSVM and compare the tokens received.
 
 ## Build and test
 
+The SBF builds take Agave 3.1.14's tools first on `PATH`, as this repository's CI does: Anchor 0.31.1 pins
+Solana 2.1.0, and the compute units `migration_route.rs` pins are the probe's 3.1.14 build.
+
 ```bash
+export PATH="$HOME/.local/share/solana/install/releases/3.1.14/solana-release/bin:$PATH"   # agave-install init 3.1.14
 cargo test -p pepper_curve -p pepper_curve_math -p pepper_dividends --lib --locked
 cargo-build-sbf --manifest-path programs/pepper_curve/Cargo.toml
 cargo-build-sbf --manifest-path programs/pepper_dividends/Cargo.toml
+cargo-build-sbf --manifest-path tests-onchain/migration-route-probe/Cargo.toml -- --locked
 SOLANA_RPC=<a mainnet RPC> bash scripts/solana/dump-litesvm-fixtures.sh
 (cd tests-onchain/pepper-curve && cargo test --locked)
 (cd tests-onchain/pepper-dividends && cargo test --locked)
+cp target/deploy/pepper_curve.so tests-onchain/pepper-curve-jupiter/tests/fixtures/pepper.so
 (cd tests-onchain/pepper-curve-jupiter && cargo test --locked)
 ```
 

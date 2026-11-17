@@ -1,4 +1,4 @@
-//! USDC moves, copied from `pepper_raise` (programs/pepper_raise/src/transfer.rs).
+//! USDC moves, copied from the raise (programs/pepper_curve/src/raise/transfer.rs, `pepper_raise`'s until N+3).
 //! Always `transfer_checked`: the mint and its 6 decimals are part of every
 //! transfer, so a wrong mint fails instead of moving the wrong token. The
 //! funding, the claim, the close and the void share them.

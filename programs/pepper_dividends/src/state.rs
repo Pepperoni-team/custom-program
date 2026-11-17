@@ -109,7 +109,7 @@ impl UsdcDistributor {
 }
 
 /// Owned copies of a distributor's seeds, so a handler can sign for its vault
-/// while it still mutates the distributor (as `pepper_raise`'s `RaiseSeeds`).
+/// while it still mutates the distributor (as the raise's `RaiseSeeds` in `pepper_curve`).
 pub struct DistributorSeeds {
     mint: Pubkey,
     month: [u8; 8],
