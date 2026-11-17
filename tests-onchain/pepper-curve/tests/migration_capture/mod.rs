@@ -70,7 +70,9 @@ pub struct Venue {
     /// included, on p-token and on LiteSVM's SPL Token 3.5.0. Jupiter's binary moves them: on its
     /// redeploy of slot 462802085 (`fixtures.rs`, 2026-10-30) 1 more over Whirlpool and 2 more over
     /// the CLMM and the DLMM than on the capture's binary of slot 459479624 (37 434, 53 310 and
-    /// 41 645 on p-token), every output the same to the µUSDC.
+    /// 41 645 on p-token), every output the same to the µUSDC; on its redeploy of slot 470226883
+    /// (`fixtures.rs`, 2026-11-17) 9, 7 and 10 more again, on both token programs, the outputs and
+    /// the borrow check's units the same.
     pub jupiter_units_p_token: u64,
     pub jupiter_units_spl_token: u64,
     /// The whole transaction by CPI from the probe, on p-token, the limit's 150 included, and how
@@ -89,9 +91,9 @@ pub const VENUES: [Venue; 3] = [
         swap: &[17, 1],
         accounts: 22,
         quoted_out: 273_254_815,
-        jupiter_units_p_token: 37_435,
-        jupiter_units_spl_token: 51_759,
-        cpi_units: 53_871,
+        jupiter_units_p_token: 37_444,
+        jupiter_units_spl_token: 51_768,
+        cpi_units: 53_880,
         borrow_check_units: 3_082,
     },
     Venue {
@@ -101,9 +103,9 @@ pub const VENUES: [Venue; 3] = [
         swap: &[26],
         accounts: 25,
         quoted_out: 273_253_801,
-        jupiter_units_p_token: 53_312,
-        jupiter_units_spl_token: 67_636,
-        cpi_units: 71_106,
+        jupiter_units_p_token: 53_319,
+        jupiter_units_spl_token: 67_643,
+        cpi_units: 71_113,
         borrow_check_units: 3_623,
     },
     Venue {
@@ -113,17 +115,18 @@ pub const VENUES: [Venue; 3] = [
         swap: &[38],
         accounts: 30,
         quoted_out: 273_277_978,
-        jupiter_units_p_token: 41_647,
-        jupiter_units_spl_token: 58_972,
-        cpi_units: 60_878,
+        jupiter_units_p_token: 41_657,
+        jupiter_units_spl_token: 58_982,
+        cpi_units: 60_888,
         borrow_check_units: 4_399,
     },
 ];
 
 /// The deploy slot of each binary the capture ran on, which it read back after its accounts: the
 /// pools ran these very binaries at the capture's slot, and `fixtures.rs` pins the three venues'.
-/// Jupiter's fixture is its redeploy of slot 462802085 since 2026-10-30, on which the capture's
-/// routes land at the same outputs (docs/solana/PEPPER-CURVE-PROGRAM.md §18.1).
+/// Jupiter's fixture is its redeploy of slot 470226883 since 2026-11-17 (462802085's from
+/// 2026-10-30), on which the capture's routes land at the same outputs
+/// (docs/solana/PEPPER-CURVE-PROGRAM.md §18.1).
 pub const PINNED_DEPLOY_SLOTS: [(Pubkey, u64); 4] = [
     (JUPITER_V6_ID, 459_479_624),
     (ORCA_WHIRLPOOL_ID, 457_152_296),

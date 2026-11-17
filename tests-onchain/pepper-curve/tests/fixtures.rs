@@ -20,24 +20,29 @@ use solana_sdk::{
 };
 
 /// Each fixture's sha256, dumped on 2026-10-22 (mainnet slots 460113619 to
-/// 460113637).
+/// 460113637); the CPMM, its create-pool fee receiver and Jupiter re-dumped on
+/// 2026-11-17 (docs/solana/PEPPER-CURVE-PROGRAM.md §13, the re-dump of that day).
 const PINNED: [(&str, &str); 10] = [
     // Metaplex Token Metadata, last deployed at slot 380725176, immutable.
     ("mpl_token_metadata.so", "31f0a627dba051a938de650464e55cc5397a4be0fd496929c1f9cf02fe5e9011"),
-    // Raydium CPMM, last deployed at slot 452376460.
-    ("raydium_cpmm.so", "b6dbea8cefc2e7d490775ce6115e34a2ba480c0853c359e0bb4043b9381ef09a"),
+    // Raydium CPMM, last deployed at slot 463522946 (2026-10-31; slot 452376460 before): Raydium's
+    // #83, which appends `initialize_v2` and leaves `initialize`'s accounts and arguments as they were.
+    ("raydium_cpmm.so", "c383e1c5b1f578f3d1bf42f12360fca67225b9adda0f3b6c293ad0d6b966818d"),
     // The CPMM's `amm_config` index 1: trade fee 10 000 (1%), create-pool fee 0.15 SOL.
     ("raydium_cpmm_amm_config.json", "253df3fb506d295a6cf1b13f0e63a17c90a583ee606262b1286e1d373453449b"),
     // The CPMM's create-pool fee receiver, a wrapped-SOL token account.
-    ("raydium_cpmm_create_pool_fee.json", "a2cb3116e839d9a6c41ab6299a9b36ae7f14e9074587d0d82226ac109d0ede69"),
+    ("raydium_cpmm_create_pool_fee.json", "b0a5eb93067f23641710229795429979338784860d7d76f6bf5f5d964cf32bf7"),
     // Raydium's LP lock, last deployed at slot 362025476.
     ("raydium_lp_lock.so", "efd657a986796e1b204ebae198e691d4137d5f89a401693b83f7fb1a142f802d"),
     // The migration's (upgrade N+1, `migration_programs.rs`), dumped on 2026-10-23, finalized
     // before mainnet slot 460474650. Jupiter v6, re-dumped on 2026-10-30 (finalized mainnet slots
     // 463171612 to 463171696): last deployed at slot 462802085, the same 2892224 bytes, its ELF
     // 2047544 (2036392 in the dump of slot 459479624, sha256 0394bfa4…4d30), one `Swap` variant
-    // appended (`BisonFiMarketBackedV2`, 203). The venues below read back unchanged.
-    ("jupiter_v6.so", "53d53f447f594158a259cbdca1f5e613caf40bc14ce759ffd5953580dc2af8dd"),
+    // appended (`BisonFiMarketBackedV2`, 203). The venues below read back unchanged. Re-dumped on
+    // 2026-11-17: last deployed at slot 470226883 (2026-11-16), the same 2892224 bytes, its IDL's
+    // `Swap` 211 variants (appended past 204) and the `*_with_attestation` routes new; the four
+    // routes, `RoutePlanStep(V2)`, the six variants and errors 6001 and 6025 unchanged.
+    ("jupiter_v6.so", "2565072a9fd6a4cee2e824136cb43d0a7dc23504045048cecd93c72e5f6dc573"),
     // Orca's Whirlpool, last deployed at slot 457152296.
     ("orca_whirlpool.so", "c422b22f3eefe86dd55878a4f505b9c68c26e241dc96af1573ca032b24b8ee3f"),
     // Raydium's CLMM, last deployed at slot 459932378.
