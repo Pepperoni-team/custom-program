@@ -77,5 +77,6 @@ tests-onchain/*/target/
 *prompt*.md
 # third-party programs the LiteSVM tests load: dumped from mainnet, never committed
 tests-onchain/pepper-curve/fixtures/*.so
+tests-onchain/metadao-launchpad/fixtures/*.so
 # the Jupiter suite runs the build of this tree, copied there (README, Build and test)
 tests-onchain/pepper-curve-jupiter/tests/fixtures/pepper.so

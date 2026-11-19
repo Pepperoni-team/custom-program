@@ -1,0 +1,24 @@
+[package]
+name = "pepper-raise-onchain-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Standalone: not a member of the root workspace, so the in-process validator
+# LiteSVM pulls in never enters the programs' Cargo.lock or their host unit tests.
+# Run by scripts/ci-onchain-tests.sh, which builds the .so from this tree first.
+[workspace]
+
+[dev-dependencies]
+# The raise lives in pepper_curve since N+3 (docs/solana/PEPPER-RAISE-PROGRAM.md).
+pepper_curve = { path = "../../programs/pepper_curve", features = ["no-entrypoint"] }
+anchor-lang = "0.31.1"
+litesvm = "0.6"
+solana-sdk = "2.2"
+spl-token = { version = "7", features = ["no-entrypoint"] }
+spl-associated-token-account = { version = "6", features = ["no-entrypoint"] }
+# Decodes the events `emit!` writes to the logs ("Program data: <base64>").
+base64 = "0.21"
+# LiteSVM's secp256r1 precompile links OpenSSL. Building it from source keeps
+# the suite free of system packages (libssl-dev, pkg-config) on any machine.
+openssl = { version = "0.10", features = ["vendored"] }

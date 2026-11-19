@@ -1,0 +1,529 @@
+{
+  "programId": "moontUzsdepotRGe5xsfip7vLPTJnVuafqdUWexVnPM",
+  "keys": {
+    "sponsor": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      138,
+      136,
+      227,
+      221,
+      116,
+      9,
+      241,
+      149,
+      253,
+      82,
+      219,
+      45,
+      60,
+      186,
+      93,
+      114,
+      202,
+      103,
+      9,
+      191,
+      29,
+      148,
+      18,
+      27,
+      243,
+      116,
+      136,
+      1,
+      180,
+      15,
+      111,
+      92
+    ],
+    "funder": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      129,
+      57,
+      119,
+      14,
+      168,
+      125,
+      23,
+      95,
+      86,
+      163,
+      84,
+      102,
+      195,
+      76,
+      126,
+      204,
+      203,
+      141,
+      138,
+      145,
+      180,
+      238,
+      55,
+      162,
+      93,
+      246,
+      15,
+      91,
+      143,
+      201,
+      179,
+      148
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "live: the commit message",
+      "accounts": [
+        {
+          "address": "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9",
+          "owner": "11111111111111111111111111111111",
+          "lamports": 10000000000,
+          "data": ""
+        },
+        {
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 1461600,
+          "data": "AQAAAG56HN0psLeP0Tr0xVmP7/TvKpcWbjym8uT7/M2AUFvxAAAAAAAAABAGAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+        },
+        {
+          "address": "EdmxWPmx2WH6WgFfTdu9xfkYf3k1g5wD1zccTVySEEh1",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 1461600,
+          "data": "AQAAAG56HN0psLeP0Tr0xVmP7/TvKpcWbjym8uT7/M2AUFvxAAAAAAAAABAGAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+        },
+        {
+          "address": "HS8SbsTrgsLr4qNXbPSaamPxz2pbvVWQm96ScthTPG2X",
+          "owner": "moontUzsdepotRGe5xsfip7vLPTJnVuafqdUWexVnPM",
+          "lamports": 6354480,
+          "data": "kDMzo85V1Sb8AIhSanQAAAAAAAAAAAAAAAAAAADtSSjGKNHCxurpAziQWZVhKVknOlxj+TY2wUYUrIc30dA2wReNQvSsmAN2yw3A7BNJ32+HxCAdnjMMvLifuhK7+xbcR6gfjQIc+7PsP11M1zSkq420iYygWCFXc8XA2w3/G5/zrVSRjMFORn8u6su+I1SUUYqTvon+cvaSCiCrEhPKk6wXBRhwcdZ7g8f/Dv6BCOjsRTBXXXcmh5Mz29q+fMb6evO+2606PWXzaqvJdDGxu+TC0vbg5HymAgNFL11hAQDSSWsAAAAAAACGO6EBAAAAAQAAAAAAAAAAAEYFAAAA7UkoxijRwsbq6QM4kFmVYSlZJzpcY/k2NsFGFKyHN9EAAAAAAAAAAADtSSjGKNHCxurpAziQWZVhKVknOlxj+TY2wUYUrIc30QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        },
+        {
+          "address": "2YEnbAkNYAGveMi7gqwURiU3fEqcRnfnfV3HipcQYd3L",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 2039280,
+          "data": "xvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWHQNsEXjUL0rJgDdssNwOwTSd9vh8QgHZ4zDLy4n7oSuwCGO6EBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "address": "2rqUGLxxq58pgpEP8gjnF32KNF6t1D9i4Zp5ZSyqYi1x",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 2039280,
+          "data": "ypOsFwUYcHHWe4PH/w7+gQjo7EUwV113JoeTM9vavnzQNsEXjUL0rJgDdssNwOwTSd9vh8QgHZ4zDLy4n7oSuwCgck4YCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "address": "ASZ2TDDNJG2n42TxAezqNNzwWipykHrENDKMCoLKgzup",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 2039280,
+          "data": "xvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWGBOXcOqH0XX1ajVGbDTH7My42KkbTuN6Jd9g9bj8mzlICy5g4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        }
+      ],
+      "steps": [
+        {
+          "what": "a first commitment moves the USDC into the vault and opens the funding record at the sponsor’s cost",
+          "clock": 1800003600,
+          "message": "gAIBBQuKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXIE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOU9Crs0Sf9SLTZuzsGI4bwppr4k/EIaggftiWzCrrWUsRTcc1/E6oC7kvooCGcFLFn04tB+GA3YfCOsonRhOtoQBbcR6gfjQIc+7PsP11M1zSkq420iYygWCFXc8XA2w3/jETp04tB+SqkMwRAOxAkRbfcj4nLfZEMLTVLT/56fhMDBkZv5SEXMv/srbpyw5vnvIzlu8X3EmssQ5s6QAAAAAt6eutbEVjC4o/WGS8cXlzXBAiR52RcwJYEoenAmHQUBt324ddloZPZy+FGzut5rBy0he1fWzeROoz1hX7/AKkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBgAFAlDDAAAGAAkDUMMAAAAAAAAHCgIDBAEABQgJCgcQ2rxv3ZhxrgcA4fUFAAAAAAA=",
+          "signers": [
+            "sponsor",
+            "funder"
+          ],
+          "outcome": "ok",
+          "tokens": [
+            {
+              "address": "ASZ2TDDNJG2n42TxAezqNNzwWipykHrENDKMCoLKgzup",
+              "amount": "150000000"
+            },
+            {
+              "address": "2YEnbAkNYAGveMi7gqwURiU3fEqcRnfnfV3HipcQYd3L",
+              "amount": "7100000000"
+            }
+          ],
+          "record": {
+            "address": "6cjVDyoP6aPntj4JgjBsjgQ7CofZsLjvVudXWJafebXd",
+            "committed": "100000000",
+            "approved": "0",
+            "claimed": false,
+            "refunded": false
+          }
+        },
+        {
+          "what": "a later commitment adds to the same record",
+          "clock": 1800003660,
+          "message": "gAIBBQuKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXIE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOU9Crs0Sf9SLTZuzsGI4bwppr4k/EIaggftiWzCrrWUsRTcc1/E6oC7kvooCGcFLFn04tB+GA3YfCOsonRhOtoQBbcR6gfjQIc+7PsP11M1zSkq420iYygWCFXc8XA2w3/jETp04tB+SqkMwRAOxAkRbfcj4nLfZEMLTVLT/56fhMDBkZv5SEXMv/srbpyw5vnvIzlu8X3EmssQ5s6QAAAAAt6eutbEVjC4o/WGS8cXlzXBAiR52RcwJYEoenAmHQUBt324ddloZPZy+FGzut5rBy0he1fWzeROoz1hX7/AKkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBgAFAlDDAAAGAAkDUMMAAAAAAAAHCgIDBAEABQgJCgcQ2rxv3ZhxrgeA8PoCAAAAAAA=",
+          "signers": [
+            "sponsor",
+            "funder"
+          ],
+          "outcome": "ok",
+          "tokens": [
+            {
+              "address": "ASZ2TDDNJG2n42TxAezqNNzwWipykHrENDKMCoLKgzup",
+              "amount": "100000000"
+            },
+            {
+              "address": "2YEnbAkNYAGveMi7gqwURiU3fEqcRnfnfV3HipcQYd3L",
+              "amount": "7150000000"
+            }
+          ],
+          "record": {
+            "address": "6cjVDyoP6aPntj4JgjBsjgQ7CofZsLjvVudXWJafebXd",
+            "committed": "150000000",
+            "approved": "0",
+            "claimed": false,
+            "refunded": false
+          }
+        },
+        {
+          "what": "past the window the program refuses it, and nothing moves",
+          "clock": 1800345600,
+          "message": "gAIBBQuKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXIE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOU9Crs0Sf9SLTZuzsGI4bwppr4k/EIaggftiWzCrrWUsRTcc1/E6oC7kvooCGcFLFn04tB+GA3YfCOsonRhOtoQBbcR6gfjQIc+7PsP11M1zSkq420iYygWCFXc8XA2w3/jETp04tB+SqkMwRAOxAkRbfcj4nLfZEMLTVLT/56fhMDBkZv5SEXMv/srbpyw5vnvIzlu8X3EmssQ5s6QAAAAAt6eutbEVjC4o/WGS8cXlzXBAiR52RcwJYEoenAmHQUBt324ddloZPZy+FGzut5rBy0he1fWzeROoz1hX7/AKkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBgAFAlDDAAAGAAkDUMMAAAAAAAAHCgIDBAEABQgJCgcQ2rxv3ZhxrgeA8PoCAAAAAAA=",
+          "signers": [
+            "sponsor",
+            "funder"
+          ],
+          "outcome": "refused",
+          "tokens": [
+            {
+              "address": "ASZ2TDDNJG2n42TxAezqNNzwWipykHrENDKMCoLKgzup",
+              "amount": "100000000"
+            }
+          ],
+          "record": {
+            "address": "6cjVDyoP6aPntj4JgjBsjgQ7CofZsLjvVudXWJafebXd",
+            "committed": "150000000",
+            "approved": "0",
+            "claimed": false,
+            "refunded": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "complete: the allocation and the refund",
+      "accounts": [
+        {
+          "address": "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9",
+          "owner": "11111111111111111111111111111111",
+          "lamports": 10000000000,
+          "data": ""
+        },
+        {
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 1461600,
+          "data": "AQAAAG56HN0psLeP0Tr0xVmP7/TvKpcWbjym8uT7/M2AUFvxAAAAAAAAABAGAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+        },
+        {
+          "address": "AKkzLhjhyFtM9j7WAhbaqYpFe49cXeJBg2kzLRC2PnNa",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 1461600,
+          "data": "AQAAAG56HN0psLeP0Tr0xVmP7/TvKpcWbjym8uT7/M2AUFvxAAAAAAAAABAGAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+        },
+        {
+          "address": "4insEo8Rw3daz2RJPF2BRnPA2TpXd9v5Q7A61FzXyh69",
+          "owner": "moontUzsdepotRGe5xsfip7vLPTJnVuafqdUWexVnPM",
+          "lamports": 6354480,
+          "data": "kDMzo85V1Sb+AIhSanQAAAAAAAAAAAAAAAAAAADtSSjGKNHCxurpAziQWZVhKVknOlxj+TY2wUYUrIc30XVDWh506hvz4MrYipbbQ79iWT/cZDnhBACY1tXkUrPR+L+gzTiiVZ35qtAk5da1P2bNUTTtkBVPECPuhPXZo6YXd/iJQ2jqrZdB3J61SrgIW7p8NkL/6ckQT7posLYcv0yKh1//HrOEUVd6zVr+5AVFZWjdfIngkIY6BVe8evSfF8b6evO+2606PWXzaqvJdDGxu+TC0vbg5HymAgNFL11hAQDSSWsAAAAAAQAYT2sAAAAAABCl1OgAAAADAAAAAAAAAAAARgUAAADtSSjGKNHCxurpAziQWZVhKVknOlxj+TY2wUYUrIc30QAAAAAAAAAAAO1JKMYo0cLG6ukDOJBZlWEpWSc6XGP5NjbBRhSshzfR/0/W3AEAAAAAAAAAAAAAAAAAARAmT2sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        },
+        {
+          "address": "Du35snf1YKtzRrYTuRDvid5bU4C4gKdkW1UMcSY9vb2n",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 2039280,
+          "data": "xvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWF1Q1oedOob8+DK2IqW20O/Ylk/3GQ54QQAmNbV5FKz0QAoLozRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "address": "95KKiYk4aVM1jxHtUiNiCEVK64aMrTHPkwsGfx9QXvE7",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 2039280,
+          "data": "iodf/x6zhFFXes1a/uQFRWVo3XyJ4JCGOgVXvHr0nxd1Q1oedOob8+DK2IqW20O/Ylk/3GQ54QQAmNbV5FKz0QCgck4YCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "address": "7oDaEmC8SPnKfhRoHLzJEqcSoGDrBhYyPpfinE3YWvFP",
+          "owner": "moontUzsdepotRGe5xsfip7vLPTJnVuafqdUWexVnPM",
+          "lamports": 1691280,
+          "data": "FCL77sx1C0P/gTl3Dqh9F19Wo1Rmw0x+zMuNipG07jeiXfYPW4/Js5Q3R7wonM0Sj7rX/zEhQeU+cO2yYJRaIDkSr+gpcYxWisAyCgMAAAAAAAAjTTgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0klrAAAAAA=="
+        }
+      ],
+      "steps": [
+        {
+          "what": "the claim message opens the token account and delivers exactly what Pepper’s math says",
+          "clock": 1800352800,
+          "message": "gAEACQ6KiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXNSVuLWO4gVtoT0skzBej0l6hUaM+ZwJPYk4GL59I86tN0e8KJzNEo+61/8xIUHlPnDtsmCUWiA5Eq/oKXGMVopk/Q4gAMVADzH0QDi4Llnmtkmd8lQXNVOtg1+KGRatLnf4iUNo6q2XQdyetUq4CFu6fDZC/+nJEE+6aLC2HL9MAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WYE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOUiodf/x6zhFFXes1a/uQFRWVo3XyJ4JCGOgVXvHr0nxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpC3p661sRWMLij9YZLxxeXNcECJHnZFzAlgSh6cCYdBR1Q1oedOob8+DK2IqW20O/Ylk/3GQ54QQAmNbV5FKz0bEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBQAFAmDqAAAFAAkDUMMAAAAAAAAGBgABBwgJCgEBCwoCAwwIBAcBCg0LCD7G1sHVn2zSAA==",
+          "signers": [
+            "sponsor"
+          ],
+          "outcome": "ok",
+          "tokens": [
+            {
+              "address": "FJqr6HD5noLLvKqGbtAHALymnFYigbfYrMHcY35hjPPA",
+              "amount": "4612203750"
+            },
+            {
+              "address": "95KKiYk4aVM1jxHtUiNiCEVK64aMrTHPkwsGfx9QXvE7",
+              "amount": "9995387796250"
+            }
+          ],
+          "record": {
+            "address": "7oDaEmC8SPnKfhRoHLzJEqcSoGDrBhYyPpfinE3YWvFP",
+            "committed": "51000000",
+            "approved": "3689763",
+            "claimed": true,
+            "refunded": false
+          }
+        },
+        {
+          "what": "a second claim is refused: the record’s flag, never a second payment",
+          "clock": 1800352860,
+          "message": "gAEACQ6KiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXNSVuLWO4gVtoT0skzBej0l6hUaM+ZwJPYk4GL59I86tN0e8KJzNEo+61/8xIUHlPnDtsmCUWiA5Eq/oKXGMVopk/Q4gAMVADzH0QDi4Llnmtkmd8lQXNVOtg1+KGRatLnf4iUNo6q2XQdyetUq4CFu6fDZC/+nJEE+6aLC2HL9MAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WYE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOUiodf/x6zhFFXes1a/uQFRWVo3XyJ4JCGOgVXvHr0nxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpC3p661sRWMLij9YZLxxeXNcECJHnZFzAlgSh6cCYdBR1Q1oedOob8+DK2IqW20O/Ylk/3GQ54QQAmNbV5FKz0bEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBQAFAmDqAAAFAAkDUMMAAAAAAAAGBgABBwgJCgEBCwoCAwwIBAcBCg0LCD7G1sHVn2zSAA==",
+          "signers": [
+            "sponsor"
+          ],
+          "outcome": "refused",
+          "tokens": [
+            {
+              "address": "FJqr6HD5noLLvKqGbtAHALymnFYigbfYrMHcY35hjPPA",
+              "amount": "4612203750"
+            }
+          ],
+          "record": {
+            "address": "7oDaEmC8SPnKfhRoHLzJEqcSoGDrBhYyPpfinE3YWvFP",
+            "committed": "51000000",
+            "approved": "3689763",
+            "claimed": true,
+            "refunded": false
+          }
+        },
+        {
+          "what": "the refund message opens the USDC account and sends back the part not approved",
+          "clock": 1800352920,
+          "message": "gAEACQ6KiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXIxE6dOLQfkqpDMEQDsQJEW33I+Jy32RDC01S0/+en4TN0e8KJzNEo+61/8xIUHlPnDtsmCUWiA5Eq/oKXGMVopk/Q4gAMVADzH0QDi4Llnmtkmd8lQXNVOtg1+KGRatLr+gzTiiVZ35qtAk5da1P2bNUTTtkBVPECPuhPXZo6YXAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WYE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOUxvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpC3p661sRWMLij9YZLxxeXNcECJHnZFzAlgSh6cCYdBR1Q1oedOob8+DK2IqW20O/Ylk/3GQ54QQAmNbV5FKz0bEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBQAFAmDqAAAFAAkDUMMAAAAAAAAGBgABBwgJCgEBCwkCAwQMBwEKDQsIAmC3+z/QLi4A",
+          "signers": [
+            "sponsor"
+          ],
+          "outcome": "ok",
+          "tokens": [
+            {
+              "address": "ASZ2TDDNJG2n42TxAezqNNzwWipykHrENDKMCoLKgzup",
+              "amount": "47310237"
+            },
+            {
+              "address": "Du35snf1YKtzRrYTuRDvid5bU4C4gKdkW1UMcSY9vb2n",
+              "amount": "899952689763"
+            }
+          ],
+          "record": {
+            "address": "7oDaEmC8SPnKfhRoHLzJEqcSoGDrBhYyPpfinE3YWvFP",
+            "committed": "51000000",
+            "approved": "3689763",
+            "claimed": true,
+            "refunded": true
+          }
+        },
+        {
+          "what": "a second refund is refused",
+          "clock": 1800352980,
+          "message": "gAEACQ6KiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXIxE6dOLQfkqpDMEQDsQJEW33I+Jy32RDC01S0/+en4TN0e8KJzNEo+61/8xIUHlPnDtsmCUWiA5Eq/oKXGMVopk/Q4gAMVADzH0QDi4Llnmtkmd8lQXNVOtg1+KGRatLr+gzTiiVZ35qtAk5da1P2bNUTTtkBVPECPuhPXZo6YXAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WYE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOUxvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpC3p661sRWMLij9YZLxxeXNcECJHnZFzAlgSh6cCYdBR1Q1oedOob8+DK2IqW20O/Ylk/3GQ54QQAmNbV5FKz0bEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBQAFAmDqAAAFAAkDUMMAAAAAAAAGBgABBwgJCgEBCwkCAwQMBwEKDQsIAmC3+z/QLi4A",
+          "signers": [
+            "sponsor"
+          ],
+          "outcome": "refused",
+          "tokens": [
+            {
+              "address": "ASZ2TDDNJG2n42TxAezqNNzwWipykHrENDKMCoLKgzup",
+              "amount": "47310237"
+            }
+          ],
+          "record": {
+            "address": "7oDaEmC8SPnKfhRoHLzJEqcSoGDrBhYyPpfinE3YWvFP",
+            "committed": "51000000",
+            "approved": "3689763",
+            "claimed": true,
+            "refunded": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "refunding: the whole commitment back",
+      "accounts": [
+        {
+          "address": "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9",
+          "owner": "11111111111111111111111111111111",
+          "lamports": 10000000000,
+          "data": ""
+        },
+        {
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 1461600,
+          "data": "AQAAAG56HN0psLeP0Tr0xVmP7/TvKpcWbjym8uT7/M2AUFvxAAAAAAAAABAGAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+        },
+        {
+          "address": "GmaDrppBC7P5ARKV8g3djiwP89vz1jLK23V2GBjuAEGB",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 1461600,
+          "data": "AQAAAG56HN0psLeP0Tr0xVmP7/TvKpcWbjym8uT7/M2AUFvxAAAAAAAAABAGAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+        },
+        {
+          "address": "dcMtcczN77NSCuddwTYScoNE7M62dkRsQ5HVPNLps23",
+          "owner": "moontUzsdepotRGe5xsfip7vLPTJnVuafqdUWexVnPM",
+          "lamports": 6354480,
+          "data": "kDMzo85V1Sb/AIhSanQAAAAAAAAAAAAAAAAAAADtSSjGKNHCxurpAziQWZVhKVknOlxj+TY2wUYUrIc30bcDjsrZB8+TNmb31FzSK5Op39Ww1BLmjYzcuy3OXNPG/4tzos5qsdfn1tW1IntzbqhU4wsMAOkGmpoq/8HgiVBgfPRi7o4XuHVnZXKp2vKJj0pkJWHUpJWHtXlVO45MfUjqSmxj4pxSCr71UHsTLsX5lUd2rr6+e5JCHuppFEbSLMb6evO+2606PWXzaqvJdDGxu+TC0vbg5HymAgNFL11hAQDSSWsAAAAAAQAYT2sAAAAAALCO8BsAAAAEAAAAAAAAAAAARgUAAADtSSjGKNHCxurpAziQWZVhKVknOlxj+TY2wUYUrIc30QAAAAAAAAAAAO1JKMYo0cLG6ukDOJBZlWEpWSc6XGP5NjbBRhSshzfRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        },
+        {
+          "address": "APMwTs4camyLAaMchcDVj8GNntwezage5n3Ybi6T6EWs",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 2039280,
+          "data": "xvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWG3A47K2QfPkzZm99Rc0iuTqd/VsNQS5o2M3LstzlzTxgCwjvAbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "address": "9Qmh5zhE9gkXLMp4syWWTGjSzMe1njuuZJRhjHjAEmw5",
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "lamports": 2039280,
+          "data": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iy3A47K2QfPkzZm99Rc0iuTqd/VsNQS5o2M3LstzlzTxgCgck4YCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "address": "Hp4yj9EQdxtkta5eWbyHHd9fYsLG6FQ8a1W1xQufu6GN",
+          "owner": "moontUzsdepotRGe5xsfip7vLPTJnVuafqdUWexVnPM",
+          "lamports": 1691280,
+          "data": "FCL77sx1C0P/gTl3Dqh9F19Wo1Rmw0x+zMuNipG07jeiXfYPW4/Js5QJYOQYhSNq4p5b9CkO9YUklsSTNdke8DzcKkAXilYQbMAyCgMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0klrAAAAAA=="
+        }
+      ],
+      "steps": [
+        {
+          "what": "a claim is refused: nothing to hand out",
+          "clock": 1800346200,
+          "message": "gAEACQ6KiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXMxP1XAFWYo0j9vH4g9IbuIYrj9xbHAWl3xHyaPYsaVoCWDkGIUjauKeW/QpDvWFJJbEkzXZHvA83CpAF4pWEGz5ycluLpm29vVR83zd8cl1QupGfkCDOkqNZkVdbXuFb3z0Yu6OF7h1Z2VyqdryiY9KZCVh1KSVh7V5VTuOTH1IAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WYE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOU6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpC3p661sRWMLij9YZLxxeXNcECJHnZFzAlgSh6cCYdBS3A47K2QfPkzZm99Rc0iuTqd/VsNQS5o2M3LstzlzTxrEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBQAFAmDqAAAFAAkDUMMAAAAAAAAGBgABBwgJCgEBCwoCAwwIBAcBCg0LCD7G1sHVn2zSAA==",
+          "signers": [
+            "sponsor"
+          ],
+          "outcome": "refused",
+          "tokens": [
+            {
+              "address": "9Qmh5zhE9gkXLMp4syWWTGjSzMe1njuuZJRhjHjAEmw5",
+              "amount": "10000000000000"
+            }
+          ],
+          "record": {
+            "address": "Hp4yj9EQdxtkta5eWbyHHd9fYsLG6FQ8a1W1xQufu6GN",
+            "committed": "51000000",
+            "approved": "0",
+            "claimed": false,
+            "refunded": false
+          }
+        },
+        {
+          "what": "the refund message sends the whole commitment back",
+          "clock": 1800346260,
+          "message": "gAEACQ6KiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXIxE6dOLQfkqpDMEQDsQJEW33I+Jy32RDC01S0/+en4TCWDkGIUjauKeW/QpDvWFJJbEkzXZHvA83CpAF4pWEGz5ycluLpm29vVR83zd8cl1QupGfkCDOkqNZkVdbXuFb4tzos5qsdfn1tW1IntzbqhU4wsMAOkGmpoq/8HgiVBgAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WYE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOUxvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpC3p661sRWMLij9YZLxxeXNcECJHnZFzAlgSh6cCYdBS3A47K2QfPkzZm99Rc0iuTqd/VsNQS5o2M3LstzlzTxrEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBQAFAmDqAAAFAAkDUMMAAAAAAAAGBgABBwgJCgEBCwkCAwQMBwEKDQsIAmC3+z/QLi4A",
+          "signers": [
+            "sponsor"
+          ],
+          "outcome": "ok",
+          "tokens": [
+            {
+              "address": "ASZ2TDDNJG2n42TxAezqNNzwWipykHrENDKMCoLKgzup",
+              "amount": "51000000"
+            },
+            {
+              "address": "APMwTs4camyLAaMchcDVj8GNntwezage5n3Ybi6T6EWs",
+              "amount": "119949000000"
+            }
+          ],
+          "record": {
+            "address": "Hp4yj9EQdxtkta5eWbyHHd9fYsLG6FQ8a1W1xQufu6GN",
+            "committed": "51000000",
+            "approved": "0",
+            "claimed": false,
+            "refunded": true
+          }
+        },
+        {
+          "what": "a second refund is refused",
+          "clock": 1800346320,
+          "message": "gAEACQ6KiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXIxE6dOLQfkqpDMEQDsQJEW33I+Jy32RDC01S0/+en4TCWDkGIUjauKeW/QpDvWFJJbEkzXZHvA83CpAF4pWEGz5ycluLpm29vVR83zd8cl1QupGfkCDOkqNZkVdbXuFb4tzos5qsdfn1tW1IntzbqhU4wsMAOkGmpoq/8HgiVBgAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WYE5dw6ofRdfVqNUZsNMfszLjYqRtO43ol32D1uPybOUxvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpC3p661sRWMLij9YZLxxeXNcECJHnZFzAlgSh6cCYdBS3A47K2QfPkzZm99Rc0iuTqd/VsNQS5o2M3LstzlzTxrEGyrwwavePAhWOXTKsFfolKn82VGVJLvqqj+BGWVMZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBQAFAmDqAAAFAAkDUMMAAAAAAAAGBgABBwgJCgEBCwkCAwQMBwEKDQsIAmC3+z/QLi4A",
+          "signers": [
+            "sponsor"
+          ],
+          "outcome": "refused",
+          "tokens": [
+            {
+              "address": "ASZ2TDDNJG2n42TxAezqNNzwWipykHrENDKMCoLKgzup",
+              "amount": "51000000"
+            }
+          ],
+          "record": {
+            "address": "Hp4yj9EQdxtkta5eWbyHHd9fYsLG6FQ8a1W1xQufu6GN",
+            "committed": "51000000",
+            "approved": "0",
+            "claimed": false,
+            "refunded": true
+          }
+        }
+      ]
+    }
+  ]
+}

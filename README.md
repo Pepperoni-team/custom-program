@@ -56,6 +56,12 @@ The two hashes are equal when the clone is the source of the deployed binary; th
   files. Third-party programs the tests load (Raydium, Meteora, Orca, Jupiter, Metaplex, p-token) are not
   committed: dump them from mainnet with `scripts/solana/dump-litesvm-fixtures.sh` (read only, a mainnet RPC
   in `SOLANA_RPC`); the tests pin each file's sha256.
+- `tests-onchain/pepper-raise`: LiteSVM tests of the revenue raise, which lives inside `pepper_curve` since its
+  upgrade N+3, against the built `pepper_curve.so`.
+- `tests-onchain/metadao-launchpad`: Pepper's own messages (a commit, a claim, a refund, each with the amounts
+  Pepper's math expects) on MetaDAO's launchpad v0.7 as mainnet runs it, from `fixtures/scenarios.json`. Its
+  binary is not committed either: `scripts/solana/dump-launchpad-fixture.sh` dumps it from mainnet, and the
+  suite pins its sha256 (`fixtures/SHA256SUMS`).
 - `tests-onchain/migration-route-probe`: a test-only program, never deployed, that the pepper-curve suite's
   `migration_route.rs` loads to stand the migration's Jupiter route one invoke level deeper, as a caller above
   `pepper_curve` would.
@@ -77,6 +83,9 @@ cargo-build-sbf --manifest-path tests-onchain/migration-route-probe/Cargo.toml -
 SOLANA_RPC=<a mainnet RPC> bash scripts/solana/dump-litesvm-fixtures.sh
 (cd tests-onchain/pepper-curve && cargo test --locked)
 (cd tests-onchain/pepper-dividends && cargo test --locked)
+(cd tests-onchain/pepper-raise && cargo test --locked)
+SOLANA_RPC=<a mainnet RPC> bash scripts/solana/dump-launchpad-fixture.sh
+(cd tests-onchain/metadao-launchpad && cargo test --locked)
 cp target/deploy/pepper_curve.so tests-onchain/pepper-curve-jupiter/tests/fixtures/pepper.so
 (cd tests-onchain/pepper-curve-jupiter && cargo test --locked)
 ```

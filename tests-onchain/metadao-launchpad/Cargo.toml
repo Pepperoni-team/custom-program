@@ -1,0 +1,25 @@
+[package]
+name = "metadao-launchpad-onchain-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Pepper's own messages on MetaDAO's real launchpad v0.7 (docs/solana/EXTERNAL-RAISES.md §21): the program dumped
+# from mainnet (fixtures/launchpad_v0_7.so, scripts/solana/dump-launchpad-fixture.sh, pinned by sha256 in the test),
+# the accounts and the messages written by Pepper's TypeScript builders (fixtures/scenarios.json,
+# scripts/solana/write-launchpad-fixture.ts). No program of ours is built here: the crate only reads the two files.
+# Standalone, not a member of the root workspace; its lock was seeded from the pepper-dividends suite's and resolved
+# offline. Run by scripts/ci-onchain-tests.sh.
+[workspace]
+
+[dev-dependencies]
+litesvm = "0.6"
+solana-sdk = "2.2"
+# The messages arrive as their wire bytes (`VersionedMessage::serialize` in web3.js).
+bincode = "1.3"
+base64 = "0.21"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# LiteSVM's secp256r1 precompile links OpenSSL. Building it from source keeps
+# the suite free of system packages (libssl-dev, pkg-config) on any machine.
+openssl = { version = "0.10", features = ["vendored"] }
