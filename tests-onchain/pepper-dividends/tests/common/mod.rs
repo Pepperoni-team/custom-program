@@ -146,6 +146,10 @@ pub fn distributor_pda(mint: &Pubkey, month: i64) -> Pubkey {
 pub fn month_record_pda(mint: &Pubkey, month: i64) -> Pubkey {
     pda(&[MONTH_SEED, mint.as_ref(), &month.to_le_bytes()]).0
 }
+/// A token's reserve, `["reserve", mint]` (2026-11-07).
+pub fn reserve_pda(mint: &Pubkey) -> Pubkey {
+    pda(&[pepper_dividends::constants::RESERVE_SEED, mint.as_ref()]).0
+}
 
 pub fn curve_pda_of(seeds: &[&[u8]]) -> (Pubkey, u8) {
     Pubkey::find_program_address(seeds, &pepper_curve::ID)
@@ -369,6 +373,31 @@ pub struct SettleAccounts {
     pub vault: Pubkey,
     pub funder_usdc_account: Pubkey,
     pub rent_payer: Pubkey,
+    pub usdc_mint: Pubkey,
+    pub token_program: Pubkey,
+    /// The recorded rent payer's USDC ATA, which only the void takes: what the payer fronted into a
+    /// month its reserve funded short goes back there (2026-11-07).
+    pub rent_payer_usdc_account: Pubkey,
+}
+
+/// The accounts and arguments of a `fund_month_from_reserve`, each derived from the month's mint and
+/// month (`Env::reserve_funding`) unless a test replaces it.
+#[derive(Clone, Debug)]
+pub struct ReserveFunding {
+    pub approver: Pubkey,
+    pub rent_payer: Pubkey,
+    pub mint: Pubkey,
+    pub month: i64,
+    pub merkle_root: [u8; 32],
+    pub total_amount: u64,
+    pub expires_at: i64,
+    pub leaf_count: u32,
+    pub legacy_distributor: Pubkey,
+    pub reserve: Pubkey,
+    pub reserve_vault: Pubkey,
+    pub payer_usdc: Pubkey,
+    pub usdc_config: Pubkey,
+    pub fee_usdc_account: Pubkey,
     pub usdc_mint: Pubkey,
     pub token_program: Pubkey,
 }
@@ -962,6 +991,7 @@ impl Env {
             rent_payer: recorded.rent_payer,
             usdc_mint: self.usdc.mint,
             token_program: spl_token::ID,
+            rent_payer_usdc_account: self.usdc_ata(&recorded.rent_payer),
         }
     }
 
@@ -1003,6 +1033,7 @@ impl Env {
                 rent_payer: accounts.rent_payer,
                 usdc_mint: accounts.usdc_mint,
                 token_program: accounts.token_program,
+                rent_payer_usdc_account: accounts.rent_payer_usdc_account,
             },
             pepper_dividends::instruction::VoidDistributor {},
         )
@@ -1134,7 +1165,9 @@ impl Env {
             claims_held_until: 0,
             funded_by_fanex: funder == self.pepper_funder.pubkey() || funder == self.payer.pubkey(),
             rents_by_payer: true,
-            reserved: [0; 54],
+            fronted_amount: 0,
+            fee_unpaid: 0,
+            reserved: [0; 38],
             claimed: vec![0; claim_registry_bytes(leaf_count)],
         }
     }
@@ -1314,29 +1347,7 @@ impl Env {
         self.load_metaplex();
         let admin = self.curve_admin.pubkey();
         let sponsor = self.sponsor.insecure_clone();
-        if !self.exists(&usdc_config_pda()) {
-            let fee_usdc_account = self.usdc_account(&admin);
-            let config = pepper_curve::state::UsdcConfig {
-                version: 1,
-                bump: curve_pda_of(&[c::USDC_CONFIG_SEED]).1,
-                paused: false,
-                admin,
-                pauser: admin,
-                migration_authority: Pubkey::default(),
-                usdc_mint: self.usdc.mint,
-                fee_usdc_account,
-                lp_fee_owner: admin,
-                raydium_cpmm_program: Pubkey::new_unique(),
-                raydium_amm_config: Pubkey::new_unique(),
-                raydium_create_pool_fee: Pubkey::new_unique(),
-                raydium_lock_program: Pubkey::new_unique(),
-                raydium_lock_authority: Pubkey::new_unique(),
-                launcher: sponsor.pubkey(),
-                claim_approver: Pubkey::default(),
-                reserved: [0; 64],
-            };
-            self.put(usdc_config_pda(), account_data(&config, pepper_curve::state::UsdcConfig::INIT_SPACE), pepper_curve::ID);
-        }
+        self.put_usdc_config();
         let mint = Keypair::new();
         let address = mint.pubkey();
         let curve = curve_pda(&address);
@@ -1383,6 +1394,211 @@ impl Env {
             },
         );
         self.send_paid_by(&sponsor, &[compute_unit_limit(CREATE_CU_LIMIT), launch], &[&mint]).expect("create_curve_usdc lands");
+        address
+    }
+
+    /// `pepper_curve`'s `UsdcConfig`, written once, as `initialize_usdc_config` and `set_usdc_raydium`
+    /// leave it: the suite's USDC, `curve_admin` as its admin (the metadata's update authority) and
+    /// pauser, its fee account `curve_admin`'s USDC ATA, opened, the sponsor its launcher, and five
+    /// Raydium keys apart from one another, which a launch refuses only all-zero (`RaydiumNotSet`). A
+    /// USDC launch needs it, and a reserve's month reads its fee account. Answers the fee account.
+    pub fn put_usdc_config(&mut self) -> Pubkey {
+        use pepper_curve::constants as c;
+        let admin = self.curve_admin.pubkey();
+        let fee_usdc_account = self.usdc_account(&admin);
+        if !self.exists(&usdc_config_pda()) {
+            let config = pepper_curve::state::UsdcConfig {
+                version: 1,
+                bump: curve_pda_of(&[c::USDC_CONFIG_SEED]).1,
+                paused: false,
+                admin,
+                pauser: admin,
+                migration_authority: Pubkey::default(),
+                usdc_mint: self.usdc.mint,
+                fee_usdc_account,
+                lp_fee_owner: admin,
+                raydium_cpmm_program: Pubkey::new_unique(),
+                raydium_amm_config: Pubkey::new_unique(),
+                raydium_create_pool_fee: Pubkey::new_unique(),
+                raydium_lock_program: Pubkey::new_unique(),
+                raydium_lock_authority: Pubkey::new_unique(),
+                launcher: self.sponsor.pubkey(),
+                claim_approver: Pubkey::default(),
+                reserved: [0; 64],
+            };
+            self.put(usdc_config_pda(), account_data(&config, pepper_curve::state::UsdcConfig::INIT_SPACE), pepper_curve::ID);
+        }
+        fee_usdc_account
+    }
+
+    // ── The reserve (the reserve's spec, 2026-11-07) ─────────────────────────
+
+    /// The reserve's vault of `mint`: its associated USDC account.
+    pub fn reserve_vault(&self, mint: &Pubkey) -> Pubkey {
+        self.usdc_ata(&reserve_pda(mint))
+    }
+
+    /// `deposit_reserve(amount)` into `mint`'s reserve by `creator`, the dividend payer paying the rents,
+    /// unsigned.
+    pub fn deposit_ix(&self, creator: &Pubkey, mint: &Pubkey, amount: u64) -> Instruction {
+        let reserve = reserve_pda(mint);
+        ix(
+            pepper_dividends::accounts::DepositReserve {
+                creator: *creator,
+                rent_payer: self.payer.pubkey(),
+                config: config_pda(),
+                mint: *mint,
+                curve: curve_pda(mint),
+                reserve,
+                reserve_vault: self.usdc_ata(&reserve),
+                creator_usdc: self.usdc_ata(creator),
+                usdc_mint: self.usdc.mint,
+                token_program: spl_token::ID,
+                associated_token_program: spl_associated_token_account::ID,
+                system_program: system_program::id(),
+            },
+            pepper_dividends::instruction::DepositReserve { amount },
+        )
+    }
+
+    /// A deposit into `self.mint`'s reserve as the app sends one: the dividend payer pays the fee,
+    /// `creator` signs.
+    pub fn deposit(&mut self, creator: &Keypair, amount: u64) -> Result<Sent, TransactionError> {
+        let payer = self.payer.insecure_clone();
+        let deposit = self.deposit_ix(&creator.pubkey(), &self.mint, amount);
+        self.send_logged_paid_by(&payer, &[deposit], &[creator])
+    }
+
+    /// `owner`'s USDC account opened and holding `amount` more µUSDC. Answers its address.
+    pub fn usdc_holding(&mut self, owner: &Pubkey, amount: u64) -> Pubkey {
+        let account = self.usdc_account(owner);
+        if amount > 0 {
+            self.mint_usdc(&account, amount);
+        }
+        account
+    }
+
+    /// A funding of `self.mint`'s `month` from its reserve over `leaf_count` leaves: the config's
+    /// approver and dividend payer, the payer's own USDC ATA, `pepper_curve`'s USDC config and its fee
+    /// account (`put_usdc_config`'s), expiring 365 days on.
+    pub fn reserve_funding(&self, month: i64, merkle_root: [u8; 32], total_amount: u64, leaf_count: u32) -> ReserveFunding {
+        let reserve = reserve_pda(&self.mint);
+        ReserveFunding {
+            approver: self.approver.pubkey(),
+            rent_payer: self.payer.pubkey(),
+            mint: self.mint,
+            month,
+            merkle_root,
+            total_amount,
+            expires_at: self.now() + 365 * DAY,
+            leaf_count,
+            legacy_distributor: legacy_distributor_pda(&self.mint, month),
+            reserve,
+            reserve_vault: self.usdc_ata(&reserve),
+            payer_usdc: self.usdc_ata(&self.payer.pubkey()),
+            usdc_config: usdc_config_pda(),
+            fee_usdc_account: self.usdc_ata(&self.curve_admin.pubkey()),
+            usdc_mint: self.usdc.mint,
+            token_program: spl_token::ID,
+        }
+    }
+
+    /// `fund_month_from_reserve` for `funding`, unsigned. The month's record, distributor and vault are
+    /// derived from its mint and month.
+    pub fn fund_from_reserve_ix(&self, funding: &ReserveFunding) -> Instruction {
+        let distributor = distributor_pda(&funding.mint, funding.month);
+        ix(
+            pepper_dividends::accounts::FundMonthFromReserve {
+                approver: funding.approver,
+                rent_payer: funding.rent_payer,
+                config: config_pda(),
+                mint: funding.mint,
+                legacy_distributor: funding.legacy_distributor,
+                month_record: month_record_pda(&funding.mint, funding.month),
+                distributor,
+                vault: spl_associated_token_account::get_associated_token_address_with_program_id(
+                    &distributor,
+                    &funding.usdc_mint,
+                    &funding.token_program,
+                ),
+                reserve: funding.reserve,
+                reserve_vault: funding.reserve_vault,
+                payer_usdc: funding.payer_usdc,
+                usdc_config: funding.usdc_config,
+                fee_usdc_account: funding.fee_usdc_account,
+                usdc_mint: funding.usdc_mint,
+                token_program: funding.token_program,
+                associated_token_program: spl_associated_token_account::ID,
+                system_program: system_program::id(),
+            },
+            pepper_dividends::instruction::FundMonthFromReserve {
+                month: funding.month,
+                merkle_root: funding.merkle_root,
+                total_amount: funding.total_amount,
+                expires_at: funding.expires_at,
+                leaf_count: funding.leaf_count,
+            },
+        )
+    }
+
+    /// Sends `funding` as Fanex's server does: the dividend payer pays the fee, the approver co-signs.
+    pub fn fund_from_reserve(&mut self, funding: &ReserveFunding) -> Result<Sent, TransactionError> {
+        let (payer, approver) = (self.payer.insecure_clone(), self.approver.insecure_clone());
+        let fund = self.fund_from_reserve_ix(funding);
+        self.send_logged_paid_by(&payer, &[fund], &[&approver])
+    }
+
+    /// `request_reserve_withdrawal` of `mint`'s reserve signed by `owner`, unsigned.
+    pub fn request_withdrawal_ix(&self, owner: &Pubkey, mint: &Pubkey) -> Instruction {
+        ix(
+            pepper_dividends::accounts::ReserveRequest { owner: *owner, reserve: reserve_pda(mint) },
+            pepper_dividends::instruction::RequestReserveWithdrawal {},
+        )
+    }
+
+    /// `cancel_reserve_withdrawal` of `mint`'s reserve signed by `owner`, unsigned.
+    pub fn cancel_withdrawal_ix(&self, owner: &Pubkey, mint: &Pubkey) -> Instruction {
+        ix(
+            pepper_dividends::accounts::ReserveRequest { owner: *owner, reserve: reserve_pda(mint) },
+            pepper_dividends::instruction::CancelReserveWithdrawal {},
+        )
+    }
+
+    /// `withdraw_reserve` of `mint`'s reserve to `owner`'s USDC ATA, signed by `owner`, unsigned.
+    pub fn withdraw_ix(&self, owner: &Pubkey, mint: &Pubkey) -> Instruction {
+        let reserve = reserve_pda(mint);
+        ix(
+            pepper_dividends::accounts::WithdrawReserve {
+                owner: *owner,
+                config: config_pda(),
+                reserve,
+                reserve_vault: self.usdc_ata(&reserve),
+                owner_usdc: self.usdc_ata(owner),
+                usdc_mint: self.usdc.mint,
+                token_program: spl_token::ID,
+            },
+            pepper_dividends::instruction::WithdrawReserve {},
+        )
+    }
+
+    /// A reserve of `mint` written into the bank as a deposit leaves it, `owner`'s, its vault holding
+    /// `balance` µUSDC minted for it, a withdrawal requested at `withdrawal_requested_at` (0: none).
+    pub fn put_reserve(&mut self, mint: Pubkey, owner: Pubkey, withdrawal_requested_at: i64, balance: u64) -> Pubkey {
+        let (address, bump) = pda(&[pepper_dividends::constants::RESERVE_SEED, mint.as_ref()]);
+        let reserve = pepper_dividends::state::DividendReserve {
+            version: ACCOUNT_VERSION,
+            bump,
+            mint,
+            owner,
+            withdrawal_requested_at,
+            reserved: [0; 64],
+        };
+        self.put(address, account_data(&reserve, pepper_dividends::state::DividendReserve::INIT_SPACE), pepper_dividends::ID);
+        let vault = self.usdc_ata(&address);
+        self.put_token_account(vault, self.usdc.mint, address, 0, COption::None);
+        if balance > 0 {
+            self.mint_usdc(&vault, balance);
+        }
         address
     }
 

@@ -1,17 +1,21 @@
 //! `void_distributor` (spec §4.8; Rick, 2026-10-23): a month funded wrong, by its root or its
 //! total, voided by the admin while nobody has claimed from it. The money and the rents go back as
 //! at a close (`settle::settle_month`), and the record turns voided, so the month may be funded
-//! again under the right root.
+//! again under the right root. A month its reserve funded short first hands the dividend payer
+//! back what it fronted (the reserve's spec §4.6, 2026-11-07), so the month funded again never
+//! spends the payer's money from the creator's reserve.
 
 use anchor_lang::prelude::*;
+use anchor_spl::associated_token::get_associated_token_address;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
 use crate::constants::{CONFIG_SEED, MONTH_SEED, MONTH_STATUS_VOIDED};
 use crate::errors::DividendsError;
-use crate::events::UsdcDistributorVoided;
+use crate::events::{UsdcDistributorFrontedReturned, UsdcDistributorVoided};
 use crate::settle::{settle_month, Settlement};
-use crate::state::{DividendsConfig, MonthRecord, UsdcDistributor};
-use crate::validation::{check_void, known_version};
+use crate::state::{DistributorSeeds, DividendsConfig, MonthRecord, UsdcDistributor};
+use crate::transfer::usdc_transfer;
+use crate::validation::{check_void, known_version, void_split};
 
 #[derive(Accounts)]
 pub struct VoidDistributor<'info> {
@@ -68,17 +72,48 @@ pub struct VoidDistributor<'info> {
     pub usdc_mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
+
+    /// CHECK: the recorded rent payer's USDC ATA (`AccountMismatch` for any other account), where what
+    /// the dividend payer fronted into a month its reserve funded short goes back first
+    /// (`fronted_amount`, 2026-11-07). Read by the transfer alone, and only on such a month. Last, so
+    /// every account before it keeps its place.
+    #[account(
+        mut,
+        address = get_associated_token_address(&distributor.rent_payer, &usdc_mint.key()) @ DividendsError::AccountMismatch,
+    )]
+    pub rent_payer_usdc_account: UncheckedAccount<'info>,
 }
 
 /// After the accounts' checks above: nobody has claimed from the month, `claimed_amount` at 0 and
 /// not one bit of the registry set (`MonthHasClaims`), since the void drops the bitmap and a
-/// holder already paid could be paid again. Then the month is settled voided, which
-/// `init_distributor` opens again, and `UsdcDistributorVoided` emitted.
+/// holder already paid could be paid again. On a month its reserve funded short, what the payer
+/// fronted goes back to the rent payer's USDC account first, as far as the vault holds it
+/// (`void_split`), and `UsdcDistributorFrontedReturned` is emitted. Then the month is settled
+/// voided, the rest to the funder's account, which `init_distributor` opens again, and
+/// `UsdcDistributorVoided` emitted.
 pub fn void_distributor(ctx: Context<VoidDistributor>) -> Result<()> {
     let accounts = ctx.accounts;
     let distributor = &accounts.distributor;
     check_void(distributor.claimed_amount, &distributor.claimed)?;
     let (mint, month, to) = (distributor.mint, distributor.month, distributor.funder_usdc_account);
+    let (to_payer, _) = void_split(accounts.vault.amount, distributor.fronted_amount);
+    if to_payer > 0 {
+        let seeds = DistributorSeeds::of(distributor);
+        let seeds = seeds.seeds();
+        usdc_transfer(
+            &accounts.token_program.to_account_info(),
+            &accounts.usdc_mint.to_account_info(),
+            &accounts.vault.to_account_info(),
+            &accounts.rent_payer_usdc_account.to_account_info(),
+            &distributor.to_account_info(),
+            to_payer,
+            &[&seeds[..]],
+        )?;
+        // The settlement sends the vault's balance as it now stands.
+        accounts.vault.reload()?;
+        let payer = accounts.rent_payer_usdc_account.key();
+        emit!(UsdcDistributorFrontedReturned { mint, month, amount: to_payer, to: payer });
+    }
     let returned = settle_month(
         Settlement {
             distributor: &accounts.distributor,

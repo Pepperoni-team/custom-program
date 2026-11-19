@@ -6,7 +6,8 @@ use anchor_lang::prelude::*;
 /// raises it, and `MonthAlreadyFunded`, `MonthHasClaims`, `PauseEndTooEarly` and
 /// `ApproverIsFunder` appended (2026-10-23), then `ClaimsHeld` (2026-10-26), then
 /// the internal audit's `PauseTooShort`, `UnsupportedVersion` and `NotRehomable`
-/// (2026-10-29), devnet's deploy numbering every one before them as it was.
+/// (2026-10-29), devnet's deploy numbering every one before them as it was, then the
+/// reserve's nine (2026-11-07), after mainnet's deploy of 2026-10-31.
 #[error_code]
 pub enum DividendsError {
     #[msg("Funding is paused")]
@@ -63,6 +64,24 @@ pub enum DividendsError {
     UnsupportedVersion,
     #[msg("This month records no Fanex payee to re-home, or the config names no payer")]
     NotRehomable,
+    #[msg("Only the curve's creator may deposit into its reserve")]
+    NotTheCreator,
+    #[msg("The reserve holds another owner's USDC")]
+    ReserveOwnedByAnother,
+    #[msg("A withdrawal of this reserve is pending")]
+    WithdrawalPending,
+    #[msg("No withdrawal of this reserve is pending")]
+    NoWithdrawalPending,
+    #[msg("The reserve's withdrawal is not due yet")]
+    WithdrawalNotReady,
+    #[msg("The month key is not a YYYYMM month")]
+    InvalidMonth,
+    #[msg("This month accrued after the reserve's withdrawal was requested")]
+    MonthAfterWithdrawalRequest,
+    #[msg("The reserve holds no USDC")]
+    ReserveEmpty,
+    #[msg("pepper_curve's USDC config is not one this program reads")]
+    UsdcConfigUnreadable,
 }
 
 #[cfg(test)]
@@ -101,6 +120,15 @@ mod tests {
             (DividendsError::PauseTooShort, 6024, "PauseTooShort"),
             (DividendsError::UnsupportedVersion, 6025, "UnsupportedVersion"),
             (DividendsError::NotRehomable, 6026, "NotRehomable"),
+            (DividendsError::NotTheCreator, 6027, "NotTheCreator"),
+            (DividendsError::ReserveOwnedByAnother, 6028, "ReserveOwnedByAnother"),
+            (DividendsError::WithdrawalPending, 6029, "WithdrawalPending"),
+            (DividendsError::NoWithdrawalPending, 6030, "NoWithdrawalPending"),
+            (DividendsError::WithdrawalNotReady, 6031, "WithdrawalNotReady"),
+            (DividendsError::InvalidMonth, 6032, "InvalidMonth"),
+            (DividendsError::MonthAfterWithdrawalRequest, 6033, "MonthAfterWithdrawalRequest"),
+            (DividendsError::ReserveEmpty, 6034, "ReserveEmpty"),
+            (DividendsError::UsdcConfigUnreadable, 6035, "UsdcConfigUnreadable"),
         ];
         for (error, code, name) in cases {
             assert_eq!(u32::from(error), code, "{name}");

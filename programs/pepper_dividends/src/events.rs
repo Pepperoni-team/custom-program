@@ -102,6 +102,68 @@ pub struct ConfigUpdated {
     pub payer_funder: Pubkey,
 }
 
+// ── The reserve (the reserve's spec, 2026-11-07) ─────────────────────────────
+
+/// `amount` µUSDC deposited into a token's reserve by its owner, its vault holding `balance`
+/// after it.
+#[event]
+pub struct ReserveDeposited {
+    pub mint: Pubkey,
+    pub owner: Pubkey,
+    pub amount: u64,
+    pub balance: u64,
+}
+
+/// The owner asked for the reserve back: from `requested_at` the reserve pays only months
+/// accrued before it, and from `withdrawable_at` the owner withdraws.
+#[event]
+pub struct ReserveWithdrawalRequested {
+    pub mint: Pubkey,
+    pub owner: Pubkey,
+    pub requested_at: i64,
+    pub withdrawable_at: i64,
+}
+
+/// The owner's pending withdrawal cancelled.
+#[event]
+pub struct ReserveWithdrawalCancelled {
+    pub mint: Pubkey,
+    pub owner: Pubkey,
+}
+
+/// The reserve's whole balance, `amount` µUSDC, paid back to its owner's USDC account.
+#[event]
+pub struct ReserveWithdrawn {
+    pub mint: Pubkey,
+    pub owner: Pubkey,
+    pub amount: u64,
+}
+
+/// A month funded from its token's reserve: `from_reserve` and the payer's `fronted` µUSDC
+/// into the vault, `total_amount` in all, then `fee_from_reserve` of Pepper's 3% to its fee
+/// account and `fee_unpaid` left owed.
+#[event]
+pub struct UsdcDistributorFundedFromReserve {
+    pub mint: Pubkey,
+    pub month: i64,
+    pub total_amount: u64,
+    pub from_reserve: u64,
+    pub fronted: u64,
+    pub fee_from_reserve: u64,
+    pub fee_unpaid: u64,
+}
+
+/// A void of a month its reserve funded short: `amount` µUSDC, what the payer fronted, back to
+/// `to`, the rent payer's USDC account, before the rest goes to the reserve
+/// (`UsdcDistributorVoided`).
+#[event]
+pub struct UsdcDistributorFrontedReturned {
+    pub mint: Pubkey,
+    pub month: i64,
+    pub amount: u64,
+    pub to: Pubkey,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -145,7 +207,7 @@ mod tests {
     fn every_event_logs_its_fields_in_order_at_its_size() {
         let (mint, other) = (key(1), key(2));
         let month = 202_611i64.to_le_bytes();
-        let cases: [(&str, Vec<u8>, Vec<u8>, usize); 10] = [
+        let cases: [(&str, Vec<u8>, Vec<u8>, usize); 16] = [
             (
                 "UsdcDistributorFunded",
                 UsdcDistributorFunded { mint, month: 202_611, total_amount: 5_000_000, funder: other }.data(),
@@ -233,6 +295,68 @@ mod tests {
                 ),
                 200,
             ),
+            (
+                "ReserveDeposited",
+                ReserveDeposited { mint, owner: other, amount: 1_000_000_000, balance: 1_500_000_000 }.data(),
+                logged(
+                    "ReserveDeposited",
+                    &[mint.as_ref(), other.as_ref(), &1_000_000_000u64.to_le_bytes(), &1_500_000_000u64.to_le_bytes()],
+                ),
+                88,
+            ),
+            (
+                "ReserveWithdrawalRequested",
+                ReserveWithdrawalRequested { mint, owner: other, requested_at: 1_800_000_000, withdrawable_at: 1_803_888_000 }.data(),
+                logged(
+                    "ReserveWithdrawalRequested",
+                    &[mint.as_ref(), other.as_ref(), &1_800_000_000i64.to_le_bytes(), &1_803_888_000i64.to_le_bytes()],
+                ),
+                88,
+            ),
+            (
+                "ReserveWithdrawalCancelled",
+                ReserveWithdrawalCancelled { mint, owner: other }.data(),
+                logged("ReserveWithdrawalCancelled", &[mint.as_ref(), other.as_ref()]),
+                72,
+            ),
+            (
+                "ReserveWithdrawn",
+                ReserveWithdrawn { mint, owner: other, amount: 7 }.data(),
+                logged("ReserveWithdrawn", &[mint.as_ref(), other.as_ref(), &7u64.to_le_bytes()]),
+                80,
+            ),
+            (
+                "UsdcDistributorFundedFromReserve",
+                UsdcDistributorFundedFromReserve {
+                    mint,
+                    month: 202_611,
+                    total_amount: 97,
+                    from_reserve: 90,
+                    fronted: 7,
+                    fee_from_reserve: 0,
+                    fee_unpaid: 3,
+                }
+                .data(),
+                logged(
+                    "UsdcDistributorFundedFromReserve",
+                    &[
+                        mint.as_ref(),
+                        &month,
+                        &97u64.to_le_bytes(),
+                        &90u64.to_le_bytes(),
+                        &7u64.to_le_bytes(),
+                        &0u64.to_le_bytes(),
+                        &3u64.to_le_bytes(),
+                    ],
+                ),
+                88,
+            ),
+            (
+                "UsdcDistributorFrontedReturned",
+                UsdcDistributorFrontedReturned { mint, month: 202_611, amount: 7, to: other }.data(),
+                logged("UsdcDistributorFrontedReturned", &[mint.as_ref(), &month, &7u64.to_le_bytes(), other.as_ref()]),
+                88,
+            ),
         ];
         for (name, data, expected, size) in cases {
             assert_eq!(data, expected, "{name}");
@@ -252,12 +376,18 @@ mod tests {
         assert_eq!(UsdcDistributorToppedUp::DISCRIMINATOR, discriminator_of("UsdcDistributorToppedUp"));
         assert_eq!(FundingPauseSet::DISCRIMINATOR, discriminator_of("FundingPauseSet"));
         assert_eq!(ConfigUpdated::DISCRIMINATOR, discriminator_of("ConfigUpdated"));
+        assert_eq!(ReserveDeposited::DISCRIMINATOR, discriminator_of("ReserveDeposited"));
+        assert_eq!(ReserveWithdrawalRequested::DISCRIMINATOR, discriminator_of("ReserveWithdrawalRequested"));
+        assert_eq!(ReserveWithdrawalCancelled::DISCRIMINATOR, discriminator_of("ReserveWithdrawalCancelled"));
+        assert_eq!(ReserveWithdrawn::DISCRIMINATOR, discriminator_of("ReserveWithdrawn"));
+        assert_eq!(UsdcDistributorFundedFromReserve::DISCRIMINATOR, discriminator_of("UsdcDistributorFundedFromReserve"));
+        assert_eq!(UsdcDistributorFrontedReturned::DISCRIMINATOR, discriminator_of("UsdcDistributorFrontedReturned"));
     }
 
     #[test]
     fn no_event_shares_a_discriminator_with_pepper_curves_nor_its_raises() {
         let ours = event_names(include_str!("events.rs"));
-        assert_eq!(ours.len(), 10, "{ours:?}");
+        assert_eq!(ours.len(), 16, "{ours:?}");
         let curve = event_names(include_str!("../../pepper_curve/src/events.rs"));
         // The raise lives in pepper_curve since N+3, its events in their own file.
         let raise = event_names(include_str!("../../pepper_curve/src/raise/events.rs"));

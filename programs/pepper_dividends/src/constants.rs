@@ -29,6 +29,17 @@ pub const MONTH_SEED: &[u8] = b"month";
 /// `CURVE_SEED`, held by a test below.
 pub const CURVE_SEED: &[u8] = b"curve";
 
+/// A token's dividend reserve, `["reserve", mint]` (the reserve's spec §3.1,
+/// 2026-11-07): the creator's USDC waiting for the months it pays, in the
+/// reserve's associated USDC account.
+pub const RESERVE_SEED: &[u8] = b"reserve";
+
+/// `pepper_curve`'s USDC config, `["usdc_config"]` under `config.curve_program`,
+/// read by hand for the fee account a reserve's month pays Pepper's 3% into (the
+/// reserve's spec §4.2). No account of this program has this seed. Byte-identical
+/// to `pepper_curve`'s `USDC_CONFIG_SEED`, held by a test below.
+pub const USDC_CONFIG_SEED: &[u8] = b"usdc_config";
+
 // ── The leaf (spec §5) ─────────────────────────────────────────────────────
 
 /// Opens every leaf: `keccak256(DIVIDEND_LEAF_DOMAIN ‖ distributor ‖ usdc_mint ‖
@@ -84,6 +95,33 @@ pub const CLAIMS_OPEN_BEFORE_CLOSE_SECONDS: i64 = 30 * 86_400;
 /// 2026-10-29), so a pauser renewing pauses cannot keep a month open for ever. Rick's
 /// to change.
 pub const MAX_CLOSE_DELAY_SECONDS: i64 = 90 * 86_400;
+
+// ── The reserve (the reserve's spec, 2026-11-07) ───────────────────────────
+
+/// How long a reserve's withdrawal waits after its owner asked: 45 days (Rick,
+/// 2026-11-07). The last month accrued before a request is due by the end of the
+/// 10th of M+2, at most 41 days later, so the admin's run pays it from the reserve
+/// before the money leaves (`WithdrawalNotReady` until then). Rick's to change.
+pub const RESERVE_WITHDRAWAL_DELAY_SECONDS: i64 = 45 * 86_400;
+
+/// Pepper's share of a month's distributable, in basis points: 3%, the holders
+/// getting the other 97% (`PLATFORM_FEE_RATE`, lib/solana/dividend-estimate.ts).
+/// A month the reserve funds pays `floor(total × 300 / 9_700)` of it.
+pub const RESERVE_MONTH_FEE_BPS: u64 = 300;
+
+/// Basis points in a whole.
+pub const BPS_DENOMINATOR: u64 = 10_000;
+
+/// A month's record instant, the moment its holders are fixed: 00:01 UTC on the
+/// 1st of the month after it, this many seconds past that midnight
+/// (docs/solana/SOLANA-DIVIDEND-DISTRIBUTION.md §4.5). With a withdrawal pending,
+/// the reserve pays only a month whose record instant came before the request.
+pub const RECORD_INSTANT_OFFSET_SECONDS: i64 = 60;
+
+/// The years a month key (YYYYMM) may name when the reserve dates it: anything
+/// outside, or a month outside 1 to 12, is `InvalidMonth`.
+pub const MIN_MONTH_YEAR: i64 = 2_020;
+pub const MAX_MONTH_YEAR: i64 = 2_200;
 
 // ── Units and layout ───────────────────────────────────────────────────────
 
@@ -149,6 +187,28 @@ pub const LEGACY_DISTRIBUTOR_V2_DISCRIMINATOR: [u8; 8] = [89, 141, 51, 26, 17, 2
 /// (the discriminator, mint, month, root, total, claimed and funder before it).
 pub const LEGACY_EXPIRES_AT_OFFSET: usize = 128;
 
+// ── `pepper_curve`'s USDC config, read by hand (the reserve's spec §4.2) ─────
+// Read only for its USDC and the fee account Pepper's 3% of a reserve's month goes
+// to, the one a creator's month pays too: the LiteSVM suite holds these bytes
+// against the real program.
+
+/// `UsdcConfig`'s discriminator: the first 8 bytes of sha256("account:UsdcConfig").
+pub const USDC_CONFIG_DISCRIMINATOR: [u8; 8] = [48, 197, 208, 34, 24, 38, 56, 253];
+
+/// The USDC config's account: 8 + 483 bytes.
+pub const USDC_CONFIG_LEN: usize = 491;
+
+/// The `UsdcConfig.version` the read takes, its first field (byte 8): another is
+/// `UsdcConfigUnreadable`, so a later layout of the same size is never read as this one.
+pub const USDC_CONFIG_VERSION: u8 = 1;
+
+/// Where `UsdcConfig.usdc_mint` starts: after the discriminator, three one-byte
+/// fields and three keys (the admin, the pauser, the migration authority).
+pub const USDC_CONFIG_USDC_MINT_OFFSET: usize = 107;
+
+/// Where `UsdcConfig.fee_usdc_account` starts: right after its USDC mint.
+pub const USDC_CONFIG_FEE_USDC_ACCOUNT_OFFSET: usize = 139;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -164,6 +224,46 @@ mod tests {
         assert_eq!(DISTRIBUTOR_SEED, b"distributor");
         assert_eq!(MONTH_SEED, b"month");
         assert_eq!(CURVE_SEED, b"curve");
+        assert_eq!(RESERVE_SEED, b"reserve");
+        assert_eq!(USDC_CONFIG_SEED, b"usdc_config");
+    }
+
+    #[test]
+    fn the_usdc_config_seed_is_pepper_curves_own() {
+        // Read under `pepper_curve`: another seed would read an empty address, and every
+        // reserve's month would be `UsdcConfigUnreadable`.
+        let curve = include_str!("../../pepper_curve/src/constants.rs");
+        assert!(curve.contains("pub const USDC_CONFIG_SEED: &[u8] = b\"usdc_config\";"));
+    }
+
+    #[test]
+    fn the_reserve_waits_45_days_and_takes_3_percent() {
+        assert_eq!(RESERVE_WITHDRAWAL_DELAY_SECONDS, 45 * DAY);
+        // The longest a month accrued before a request waits for the end of its due day, the 10th
+        // of M+2 (UTC): September's, accrued at 00:01 on 1 October, a request a minute later, due
+        // until the end of 10 November, 41 days on.
+        assert!(RESERVE_WITHDRAWAL_DELAY_SECONDS > 41 * DAY);
+        assert_eq!((RESERVE_MONTH_FEE_BPS, BPS_DENOMINATOR), (300, 10_000));
+        assert_eq!(RECORD_INSTANT_OFFSET_SECONDS, 60);
+        assert!(MIN_MONTH_YEAR < 2_026 && 2_026 < MAX_MONTH_YEAR);
+    }
+
+    #[test]
+    fn the_usdc_config_reads_where_pepper_curve_puts_it() {
+        assert_eq!(hash(b"account:UsdcConfig").to_bytes()[..8], USDC_CONFIG_DISCRIMINATOR);
+        // Counted by hand: three one-byte fields (version, bump, paused), thirteen keys (admin,
+        // pauser, migration authority, USDC mint, fee account, LP fee owner, the five Raydium
+        // keys, the launcher, the claim approver), 64 reserved.
+        assert_eq!(USDC_CONFIG_LEN, 8 + 3 + 13 * 32 + 64);
+        assert_eq!(USDC_CONFIG_USDC_MINT_OFFSET, 8 + 3 + 3 * 32);
+        assert_eq!(USDC_CONFIG_FEE_USDC_ACCOUNT_OFFSET, USDC_CONFIG_USDC_MINT_OFFSET + 32);
+        assert!(USDC_CONFIG_FEE_USDC_ACCOUNT_OFFSET + 32 <= USDC_CONFIG_LEN);
+        let curve = include_str!("../../pepper_curve/src/constants.rs");
+        assert!(curve.contains("pub const USDC_ACCOUNT_VERSION: u8 = 1;"));
+        assert_eq!(USDC_CONFIG_VERSION, 1);
+        // No length nor discriminator is a curve's.
+        assert!(![CURVE_LEN, CURVE_USDC_LEN].contains(&USDC_CONFIG_LEN));
+        assert!(![CURVE_DISCRIMINATOR, CURVE_USDC_DISCRIMINATOR].contains(&USDC_CONFIG_DISCRIMINATOR));
     }
 
     #[test]

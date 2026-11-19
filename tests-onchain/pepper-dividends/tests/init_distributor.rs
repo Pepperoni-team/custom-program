@@ -100,8 +100,10 @@ fn a_pepper_funder_opens_a_month_paying_no_lamport_and_the_payer_pays_the_rents(
     assert_eq!((d.funder, d.funder_usdc_account, d.rent_payer), (funder.pubkey(), env.usdc_ata(&funder.pubkey()), env.payer.pubkey()));
     // A fresh month, its claims held for its review window, a day (the internal audit, 2026-10-29),
     // a Fanex key its funder and the dividend payer its rent payer, as its two flags record.
-    assert_eq!((d.expires_at, d.claims_held_until, d.reserved), (funding.expires_at, env.now() + REVIEW_WINDOW_SECONDS, [0; 54]));
+    assert_eq!((d.expires_at, d.claims_held_until, d.reserved), (funding.expires_at, env.now() + REVIEW_WINDOW_SECONDS, [0; 38]));
     assert_eq!((d.funded_by_fanex, d.rents_by_payer), (true, true));
+    // Paid whole by its funder: nothing fronted, nothing owed (the reserve's two amounts, 2026-11-07).
+    assert_eq!((d.fronted_amount, d.fee_unpaid), (0, 0));
     assert_eq!(d.bump, Pubkey::find_program_address(&[b"distributor", env.mint.as_ref(), &MONTH.to_le_bytes()], &pepper_dividends::ID).1);
     let record: MonthRecord = env.fetch(&month_record_pda(&env.mint, MONTH));
     assert_eq!((record.version, record.status, record.distributor, record.funded_at), (1, MONTH_STATUS_OPEN, distributor, env.now()));

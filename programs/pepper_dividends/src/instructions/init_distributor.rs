@@ -168,7 +168,10 @@ pub fn init_distributor(
     distributor.funded_by_fanex = funded_by_fanex;
     // The rent payer is the config's payer, held by its account's constraint.
     distributor.rents_by_payer = true;
-    distributor.reserved = [0; 54];
+    // Nothing fronted, nothing owed: a month a funder pays whole (the reserve's twin writes these).
+    distributor.fronted_amount = 0;
+    distributor.fee_unpaid = 0;
+    distributor.reserved = [0; 38];
     distributor.claimed = vec![0; claim_registry_bytes(leaf_count)];
 
     let record = &mut ctx.accounts.month_record;

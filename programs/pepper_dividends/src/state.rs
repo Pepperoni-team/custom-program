@@ -5,7 +5,7 @@
 
 use anchor_lang::prelude::*;
 
-use crate::constants::{DISTRIBUTOR_SEED, MAX_DISTRIBUTOR_LEAVES};
+use crate::constants::{DISTRIBUTOR_SEED, MAX_DISTRIBUTOR_LEAVES, RESERVE_SEED};
 use crate::validation::claim_registry_bytes;
 
 /// The program's one config (PDA: [CONFIG_SEED]), 403 bytes on chain (8 + 395).
@@ -89,8 +89,16 @@ pub struct UsdcDistributor {
     /// 2026-10-29, which refuses any other rent payer): only then does
     /// `rehome_distributor` move the rent payer. Taken from the reserved bytes then.
     pub rents_by_payer: bool,
+    /// µUSDC the dividend payer put into a month its token's reserve funded short
+    /// (`fund_month_from_reserve`, the reserve's spec §4.2): the void sends it back to the
+    /// rent payer first, the close does not (the creator owes it). 0 on every other month.
+    /// Taken from the reserved bytes on 2026-11-07.
+    pub fronted_amount: u64,
+    /// The part of Pepper's 3% the reserve could not pay at that funding, a debt of the
+    /// creator's; 0 on every other month. Taken from the reserved bytes on 2026-11-07.
+    pub fee_unpaid: u64,
     /// Room to grow without a layout break, before the bitmap, whose length varies.
-    pub reserved: [u8; 54],
+    pub reserved: [u8; 38],
     /// Bit `index % 8` of byte `index / 8`, least significant first, set once
     /// leaf `index` has claimed: exactly ⌈leaf_count / 8⌉ bytes.
     pub claimed: Vec<u8>,
@@ -98,7 +106,7 @@ pub struct UsdcDistributor {
 
 impl UsdcDistributor {
     /// The discriminator, every field before `claimed`, and the bitmap's 4-byte length.
-    pub const HEADER_SPACE: usize = 8 + 1 + 1 + 32 + 8 + 32 + 8 + 8 + 32 + 32 + 32 + 8 + 4 + 8 + 1 + 1 + 54 + 4;
+    pub const HEADER_SPACE: usize = 8 + 1 + 1 + 32 + 8 + 32 + 8 + 8 + 32 + 32 + 32 + 8 + 4 + 8 + 1 + 1 + 8 + 8 + 38 + 4;
 
     /// The account's size for `leaf_count` leaves, discriminator included. Clamped
     /// to `MAX_DISTRIBUTOR_LEAVES`, so an absurd count reaches the handler's
@@ -123,6 +131,42 @@ impl DistributorSeeds {
 
     pub fn seeds(&self) -> [&[u8]; 4] {
         [DISTRIBUTOR_SEED, self.mint.as_ref(), &self.month, &self.bump]
+    }
+}
+
+/// A token's dividend reserve (PDA: [RESERVE_SEED, mint]), 146 bytes on chain (8 + 138):
+/// whose USDC it is and whether a withdrawal is pending (the reserve's spec §3.1). The
+/// money sits in its vault, the reserve's associated USDC account, whose balance no field
+/// counts, stray transfers included. Never closed.
+#[account]
+#[derive(InitSpace)]
+pub struct DividendReserve {
+    pub version: u8,
+    pub bump: u8,
+    pub mint: Pubkey,
+    /// Whose USDC it is: the curve's creator at the first deposit, recorded because
+    /// `pepper_curve` can change a curve's creator. A withdrawal pays it; an empty reserve
+    /// passes to the curve's creator of the day at a deposit.
+    pub owner: Pubkey,
+    /// Unix seconds of the owner's pending withdrawal request, 0 when none.
+    pub withdrawal_requested_at: i64,
+    /// Room to grow without a layout break.
+    pub reserved: [u8; 64],
+}
+
+/// Owned copies of a reserve's seeds, so a handler signs for its vault.
+pub struct ReserveSeeds {
+    mint: Pubkey,
+    bump: [u8; 1],
+}
+
+impl ReserveSeeds {
+    pub fn of(reserve: &DividendReserve) -> Self {
+        Self { mint: reserve.mint, bump: [reserve.bump] }
+    }
+
+    pub fn seeds(&self) -> [&[u8]; 3] {
+        [RESERVE_SEED, self.mint.as_ref(), &self.bump]
     }
 }
 
@@ -202,8 +246,21 @@ mod tests {
             claims_held_until: 0x4444_4444_4444_4405,
             funded_by_fanex: true,
             rents_by_payer: false,
-            reserved: [0xCD; 54],
+            fronted_amount: 0x5555_5555_5555_5506,
+            fee_unpaid: 0x6666_6666_6666_6607,
+            reserved: [0xCD; 38],
             claimed: vec![0xEE; claim_registry_bytes(leaf_count)],
+        }
+    }
+
+    fn sample_reserve() -> DividendReserve {
+        DividendReserve {
+            version: 1,
+            bump: 251,
+            mint: key(41),
+            owner: key(42),
+            withdrawal_requested_at: 0x7777_7777_7777_7708,
+            reserved: [0xAD; 64],
         }
     }
 
@@ -222,17 +279,21 @@ mod tests {
     /// the bytes from `reserved` instead. Counted by hand, field by field (Pubkey
     /// 32, u64/i64 8, u32 4, u8/bool 1, [u8; n] n): DividendsConfig 3 x 1 + 8 +
     /// 8 x 32 + 128 = 395; the distributor's header 8 + 2 x 1 + 32 + 8 + 32 + 2 x
-    /// 8 + 3 x 32 + 8 + 4 + 8 + 2 x 1 + 54 + 4 = 274, the hold's 8 bytes taken from
-    /// the 64 reserved ones (2026-10-26), the two funding flags' 2 bytes from the 56
-    /// left (2026-10-29); MonthRecord 3 x 1 + 32 + 8 + 24 = 67.
+    /// 8 + 3 x 32 + 8 + 4 + 8 + 2 x 1 + 2 x 8 + 38 + 4 = 274, the hold's 8 bytes taken
+    /// from the 64 reserved ones (2026-10-26), the two funding flags' 2 bytes from the
+    /// 56 left (2026-10-29), the reserve's two amounts' 16 bytes from the 54 left
+    /// (2026-11-07); MonthRecord 3 x 1 + 32 + 8 + 24 = 67; DividendReserve 2 x 1 + 2 x
+    /// 32 + 8 + 64 = 138.
     #[test]
     fn layouts_are_pinned() {
         assert_eq!(DividendsConfig::INIT_SPACE, 395);
         assert_eq!(3 + 8 + 8 * 32 + 128, 395);
         assert_eq!(UsdcDistributor::HEADER_SPACE, 274);
-        assert_eq!(8 + 2 + 32 + 8 + 32 + 2 * 8 + 3 * 32 + 8 + 4 + 8 + 2 + 54 + 4, 274);
+        assert_eq!(8 + 2 + 32 + 8 + 32 + 2 * 8 + 3 * 32 + 8 + 4 + 8 + 2 + 2 * 8 + 38 + 4, 274);
         assert_eq!(MonthRecord::INIT_SPACE, 67);
         assert_eq!(3 + 32 + 8 + 24, 67);
+        assert_eq!(DividendReserve::INIT_SPACE, 138);
+        assert_eq!(2 + 2 * 32 + 8 + 64, 138);
     }
 
     #[test]
@@ -242,18 +303,58 @@ mod tests {
         assert_eq!(DividendsConfig::DISCRIMINATOR, &[20, 198, 109, 122, 226, 121, 191, 253]);
         assert_eq!(UsdcDistributor::DISCRIMINATOR, &[42, 186, 165, 125, 5, 62, 139, 212]);
         assert_eq!(MonthRecord::DISCRIMINATOR, &[253, 225, 197, 68, 4, 50, 181, 176]);
+        assert_eq!(DividendReserve::DISCRIMINATOR, &[152, 12, 197, 58, 185, 242, 122, 233]);
         for (name, discriminator) in [
             ("DividendsConfig", DividendsConfig::DISCRIMINATOR),
             ("UsdcDistributor", UsdcDistributor::DISCRIMINATOR),
             ("MonthRecord", MonthRecord::DISCRIMINATOR),
+            ("DividendReserve", DividendReserve::DISCRIMINATOR),
         ] {
             assert_eq!(&hash(format!("account:{name}").as_bytes()).to_bytes()[..8], discriminator, "{name}");
         }
-        // None reads as one of `pepper_curve`'s curves, whose bytes the creator read checks.
-        for discriminator in [DividendsConfig::DISCRIMINATOR, UsdcDistributor::DISCRIMINATOR, MonthRecord::DISCRIMINATOR] {
+        // None reads as one of `pepper_curve`'s accounts this program reads by hand.
+        for discriminator in [
+            DividendsConfig::DISCRIMINATOR,
+            UsdcDistributor::DISCRIMINATOR,
+            MonthRecord::DISCRIMINATOR,
+            DividendReserve::DISCRIMINATOR,
+        ] {
             assert_ne!(discriminator, crate::constants::CURVE_DISCRIMINATOR);
             assert_ne!(discriminator, crate::constants::CURVE_USDC_DISCRIMINATOR);
+            assert_ne!(discriminator, crate::constants::USDC_CONFIG_DISCRIMINATOR);
         }
+    }
+
+    #[test]
+    fn every_reserve_field_sits_at_its_offset() {
+        let bytes = account_bytes(&sample_reserve());
+        assert_eq!(bytes.len(), 146);
+        assert_eq!(&bytes[..8], DividendReserve::DISCRIMINATOR);
+        assert_fields_at(
+            &bytes,
+            &[
+                ("version", 8, vec![1]),
+                ("bump", 9, vec![251]),
+                ("mint", 10, key(41).to_bytes().to_vec()),
+                ("owner", 42, key(42).to_bytes().to_vec()),
+                ("withdrawal_requested_at", 74, 0x7777_7777_7777_7708i64.to_le_bytes().to_vec()),
+                ("reserved", 82, vec![0xAD; 64]),
+            ],
+        );
+    }
+
+    #[test]
+    fn the_reserve_signs_for_its_own_address() {
+        let mint = key(43);
+        let (address, bump) = Pubkey::find_program_address(&[RESERVE_SEED, mint.as_ref()], &crate::ID);
+        let reserve = DividendReserve { mint, bump, ..sample_reserve() };
+        let seeds = ReserveSeeds::of(&reserve);
+        assert_eq!(Pubkey::create_program_address(&seeds.seeds(), &crate::ID).unwrap(), address);
+        // Another token's reserve is another address, and none is a month's distributor.
+        let other = ReserveSeeds::of(&DividendReserve { mint: key(44), ..reserve.clone() });
+        assert_ne!(Pubkey::create_program_address(&other.seeds(), &crate::ID).ok(), Some(address));
+        let month = Pubkey::find_program_address(&[DISTRIBUTOR_SEED, mint.as_ref(), &202_611i64.to_le_bytes()], &crate::ID).0;
+        assert_ne!(month, address);
     }
 
     #[test]
@@ -308,7 +409,9 @@ mod tests {
                 ("claims_held_until", 206, i(0x4444_4444_4444_4405)),
                 ("funded_by_fanex", 214, vec![1]),
                 ("rents_by_payer", 215, vec![0]),
-                ("reserved", 216, vec![0xCD; 54]),
+                ("fronted_amount", 216, u(0x5555_5555_5555_5506)),
+                ("fee_unpaid", 224, u(0x6666_6666_6666_6607)),
+                ("reserved", 232, vec![0xCD; 38]),
                 // The bitmap: its u32 length, then one bit per leaf.
                 ("claimed's length", 270, 2u32.to_le_bytes().to_vec()),
                 ("claimed", 274, vec![0xEE; 2]),
@@ -363,15 +466,20 @@ mod tests {
         assert_eq!((config.version, config.claims_paused_until, config.reserved.len()), (0, 0, 128));
         let record = MonthRecord::try_from_slice(&[0u8; MonthRecord::INIT_SPACE]).unwrap();
         assert_eq!((record.status, record.reserved.len()), (0, 24));
+        let reserve = DividendReserve::try_from_slice(&[0u8; DividendReserve::INIT_SPACE]).unwrap();
+        assert_eq!((reserve.withdrawal_requested_at, reserve.owner, reserve.reserved.len()), (0, Pubkey::default(), 64));
         // A distributor's zeroed header reads as no leaf, no hold and an empty bitmap.
         let distributor = UsdcDistributor::try_from_slice(&[0u8; UsdcDistributor::HEADER_SPACE - 8]).unwrap();
         assert_eq!(
             (distributor.leaf_count, distributor.claims_held_until, distributor.claimed.len(), distributor.reserved.len()),
-            (0, 0, 0, 54)
+            (0, 0, 0, 38)
         );
         // And, as every month funded before 2026-10-29 reads, with neither funding flag: a month
         // no re-home may touch.
         assert_eq!((distributor.funded_by_fanex, distributor.rents_by_payer), (false, false));
+        // Nor, as every month funded before 2026-11-07 reads, anything fronted or owed: the bytes
+        // the reserve's two amounts took were reserved zeros in every month on chain.
+        assert_eq!((distributor.fronted_amount, distributor.fee_unpaid), (0, 0));
     }
 
     #[test]
@@ -422,12 +530,16 @@ mod tests {
         assert_eq!(mismatch, 3002);
         let (config, distributor, record) =
             (account_bytes(&sample_config()), account_bytes(&sample_distributor(14)), account_bytes(&sample_record()));
+        let reserve = account_bytes(&sample_reserve());
         assert_eq!(load_as::<DividendsConfig>(config.clone(), crate::ID), Ok(()));
         assert_eq!(load_as::<UsdcDistributor>(distributor.clone(), crate::ID), Ok(()));
         assert_eq!(load_as::<MonthRecord>(record.clone(), crate::ID), Ok(()));
+        assert_eq!(load_as::<DividendReserve>(reserve.clone(), crate::ID), Ok(()));
         assert_eq!(load_as::<UsdcDistributor>(record.clone(), crate::ID), Err(mismatch));
         assert_eq!(load_as::<MonthRecord>(distributor.clone(), crate::ID), Err(mismatch));
         assert_eq!(load_as::<DividendsConfig>(distributor.clone(), crate::ID), Err(mismatch));
+        assert_eq!(load_as::<DividendReserve>(distributor.clone(), crate::ID), Err(mismatch));
+        assert_eq!(load_as::<UsdcDistributor>(reserve.clone(), crate::ID), Err(mismatch));
         // The same bytes under another program's ownership load as nothing of ours.
         let wrong_owner = u32::from(anchor_lang::error::ErrorCode::AccountOwnedByWrongProgram);
         assert_eq!(wrong_owner, 3007);

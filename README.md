@@ -22,7 +22,7 @@ are part of the deployed account layout and of the IDL every client decodes with
 | Program | Build | Executable hash (`solana-verify`) |
 |---|---|---|
 | `pepper_curve` | N+3 since 2026-11-09: the verifiable build of this repository's `programs/pepper_curve` | `699109070811c9aff4c51bba212d70d90410974eb6bc32f709436387f8511564` |
-| `pepper_dividends` | the verifiable build of `programs/pepper_dividends` | `200a978c9f28a272a75f109856421217485c5b110a303d4cd4ad5f76ce702e08` |
+| `pepper_dividends` | the reserve since 2026-11-19: the verifiable build of `programs/pepper_dividends` | `a3566a9eddf5a632ef6f14c2ffbcbeadc716f9c6c7d60667b3ad1e93d154a6a8` |
 
 Both programs are upgradeable, and their upgrade authority is the vault of a
 [Squads v4](https://squads.xyz) multisig, three signatures of five: no single key can change either

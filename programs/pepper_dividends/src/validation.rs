@@ -6,11 +6,14 @@
 use anchor_lang::prelude::*;
 
 use crate::constants::{
-    ACCOUNT_VERSION, CLAIMS_OPEN_BEFORE_CLOSE_SECONDS, CURVE_CREATOR_OFFSET, CURVE_DISCRIMINATOR, CURVE_LEN,
-    CURVE_USDC_CREATOR_OFFSET, CURVE_USDC_DISCRIMINATOR, CURVE_USDC_LEN, CURVE_USDC_VERSION,
+    ACCOUNT_VERSION, BPS_DENOMINATOR, CLAIMS_OPEN_BEFORE_CLOSE_SECONDS, CURVE_CREATOR_OFFSET, CURVE_DISCRIMINATOR,
+    CURVE_LEN, CURVE_USDC_CREATOR_OFFSET, CURVE_USDC_DISCRIMINATOR, CURVE_USDC_LEN, CURVE_USDC_VERSION,
     LEGACY_DISTRIBUTOR_DISCRIMINATOR, LEGACY_DISTRIBUTOR_V2_DISCRIMINATOR, LEGACY_EXPIRES_AT_OFFSET,
     MAX_CLAIMS_PAUSE_SECONDS, MAX_CLOSE_DELAY_SECONDS, MAX_DISTRIBUTOR_EXPIRY_SECONDS, MAX_DISTRIBUTOR_LEAVES,
-    MIN_CLAIMS_PAUSE_SECONDS, MIN_DISTRIBUTOR_EXPIRY_SECONDS, MONTH_STATUS_VOIDED, REVIEW_WINDOW_SECONDS,
+    MAX_MONTH_YEAR, MIN_CLAIMS_PAUSE_SECONDS, MIN_DISTRIBUTOR_EXPIRY_SECONDS, MIN_MONTH_YEAR, MONTH_STATUS_VOIDED,
+    RECORD_INSTANT_OFFSET_SECONDS, RESERVE_MONTH_FEE_BPS, RESERVE_WITHDRAWAL_DELAY_SECONDS, REVIEW_WINDOW_SECONDS,
+    USDC_CONFIG_DISCRIMINATOR, USDC_CONFIG_FEE_USDC_ACCOUNT_OFFSET, USDC_CONFIG_LEN, USDC_CONFIG_USDC_MINT_OFFSET,
+    USDC_CONFIG_VERSION,
 };
 use crate::errors::DividendsError;
 
@@ -340,6 +343,146 @@ pub fn check_void(claimed_amount: u64, claimed: &[u8]) -> Result<()> {
     } else {
         Ok(())
     }
+}
+
+/// What a void sends where (the reserve's spec §4.6), as (to the rent payer, to the funder): what
+/// the payer fronted into a month its reserve funded short goes back to it first, as far as the
+/// vault holds it, and the rest to the funder's recorded account, the reserve's vault.
+pub fn void_split(vault: u64, fronted_amount: u64) -> (u64, u64) {
+    let to_payer = vault.min(fronted_amount);
+    (to_payer, vault - to_payer)
+}
+
+// ── The reserve (the reserve's spec, 2026-11-07) ────────────────────────────
+
+/// Who owns a reserve after a deposit by `depositor`, the curve's creator (§4.1): the depositor
+/// when the reserve is born in this deposit (its owner all-zero), is already theirs, or holds
+/// nothing, an empty reserve passing to the curve's creator of the day; a reserve holding another
+/// owner's USDC is `ReserveOwnedByAnother`. A pending withdrawal refuses every deposit first
+/// (`WithdrawalPending`).
+pub fn reserve_owner_after_deposit(
+    owner: &Pubkey,
+    depositor: &Pubkey,
+    vault_balance: u64,
+    withdrawal_requested_at: i64,
+) -> Result<Pubkey> {
+    if withdrawal_requested_at != 0 {
+        return err!(DividendsError::WithdrawalPending);
+    }
+    if *owner == Pubkey::default() || owner == depositor || vault_balance == 0 {
+        Ok(*depositor)
+    } else {
+        err!(DividendsError::ReserveOwnedByAnother)
+    }
+}
+
+/// Pepper's 3% of a month whose holders' 97% is `total_amount`: `floor(total × 300 / 9,700)`
+/// (`RESERVE_MONTH_FEE_BPS`), in u128 so no total overflows it, and always below the total.
+pub fn reserve_month_fee(total_amount: u64) -> u64 {
+    let fee = u128::from(total_amount) * u128::from(RESERVE_MONTH_FEE_BPS)
+        / u128::from(BPS_DENOMINATOR - RESERVE_MONTH_FEE_BPS);
+    // Below `total_amount`, a u64, since 300 / 9,700 < 1.
+    fee as u64
+}
+
+/// How a month of `total_amount` µUSDC is funded from a reserve holding `reserve` (§4.2): the
+/// holders first, from the reserve as far as it goes and the dividend payer fronting the rest;
+/// then Pepper's fee from what the reserve has left, the part it cannot pay owed.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ReserveSplit {
+    /// µUSDC from the reserve's vault into the month's.
+    pub from_reserve: u64,
+    /// µUSDC from the dividend payer into the month's vault.
+    pub fronted: u64,
+    /// Pepper's fee paid from the reserve.
+    pub fee_from_reserve: u64,
+    /// Pepper's fee the reserve could not pay.
+    pub fee_unpaid: u64,
+}
+
+/// The split of `total_amount` (positive, `ZeroAmount` before) over a reserve holding `reserve`
+/// µUSDC; an empty reserve is `ReserveEmpty`: a month a reserve cannot pay a cent of is the
+/// payer's own `init_distributor`, never one recorded as the reserve's.
+pub fn reserve_split(reserve: u64, total_amount: u64) -> Result<ReserveSplit> {
+    require!(reserve > 0, DividendsError::ReserveEmpty);
+    let fee = reserve_month_fee(total_amount);
+    let from_reserve = reserve.min(total_amount);
+    let fee_from_reserve = (reserve - from_reserve).min(fee);
+    Ok(ReserveSplit {
+        from_reserve,
+        fronted: total_amount - from_reserve,
+        fee_from_reserve,
+        fee_unpaid: fee - fee_from_reserve,
+    })
+}
+
+/// Days from 1970-01-01 to `year`-`month`-`day`, proleptic Gregorian (Howard Hinnant's
+/// `days_from_civil`), for years from 0 on.
+fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
+    let y = if month <= 2 { year - 1 } else { year };
+    let era = y / 400;
+    let year_of_era = y - era * 400;
+    let day_of_year = (153 * ((month + 9) % 12) + 2) / 5 + day - 1;
+    let day_of_era = year_of_era * 365 + year_of_era / 4 - year_of_era / 100 + day_of_year;
+    era * 146_097 + day_of_era - 719_468
+}
+
+/// The record instant of month key `month` (YYYYMM): 00:01 UTC on the 1st of the month after it,
+/// when its holders are fixed (`RECORD_INSTANT_OFFSET_SECONDS`). A key that is no month of
+/// `MIN_MONTH_YEAR` to `MAX_MONTH_YEAR` is `InvalidMonth`.
+pub fn month_record_instant(month: i64) -> Result<i64> {
+    let (year, month_of_year) = (month / 100, month % 100);
+    if !(MIN_MONTH_YEAR..=MAX_MONTH_YEAR).contains(&year) || !(1..=12).contains(&month_of_year) {
+        return err!(DividendsError::InvalidMonth);
+    }
+    let (next_year, next_month) = if month_of_year == 12 { (year + 1, 1) } else { (year, month_of_year + 1) };
+    Ok(days_from_civil(next_year, next_month, 1) * 86_400 + RECORD_INSTANT_OFFSET_SECONDS)
+}
+
+/// Whether a reserve may fund `month` (§4.2): any month while no withdrawal is pending; with one
+/// pending, only a month accrued by its request, its record instant at or before it
+/// (`MonthAfterWithdrawalRequest`, `InvalidMonth` for a key that is no month).
+pub fn check_month_before_withdrawal(month: i64, withdrawal_requested_at: i64) -> Result<()> {
+    if withdrawal_requested_at == 0 || month_record_instant(month)? <= withdrawal_requested_at {
+        Ok(())
+    } else {
+        err!(DividendsError::MonthAfterWithdrawalRequest)
+    }
+}
+
+/// When a withdrawal requested at `requested_at` may run: `RESERVE_WITHDRAWAL_DELAY_SECONDS` on.
+pub fn withdrawable_at(requested_at: i64) -> i64 {
+    requested_at.saturating_add(RESERVE_WITHDRAWAL_DELAY_SECONDS)
+}
+
+/// `withdraw_reserve` (§4.5): a request pending (`NoWithdrawalPending`) for its whole delay
+/// (`WithdrawalNotReady`).
+pub fn check_withdrawal_ready(withdrawal_requested_at: i64, now: i64) -> Result<()> {
+    if withdrawal_requested_at == 0 {
+        return err!(DividendsError::NoWithdrawalPending);
+    }
+    if now < withdrawable_at(withdrawal_requested_at) {
+        return err!(DividendsError::WithdrawalNotReady);
+    }
+    Ok(())
+}
+
+/// The USDC mint and the fee account of `pepper_curve`'s `UsdcConfig`, read by hand from its
+/// account (§4.2): owned by `curve_program`, its discriminator, its exact length and its version
+/// (`USDC_CONFIG_VERSION`). Anything else is `UsdcConfigUnreadable`, never «no fee account».
+pub fn usdc_config_fee_account(owner: &Pubkey, curve_program: &Pubkey, data: &[u8]) -> Result<(Pubkey, Pubkey)> {
+    if owner != curve_program
+        || data.len() != USDC_CONFIG_LEN
+        || data[..8] != USDC_CONFIG_DISCRIMINATOR
+        || data[8] != USDC_CONFIG_VERSION
+    {
+        return err!(DividendsError::UsdcConfigUnreadable);
+    }
+    let read = |at: usize| -> Result<Pubkey> {
+        let bytes: [u8; 32] = data[at..at + 32].try_into().map_err(|_| error!(DividendsError::UsdcConfigUnreadable))?;
+        Ok(Pubkey::new_from_array(bytes))
+    };
+    Ok((read(USDC_CONFIG_USDC_MINT_OFFSET)?, read(USDC_CONFIG_FEE_USDC_ACCOUNT_OFFSET)?))
 }
 
 #[cfg(test)]
@@ -942,5 +1085,189 @@ mod close_and_void_tests {
         let mut registry = [0u8; 8_192];
         registry[8_191] = 0x80;
         assert_eq!(refusal(check_void(0, &registry)).as_deref(), Some("MonthHasClaims"));
+    }
+
+    #[test]
+    fn a_void_hands_the_payer_back_what_it_fronted_first() {
+        // A month the reserve paid in full: everything to the reserve.
+        assert_eq!(void_split(97_000_000, 0), (0, 97_000_000));
+        // Funded short: the payer's part first, the reserve's after it.
+        assert_eq!(void_split(97_000_000, 7_000_000), (7_000_000, 90_000_000));
+        // A vault short of the fronted part (nothing claimed, so only a stranger's loss could do
+        // it) hands the payer what is there and the reserve nothing; an empty vault moves nothing.
+        assert_eq!(void_split(5_000_000, 7_000_000), (5_000_000, 0));
+        assert_eq!(void_split(0, 7_000_000), (0, 0));
+        // A stray transfer into the vault rides with the reserve's part.
+        assert_eq!(void_split(97_000_001, 7_000_000), (7_000_000, 90_000_001));
+    }
+}
+
+#[cfg(test)]
+mod reserve_tests {
+    use super::test_support::refusal;
+    use super::*;
+
+    const DAY: i64 = 86_400;
+
+    fn key(byte: u8) -> Pubkey {
+        Pubkey::new_from_array([byte; 32])
+    }
+
+    #[test]
+    fn a_deposit_keeps_or_takes_the_reserve_and_never_anothers_money() {
+        let (creator, other) = (key(1), key(2));
+        // Born in this deposit, or already the depositor's: the depositor's.
+        assert_eq!(reserve_owner_after_deposit(&Pubkey::default(), &creator, 0, 0).unwrap(), creator);
+        assert_eq!(reserve_owner_after_deposit(&creator, &creator, 5_000_000, 0).unwrap(), creator);
+        // Another owner's reserve: refused while it holds a µUSDC, taken over once it is empty.
+        assert_eq!(
+            refusal(reserve_owner_after_deposit(&other, &creator, 1, 0)).as_deref(),
+            Some("ReserveOwnedByAnother")
+        );
+        assert_eq!(reserve_owner_after_deposit(&other, &creator, 0, 0).unwrap(), creator);
+        // A pending withdrawal refuses every deposit, the owner's own and on an empty reserve too.
+        for (owner, balance) in [(creator, 5_000_000), (creator, 0), (other, 0)] {
+            assert_eq!(
+                refusal(reserve_owner_after_deposit(&owner, &creator, balance, 1_800_000_000)).as_deref(),
+                Some("WithdrawalPending")
+            );
+        }
+    }
+
+    #[test]
+    fn the_fee_is_3_of_the_month_whose_97_the_holders_get() {
+        assert_eq!(reserve_month_fee(97_000_000), 3_000_000);
+        assert_eq!(reserve_month_fee(9_700), 300);
+        // Floored: 96 µUSDC carry a fee of 2.97, so 2; 32 carry 0.99, so nothing.
+        assert_eq!(reserve_month_fee(97), 3);
+        assert_eq!(reserve_month_fee(96), 2);
+        assert_eq!(reserve_month_fee(32), 0);
+        // No total overflows it, and the fee stays below the total.
+        let fee = reserve_month_fee(u64::MAX);
+        assert_eq!(u128::from(fee), u128::from(u64::MAX) * 300 / 9_700);
+        assert!(fee < u64::MAX);
+    }
+
+    #[test]
+    fn a_reserve_pays_the_holders_first_and_the_fee_from_what_is_left() {
+        const TOTAL: u64 = 97_000_000;
+        const FEE: u64 = 3_000_000;
+        let split = |reserve: u64| reserve_split(reserve, TOTAL).unwrap();
+        // Enough for the month and the fee: all of it from the reserve.
+        assert_eq!(split(500_000_000), ReserveSplit { from_reserve: TOTAL, fronted: 0, fee_from_reserve: FEE, fee_unpaid: 0 });
+        assert_eq!(split(TOTAL + FEE), ReserveSplit { from_reserve: TOTAL, fronted: 0, fee_from_reserve: FEE, fee_unpaid: 0 });
+        // The month and part of the fee: the rest of the fee owed.
+        assert_eq!(
+            split(TOTAL + 1_000_000),
+            ReserveSplit { from_reserve: TOTAL, fronted: 0, fee_from_reserve: 1_000_000, fee_unpaid: 2_000_000 }
+        );
+        // Exactly the month: the whole fee owed.
+        assert_eq!(split(TOTAL), ReserveSplit { from_reserve: TOTAL, fronted: 0, fee_from_reserve: 0, fee_unpaid: FEE });
+        // Short of the month: the payer fronts the rest, and the whole fee is owed.
+        assert_eq!(
+            split(90_000_000),
+            ReserveSplit { from_reserve: 90_000_000, fronted: 7_000_000, fee_from_reserve: 0, fee_unpaid: FEE }
+        );
+        assert_eq!(split(1), ReserveSplit { from_reserve: 1, fronted: TOTAL - 1, fee_from_reserve: 0, fee_unpaid: FEE });
+        // Every case adds up: the vault gets the total, the fee is paid or owed.
+        for reserve in [1, 90_000_000, TOTAL, TOTAL + 1, TOTAL + FEE - 1, TOTAL + FEE, u64::MAX] {
+            let s = split(reserve);
+            assert_eq!(s.from_reserve + s.fronted, TOTAL, "{reserve}");
+            assert_eq!(s.fee_from_reserve + s.fee_unpaid, FEE, "{reserve}");
+            assert!(s.from_reserve + s.fee_from_reserve <= reserve, "{reserve}");
+        }
+        // An empty reserve funds nothing: the payer's own month, never one recorded as the reserve's.
+        assert_eq!(refusal(reserve_split(0, TOTAL)).as_deref(), Some("ReserveEmpty"));
+    }
+
+    #[test]
+    fn a_month_is_dated_by_its_record_instant() {
+        // October 2026's holders are fixed at 00:01 UTC on 1 November 2026.
+        assert_eq!(month_record_instant(202_610).unwrap(), 1_793_491_200 + 60);
+        // December rolls into the next year.
+        assert_eq!(month_record_instant(202_612).unwrap(), 1_798_761_600 + 60);
+        // February of a leap year and of a common one: 29 and 28 days to March.
+        assert_eq!(month_record_instant(202_803).unwrap() - month_record_instant(202_802).unwrap(), 31 * DAY);
+        assert_eq!(month_record_instant(202_802).unwrap() - month_record_instant(202_801).unwrap(), 29 * DAY);
+        assert_eq!(month_record_instant(202_702).unwrap() - month_record_instant(202_701).unwrap(), 28 * DAY);
+        // The year 2100 is no leap year, 2000-style rules held.
+        assert_eq!(month_record_instant(210_002).unwrap() - month_record_instant(210_001).unwrap(), 28 * DAY);
+        // The epoch itself, through the same formula.
+        assert_eq!(days_from_civil(1_970, 1, 1), 0);
+        assert_eq!(days_from_civil(2_000, 3, 1), 11_017);
+        // A key that is no month.
+        for month in [202_600, 202_613, 202_699, 201_912, 220_101, 0, -202_611, 2_026, i64::MAX, i64::MIN] {
+            assert_eq!(refusal(month_record_instant(month)).as_deref(), Some("InvalidMonth"), "{month}");
+        }
+        assert!(month_record_instant(202_001).is_ok() && month_record_instant(220_012).is_ok());
+    }
+
+    #[test]
+    fn with_a_withdrawal_pending_only_a_month_accrued_before_it_is_paid() {
+        let october_fixed = month_record_instant(202_610).unwrap();
+        // Nothing pending: any month, even a key that is no month (the program never dates one then).
+        assert_eq!(refusal(check_month_before_withdrawal(202_611, 0)), None);
+        assert_eq!(refusal(check_month_before_withdrawal(42, 0)), None);
+        // A request at October's record instant or later: October paid, November not.
+        assert_eq!(refusal(check_month_before_withdrawal(202_610, october_fixed)), None);
+        assert_eq!(refusal(check_month_before_withdrawal(202_610, october_fixed + 10 * DAY)), None);
+        assert_eq!(
+            refusal(check_month_before_withdrawal(202_611, october_fixed + 10 * DAY)).as_deref(),
+            Some("MonthAfterWithdrawalRequest")
+        );
+        // A second before October's instant: October not yet accrued.
+        assert_eq!(
+            refusal(check_month_before_withdrawal(202_610, october_fixed - 1)).as_deref(),
+            Some("MonthAfterWithdrawalRequest")
+        );
+        // A key that is no month, with a request pending.
+        assert_eq!(refusal(check_month_before_withdrawal(202_613, october_fixed)).as_deref(), Some("InvalidMonth"));
+    }
+
+    #[test]
+    fn a_withdrawal_waits_its_45_days() {
+        let requested = 1_800_000_000;
+        assert_eq!(withdrawable_at(requested), requested + 45 * DAY);
+        assert_eq!(refusal(check_withdrawal_ready(0, requested)).as_deref(), Some("NoWithdrawalPending"));
+        assert_eq!(
+            refusal(check_withdrawal_ready(requested, requested + 45 * DAY - 1)).as_deref(),
+            Some("WithdrawalNotReady")
+        );
+        assert_eq!(refusal(check_withdrawal_ready(requested, requested + 45 * DAY)), None);
+        // A clock at the edge saturates instead of wrapping into the past.
+        assert_eq!(withdrawable_at(i64::MAX - 1), i64::MAX);
+        assert_eq!(refusal(check_withdrawal_ready(i64::MAX - 1, i64::MAX - 1)).as_deref(), Some("WithdrawalNotReady"));
+    }
+
+    /// A `UsdcConfig`'s bytes as `pepper_curve` stores them, its USDC and fee account at their offsets.
+    fn usdc_config_bytes(usdc_mint: Pubkey, fee_account: Pubkey) -> Vec<u8> {
+        let mut data = vec![0u8; USDC_CONFIG_LEN];
+        data[..8].copy_from_slice(&USDC_CONFIG_DISCRIMINATOR);
+        data[8] = USDC_CONFIG_VERSION;
+        data[USDC_CONFIG_USDC_MINT_OFFSET..USDC_CONFIG_USDC_MINT_OFFSET + 32].copy_from_slice(usdc_mint.as_ref());
+        data[USDC_CONFIG_FEE_USDC_ACCOUNT_OFFSET..USDC_CONFIG_FEE_USDC_ACCOUNT_OFFSET + 32]
+            .copy_from_slice(fee_account.as_ref());
+        data
+    }
+
+    #[test]
+    fn the_usdc_config_is_read_by_hand_or_refused() {
+        let (curve_program, usdc, fee) = (key(9), key(10), key(11));
+        let data = usdc_config_bytes(usdc, fee);
+        assert_eq!(usdc_config_fee_account(&curve_program, &curve_program, &data).unwrap(), (usdc, fee));
+        // Another owner, length, discriminator or version: unreadable, never «no fee account».
+        let unreadable = |owner: &Pubkey, data: &[u8]| refusal(usdc_config_fee_account(owner, &curve_program, data));
+        assert_eq!(unreadable(&key(12), &data).as_deref(), Some("UsdcConfigUnreadable"));
+        assert_eq!(unreadable(&curve_program, &data[..USDC_CONFIG_LEN - 1]).as_deref(), Some("UsdcConfigUnreadable"));
+        let mut longer = data.clone();
+        longer.push(0);
+        assert_eq!(unreadable(&curve_program, &longer).as_deref(), Some("UsdcConfigUnreadable"));
+        let mut other_name = data.clone();
+        other_name[0] ^= 1;
+        assert_eq!(unreadable(&curve_program, &other_name).as_deref(), Some("UsdcConfigUnreadable"));
+        let mut other_version = data.clone();
+        other_version[8] = 2;
+        assert_eq!(unreadable(&curve_program, &other_version).as_deref(), Some("UsdcConfigUnreadable"));
+        assert_eq!(unreadable(&curve_program, &[]).as_deref(), Some("UsdcConfigUnreadable"));
     }
 }

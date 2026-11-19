@@ -4,6 +4,8 @@
 //! into the distributor's vault against a merkle root, each holder claims their
 //! leaf into their own USDC account, and the close returns to the funder what
 //! nobody claimed. A month funded in SOL stays in `pepper_curve` until it closes.
+//! A creator may prepay months into the token's reserve, which then funds them
+//! (docs/superpowers/specs/2026-11-07-dividend-reserve-design.md).
 //! Spec: docs/superpowers/specs/2026-10-21-usdc-dividends-program-design.md;
 //! canonical doc: docs/solana/PEPPER-DIVIDENDS-PROGRAM.md.
 //!
@@ -122,6 +124,43 @@ pub mod pepper_dividends {
     /// total grows by as much, its root stays.
     pub fn top_up_distributor(ctx: Context<TopUpDistributor>, amount: u64) -> Result<()> {
         instructions::top_up::top_up_distributor(ctx, amount)
+    }
+
+    // ── The reserve (the reserve's spec, 2026-11-07) ─────────────────────────
+
+    /// The curve's creator's USDC into the token's reserve, the dividend payer paying its rents at
+    /// the first deposit.
+    pub fn deposit_reserve(ctx: Context<DepositReserve>, amount: u64) -> Result<()> {
+        instructions::deposit_reserve::deposit_reserve(ctx, amount)
+    }
+
+    /// A month funded from its token's reserve, with the approver's and the dividend payer's
+    /// signatures: the holders first, the payer fronting what the reserve lacks, then Pepper's 3%.
+    pub fn fund_month_from_reserve(
+        ctx: Context<FundMonthFromReserve>,
+        month: i64,
+        merkle_root: [u8; 32],
+        total_amount: u64,
+        expires_at: i64,
+        leaf_count: u32,
+    ) -> Result<()> {
+        instructions::fund_from_reserve::fund_month_from_reserve(ctx, month, merkle_root, total_amount, expires_at, leaf_count)
+    }
+
+    /// The reserve's owner asks for it back: from then on it pays only months accrued before.
+    pub fn request_reserve_withdrawal(ctx: Context<ReserveRequest>) -> Result<()> {
+        instructions::reserve_withdrawal::request_reserve_withdrawal(ctx)
+    }
+
+    /// The owner's pending request cancelled.
+    pub fn cancel_reserve_withdrawal(ctx: Context<ReserveRequest>) -> Result<()> {
+        instructions::reserve_withdrawal::cancel_reserve_withdrawal(ctx)
+    }
+
+    /// The reserve's whole balance back to its owner, 45 days after the request, signed by the
+    /// owner alone.
+    pub fn withdraw_reserve(ctx: Context<WithdrawReserve>) -> Result<()> {
+        instructions::reserve_withdrawal::withdraw_reserve(ctx)
     }
 }
 

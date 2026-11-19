@@ -12,6 +12,60 @@
   ],
   "instructions": [
     {
+      "name": "cancel_reserve_withdrawal",
+      "docs": [
+        "The owner's pending request cancelled."
+      ],
+      "discriminator": [
+        231,
+        162,
+        169,
+        195,
+        21,
+        52,
+        174,
+        29
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "docs": [
+            "The reserve's owner (`Unauthorized` for anyone else)."
+          ],
+          "signer": true,
+          "relations": [
+            "reserve"
+          ]
+        },
+        {
+          "name": "reserve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  101,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "reserve.mint",
+                "account": "DividendReserve"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "claim",
       "docs": [
         "Leaf `index` paid into the claimant's own USDC account, from any sender."
@@ -384,6 +438,526 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "deposit_reserve",
+      "docs": [
+        "The curve's creator's USDC into the token's reserve, the dividend payer paying its rents at",
+        "the first deposit."
+      ],
+      "discriminator": [
+        187,
+        75,
+        224,
+        96,
+        122,
+        233,
+        220,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "docs": [
+            "The curve's creator: its USDC pays."
+          ],
+          "signer": true
+        },
+        {
+          "name": "rent_payer",
+          "docs": [
+            "Pays the reserve's and its vault's rents at the first deposit: the config's dividend payer",
+            "(`Unauthorized` for any other key), as for a month's rents."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "curve",
+          "docs": [
+            "read by hand (`curve_creator`): only the curve's creator deposits."
+          ]
+        },
+        {
+          "name": "reserve",
+          "docs": [
+            "The token's reserve, born at its first deposit. One this deposit creates reads version 0, as",
+            "a month's record does at its funding; any version but that and `ACCOUNT_VERSION` is",
+            "`UnsupportedVersion`."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  101,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reserve_vault",
+          "docs": [
+            "The reserve's vault, its associated USDC account, born at the first deposit. Anchor checks",
+            "what it finds (its mint, its owner, its token program, its address)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "reserve"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "creator_usdc",
+          "docs": [
+            "The creator's own USDC ATA (`AccountMismatch` for any other account)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The config's USDC (`AccountMismatch` for another mint)."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "fund_month_from_reserve",
+      "docs": [
+        "A month funded from its token's reserve, with the approver's and the dividend payer's",
+        "signatures: the holders first, the payer fronting what the reserve lacks, then Pepper's 3%."
+      ],
+      "discriminator": [
+        48,
+        146,
+        195,
+        216,
+        244,
+        167,
+        29,
+        236
+      ],
+      "accounts": [
+        {
+          "name": "approver",
+          "docs": [
+            "The config's approver, a key of its own, co-signing every month (`Unauthorized` for another)."
+          ],
+          "signer": true
+        },
+        {
+          "name": "rent_payer",
+          "docs": [
+            "The config's dividend payer (`Unauthorized` for any other key): it pays the three rents, as",
+            "for every month, and fronts from its USDC what the reserve lacks."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "legacy_distributor",
+          "docs": [
+            "`init_distributor` (`LegacyMonthLive`)."
+          ]
+        },
+        {
+          "name": "month_record",
+          "docs": [
+            "Created with the month and never closed, checked before the distributor as by",
+            "`init_distributor` (`MonthAlreadyFunded`, `UnsupportedVersion`)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  110,
+                  116,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "arg",
+                "path": "month"
+              }
+            ]
+          }
+        },
+        {
+          "name": "distributor",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "arg",
+                "path": "month"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "The distributor's associated USDC account, `init_if_needed` as at `init_distributor`."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "distributor"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "reserve",
+          "docs": [
+            "The token's reserve, born by a deposit (`AccountNotInitialized` before one)."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  101,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reserve_vault",
+          "docs": [
+            "The reserve's vault: its balance is what the reserve can pay."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "reserve"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "payer_usdc",
+          "docs": [
+            "transfer alone and only when the reserve is short of the month, so a payer with no USDC",
+            "account funds a month the reserve covers."
+          ],
+          "writable": true
+        },
+        {
+          "name": "usdc_config",
+          "docs": [
+            "(`ConstraintSeeds` for another address), read by hand (`usdc_config_fee_account`) for its USDC",
+            "and its fee account."
+          ]
+        },
+        {
+          "name": "fee_usdc_account",
+          "docs": [
+            "Pepper's 3% goes; read by the transfer alone, and only when the reserve pays some of it."
+          ],
+          "writable": true
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The config's USDC (`AccountMismatch` for another mint)."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "month",
+          "type": "i64"
+        },
+        {
+          "name": "merkle_root",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "total_amount",
+          "type": "u64"
+        },
+        {
+          "name": "expires_at",
+          "type": "i64"
+        },
+        {
+          "name": "leaf_count",
+          "type": "u32"
+        }
+      ]
     },
     {
       "name": "hold_claims",
@@ -1040,6 +1614,60 @@
       "args": []
     },
     {
+      "name": "request_reserve_withdrawal",
+      "docs": [
+        "The reserve's owner asks for it back: from then on it pays only months accrued before."
+      ],
+      "discriminator": [
+        33,
+        211,
+        240,
+        185,
+        202,
+        52,
+        193,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "docs": [
+            "The reserve's owner (`Unauthorized` for anyone else)."
+          ],
+          "signer": true,
+          "relations": [
+            "reserve"
+          ]
+        },
+        {
+          "name": "reserve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  101,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "reserve.mint",
+                "account": "DividendReserve"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "resume_claims",
       "docs": [
         "Claims open again, by the admin alone, at the time it runs."
@@ -1508,12 +2136,188 @@
         {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "rent_payer_usdc_account",
+          "docs": [
+            "the dividend payer fronted into a month its reserve funded short goes back first",
+            "(`fronted_amount`, 2026-11-07). Read by the transfer alone, and only on such a month. Last, so",
+            "every account before it keeps its place."
+          ],
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "withdraw_reserve",
+      "docs": [
+        "The reserve's whole balance back to its owner, 45 days after the request, signed by the",
+        "owner alone."
+      ],
+      "discriminator": [
+        165,
+        158,
+        228,
+        5,
+        114,
+        119,
+        194,
+        14
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "docs": [
+            "The reserve's owner (`Unauthorized` for anyone else)."
+          ],
+          "signer": true,
+          "relations": [
+            "reserve"
+          ]
+        },
+        {
+          "name": "config",
+          "docs": [
+            "Binds the USDC, so the vault is the reserve's USDC account and no other token's."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "reserve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  101,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "reserve.mint",
+                "account": "DividendReserve"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reserve_vault",
+          "docs": [
+            "The reserve's vault, its associated USDC account."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "reserve"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "owner_usdc",
+          "docs": [
+            "alone: an empty reserve withdraws while it is closed, and one holding USDC needs it opened",
+            "again first, `create_idempotent` in the same transaction."
+          ],
+          "writable": true
+        },
+        {
+          "name": "usdc_mint",
+          "docs": [
+            "The config's USDC (`AccountMismatch` for another mint)."
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
       "args": []
     }
   ],
   "accounts": [
+    {
+      "name": "DividendReserve",
+      "discriminator": [
+        152,
+        12,
+        197,
+        58,
+        185,
+        242,
+        122,
+        233
+      ]
+    },
     {
       "name": "DividendsConfig",
       "discriminator": [
@@ -1608,6 +2412,58 @@
       ]
     },
     {
+      "name": "ReserveDeposited",
+      "discriminator": [
+        97,
+        31,
+        143,
+        158,
+        209,
+        4,
+        254,
+        91
+      ]
+    },
+    {
+      "name": "ReserveWithdrawalCancelled",
+      "discriminator": [
+        255,
+        141,
+        85,
+        3,
+        157,
+        188,
+        26,
+        131
+      ]
+    },
+    {
+      "name": "ReserveWithdrawalRequested",
+      "discriminator": [
+        237,
+        250,
+        56,
+        20,
+        5,
+        106,
+        175,
+        216
+      ]
+    },
+    {
+      "name": "ReserveWithdrawn",
+      "discriminator": [
+        186,
+        11,
+        109,
+        7,
+        117,
+        246,
+        188,
+        249
+      ]
+    },
+    {
       "name": "UsdcDistributorClosed",
       "discriminator": [
         172,
@@ -1621,6 +2477,19 @@
       ]
     },
     {
+      "name": "UsdcDistributorFrontedReturned",
+      "discriminator": [
+        128,
+        122,
+        66,
+        195,
+        228,
+        58,
+        41,
+        156
+      ]
+    },
+    {
       "name": "UsdcDistributorFunded",
       "discriminator": [
         28,
@@ -1631,6 +2500,19 @@
         57,
         207,
         163
+      ]
+    },
+    {
+      "name": "UsdcDistributorFundedFromReserve",
+      "discriminator": [
+        123,
+        133,
+        149,
+        163,
+        130,
+        161,
+        181,
+        69
       ]
     },
     {
@@ -1821,6 +2703,51 @@
       "code": 6026,
       "name": "NotRehomable",
       "msg": "This month records no Fanex payee to re-home, or the config names no payer"
+    },
+    {
+      "code": 6027,
+      "name": "NotTheCreator",
+      "msg": "Only the curve's creator may deposit into its reserve"
+    },
+    {
+      "code": 6028,
+      "name": "ReserveOwnedByAnother",
+      "msg": "The reserve holds another owner's USDC"
+    },
+    {
+      "code": 6029,
+      "name": "WithdrawalPending",
+      "msg": "A withdrawal of this reserve is pending"
+    },
+    {
+      "code": 6030,
+      "name": "NoWithdrawalPending",
+      "msg": "No withdrawal of this reserve is pending"
+    },
+    {
+      "code": 6031,
+      "name": "WithdrawalNotReady",
+      "msg": "The reserve's withdrawal is not due yet"
+    },
+    {
+      "code": 6032,
+      "name": "InvalidMonth",
+      "msg": "The month key is not a YYYYMM month"
+    },
+    {
+      "code": 6033,
+      "name": "MonthAfterWithdrawalRequest",
+      "msg": "This month accrued after the reserve's withdrawal was requested"
+    },
+    {
+      "code": 6034,
+      "name": "ReserveEmpty",
+      "msg": "The reserve holds no USDC"
+    },
+    {
+      "code": 6035,
+      "name": "UsdcConfigUnreadable",
+      "msg": "pepper_curve's USDC config is not one this program reads"
     }
   ],
   "types": [
@@ -1976,6 +2903,60 @@
           {
             "name": "payer_funder",
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DividendReserve",
+      "docs": [
+        "A token's dividend reserve (PDA: [RESERVE_SEED, mint]), 146 bytes on chain (8 + 138):",
+        "whose USDC it is and whether a withdrawal is pending (the reserve's spec §3.1). The",
+        "money sits in its vault, the reserve's associated USDC account, whose balance no field",
+        "counts, stray transfers included. Never closed."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "docs": [
+              "Whose USDC it is: the curve's creator at the first deposit, recorded because",
+              "`pepper_curve` can change a curve's creator. A withdrawal pays it; an empty reserve",
+              "passes to the curve's creator of the day at a deposit."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "withdrawal_requested_at",
+            "docs": [
+              "Unix seconds of the owner's pending withdrawal request, 0 when none."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Room to grow without a layout break."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
           }
         ]
       }
@@ -2164,6 +3145,104 @@
       }
     },
     {
+      "name": "ReserveDeposited",
+      "docs": [
+        "`amount` µUSDC deposited into a token's reserve by its owner, its vault holding `balance`",
+        "after it."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "balance",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReserveWithdrawalCancelled",
+      "docs": [
+        "The owner's pending withdrawal cancelled."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReserveWithdrawalRequested",
+      "docs": [
+        "The owner asked for the reserve back: from `requested_at` the reserve pays only months",
+        "accrued before it, and from `withdrawable_at` the owner withdraws."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "requested_at",
+            "type": "i64"
+          },
+          {
+            "name": "withdrawable_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReserveWithdrawn",
+      "docs": [
+        "The reserve's whole balance, `amount` µUSDC, paid back to its owner's USDC account."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "UsdcDistributor",
       "docs": [
         "One token's month (PDA: [DISTRIBUTOR_SEED, mint, month as i64 LE]): the root",
@@ -2284,6 +3363,24 @@
             "type": "bool"
           },
           {
+            "name": "fronted_amount",
+            "docs": [
+              "µUSDC the dividend payer put into a month its token's reserve funded short",
+              "(`fund_month_from_reserve`, the reserve's spec §4.2): the void sends it back to the",
+              "rent payer first, the close does not (the creator owes it). 0 on every other month.",
+              "Taken from the reserved bytes on 2026-11-07."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fee_unpaid",
+            "docs": [
+              "The part of Pepper's 3% the reserve could not pay at that funding, a debt of the",
+              "creator's; 0 on every other month. Taken from the reserved bytes on 2026-11-07."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "reserved",
             "docs": [
               "Room to grow without a layout break, before the bitmap, whose length varies."
@@ -2291,7 +3388,7 @@
             "type": {
               "array": [
                 "u8",
-                54
+                38
               ]
             }
           },
@@ -2335,6 +3432,35 @@
       }
     },
     {
+      "name": "UsdcDistributorFrontedReturned",
+      "docs": [
+        "A void of a month its reserve funded short: `amount` µUSDC, what the payer fronted, back to",
+        "`to`, the rent payer's USDC account, before the rest goes to the reserve",
+        "(`UsdcDistributorVoided`)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "to",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
       "name": "UsdcDistributorFunded",
       "docs": [
         "A month funded: `total_amount` µUSDC moved from the funder into the vault."
@@ -2357,6 +3483,47 @@
           {
             "name": "funder",
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UsdcDistributorFundedFromReserve",
+      "docs": [
+        "A month funded from its token's reserve: `from_reserve` and the payer's `fronted` µUSDC",
+        "into the vault, `total_amount` in all, then `fee_from_reserve` of Pepper's 3% to its fee",
+        "account and `fee_unpaid` left owed."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "i64"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "from_reserve",
+            "type": "u64"
+          },
+          {
+            "name": "fronted",
+            "type": "u64"
+          },
+          {
+            "name": "fee_from_reserve",
+            "type": "u64"
+          },
+          {
+            "name": "fee_unpaid",
+            "type": "u64"
           }
         ]
       }
